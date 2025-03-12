@@ -1,5 +1,7 @@
 from itertools import combinations
 import random
+import math
+
 
 class Player:
     def __init__(self, name: str):
@@ -9,7 +11,10 @@ class Player:
         return self.name
     
     def __repr__(self):
-        return self.name
+        return self.__str__()
+    
+    def __lt__(self, other_player):
+        return self.name < other_player.name
 
 class Game:
     def __init__(self, players: list[Player]):
@@ -19,6 +24,18 @@ class Game:
     
     def __str__(self):
         return f"{self.players[0]}/{self.players[1]} vs. {self.players[2]}/{self.players[3]}"
+
+    def __repr__(self):
+        return self.__str__()
+
+    def __eq__(self, other_game):
+        this_game_sides = set()
+        this_game_sides.add(tuple(sorted(self.players[:2])))
+        this_game_sides.add(tuple(sorted(self.players[2:])))
+        other_game_sides = set()
+        other_game_sides.add(tuple(sorted(other_game.players[:2])))
+        other_game_sides.add(tuple(sorted(other_game.players[2:])))
+        return this_game_sides == other_game_sides
 
 class LeagueRound:
     def __init__(self, number: int, games: list[Game], players_out: list[Player]):
@@ -43,38 +60,60 @@ class League:
     def add_round(self, round: LeagueRound):
         self.schedule.append(round)
 
-    def generate_schedule(self, rounds: int = 7):
+    def calculate_max_possible_unique_pairs(self):
+        n = len(self.players)
+        r = 2
+        return math.factorial(n) // (math.factorial(r) * math.factorial(n-r))
+    
+    def generate_schedule(self, rounds: int=7):
+        max_unique_pairs = self.calculate_max_possible_unique_pairs()
+        if rounds > max_unique_pairs:
+            raise ValueError(f"This number of rounds is not possible with the current number of players.")
+
         # Reset schedule
         self.reset_schedule()
-        
-        # Get all possible combinations of 4 players
-        all_possible_players_combinations = list(combinations(self.players, 4))
-        
-        # Shuffle the list of possible games to randomize schedule generation
-        random.shuffle(all_possible_players_combinations)
-        
-        # Generate rounds
-        for i in range(rounds):
-            round_games = []
-            remaining_available_players = set(self.players)
-            
-            # Keep adding games until we can't add more
-            while len(remaining_available_players) >= 4:
-                # Find a valid game from remaining combinations
-                for players_combination in all_possible_players_combinations:
-                    # Check if all players in this game are still available
-                    if all(player in remaining_available_players for player in players_combination):
-                        round_games.append(Game(list(players_combination)))
 
-                        all_possible_players_combinations.remove(players_combination)
-                        
-                        # Remove used players from available pool
-                        for player in players_combination:
-                            remaining_available_players.remove(player)
-                        break
+        while len(self.schedule) != rounds:
+            # Get all possible combinations of 4 players
+            all_possible_players_combinations = list(combinations(self.players, 4))
             
-            if round_games:  # Only add non-empty rounds
-                self.add_round(LeagueRound(i + 1, round_games, remaining_available_players))
+            # Shuffle the list of possible games to randomize schedule generation
+            random.shuffle(all_possible_players_combinations)
+            
+            # Generate rounds
+            for i in range(rounds):
+                round_games = []
+                remaining_available_players = set(self.players)
+                
+                # Keep adding games until we can't add more
+                while len(remaining_available_players) >= 4:
+                    # If we run out of possible combinations, start over
+                    if len(all_possible_players_combinations) == 0:
+                        all_possible_players_combinations = list(combinations(self.players, 4))
+                        random.shuffle(all_possible_players_combinations)
+                    
+                    # Find a valid game from remaining combinations
+                    for players_combination in all_possible_players_combinations:
+                        # Check if all players in this game are still available
+                        if all(player in remaining_available_players for player in players_combination):
+                            players = list(players_combination)
+                            random.shuffle(players)
+                            round_games.append(Game(players))
+
+                            all_possible_players_combinations.remove(players_combination)
+                            
+                            # Remove used players from available pool
+                            for player in players_combination:
+                                remaining_available_players.remove(player)
+                            break
+                
+                # Only add non-empty rounds
+                if round_games:
+                    # if the round has only one game, and that game is already in the schedule, skip this round
+                    if len(round_games) == 1 and round_games[0] in [round.games[0] for round in self.schedule]:
+                        continue
+                        
+                    self.add_round(LeagueRound(i + 1, round_games, remaining_available_players))
         
         return self.schedule
 
