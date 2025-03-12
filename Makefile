@@ -4,6 +4,6 @@ run:
 test:
 	@pytest
 
-deploy:
+deploy: test
 	@echo "Deploying to Google App Engine..."
 	@gcloud app deploy
