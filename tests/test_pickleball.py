@@ -41,7 +41,27 @@ class TestLeague(unittest.TestCase):
 
         for round in schedule:
             self.assertEqual(round.number_of_games(), 2)
+            self.assertEqual(len(round.players_out), 1)
+            
+            player_out = round.players_out.pop()
+            self.assertTrue(player_out in league.players)
+            self.assertFalse(player_out in round.games[0].players)
+            self.assertFalse(player_out in round.games[1].players)
     
+    def test_generate_schedule_with_10_players(self):
+        league = League("GC, Juliano, Fariba, Galina, Igor, Yuri, Scott, Mark, John, Jane")
+        schedule = league.generate_schedule()
+        self.assertEqual(len(schedule), 7)
+
+        for round in schedule:
+            self.assertEqual(round.number_of_games(), 2)
+            self.assertEqual(len(round.players_out), 2)
+
+            for player_out in round.players_out:
+                self.assertTrue(player_out in league.players)
+                self.assertFalse(player_out in round.games[0].players)
+                self.assertFalse(player_out in round.games[1].players)
+        
     def test_schedule_rounds_start_with_one(self):
         league = League("GC, Juliano, Fariba, Galina, Igor, Yuri, Scott, Mark, John")
         schedule = league.generate_schedule(rounds=5)

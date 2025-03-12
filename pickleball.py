@@ -21,9 +21,10 @@ class Game:
         return f"{self.players[0]}/{self.players[1]} vs. {self.players[2]}/{self.players[3]}"
 
 class LeagueRound:
-    def __init__(self, number: int, games: list[Game]):
+    def __init__(self, number: int, games: list[Game], players_out: list[Player]):
         self.number = number
         self.games = games
+        self.players_out = players_out
     
     def number_of_games(self):
         return len(self.games)
@@ -55,25 +56,25 @@ class League:
         # Generate rounds
         for i in range(rounds):
             round_games = []
-            available_players = set(self.players)
+            remaining_available_players = set(self.players)
             
             # Keep adding games until we can't add more
-            while len(available_players) >= 4:
+            while len(remaining_available_players) >= 4:
                 # Find a valid game from remaining combinations
                 for players_combination in all_possible_players_combinations:
                     # Check if all players in this game are still available
-                    if all(player in available_players for player in players_combination):
+                    if all(player in remaining_available_players for player in players_combination):
                         round_games.append(Game(list(players_combination)))
 
                         all_possible_players_combinations.remove(players_combination)
                         
                         # Remove used players from available pool
                         for player in players_combination:
-                            available_players.remove(player)
+                            remaining_available_players.remove(player)
                         break
             
             if round_games:  # Only add non-empty rounds
-                self.add_round(LeagueRound(i + 1, round_games))
+                self.add_round(LeagueRound(i + 1, round_games, remaining_available_players))
         
         return self.schedule
 
