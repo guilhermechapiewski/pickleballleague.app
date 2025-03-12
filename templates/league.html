@@ -39,9 +39,10 @@
             {% for round in schedule %}
                 <tr>
                     <td>
-                    {% for game in round.games %}
-                        <span style="display: inline-block; white-space: nowrap;">{{ game.players[0].name }}/{{ game.players[1].name }} vs. {{ game.players[2].name }}/{{ game.players[3].name }}</span><br>
-                    {% endfor %}
+                        <b>Round {{ round.number }}:</b><br>
+                        {% for game in round.games %}
+                            <span style="display: inline-block; white-space: nowrap;">{{ game.players[0].name }}/{{ game.players[1].name }} vs. {{ game.players[2].name }}/{{ game.players[3].name }}</span><br>
+                        {% endfor %}
                     </td>
                     {% for player in players %}
                     <td></td>
