@@ -1,0 +1,57 @@
+<html>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+        }
+    </style>
+    <script>
+        print_page = function() {
+            
+            // Force landscape printing
+            var style = document.createElement('style');
+            style.type = 'text/css';
+            style.media = 'print';
+            style.innerHTML = '@page { size: landscape; }';
+            document.head.appendChild(style);
+
+            // Hide footer
+            document.getElementById("footer").style.display = "none";
+            window.print();
+            document.getElementById("footer").style.display = "block";
+        }
+
+        shuffle_schedule = function() {
+            window.location.reload();
+        }
+    </script>
+    <body>
+        <table style="width: 100%;" border="1">
+            <tr>
+                <th style="width: 20%; white-space: nowrap;" rowspan="2">Rounds</th>
+                <th style="width: 80%; white-space: nowrap;" colspan="{{ players|length }}">Player Scores</th>
+            </tr>
+            <tr>
+                {% for player in players %}
+                    <th style="width: {{ width }}%; white-space: nowrap;">{{ player }}</th>
+                {% endfor %}
+            </tr>
+            {% for round in schedule %}
+                <tr>
+                    <td>
+                    {% for game in round %}
+                        <span style="display: inline-block; white-space: nowrap;">{{ game[0] }}/{{ game[1] }} vs. {{ game[2] }}/{{ game[3] }}</span><br>
+                    {% endfor %}
+                    </td>
+                    {% for player in players %}
+                    <td></td>
+                {% endfor %}
+                </tr>
+            {% endfor %}
+        </table>
+        <br>
+        <div id="footer">
+            <a href="#" onclick="print_page()">Print</a> | <a href="#" onclick="shuffle_schedule()">Shuffle</a> | <a href="/">New League</a>
+        </div>
+    </body>
+</html>
