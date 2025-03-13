@@ -22,17 +22,20 @@
         }
     </script>
     <body>
+        {% if league.name %}
+            <h1>{{ league.name }}</h1>
+        {% endif %}
         <table style="width: 100%;" border="1">
             <tr>
                 <th style="width: 20%; white-space: nowrap;" rowspan="2">Rounds</th>
-                <th style="width: 80%; white-space: nowrap;" colspan="{{ players|length }}">Player Scores</th>
+                <th style="width: 80%; white-space: nowrap;" colspan="{{ league.players|length }}">Player Scores</th>
             </tr>
             <tr>
-                {% for player in players %}
+                {% for player in league.players %}
                     <th style="width: {{ width }}%; white-space: nowrap;">{{ player }}</th>
                 {% endfor %}
             </tr>
-            {% for round in schedule %}
+            {% for round in league.schedule %}
                 <tr>
                     <td>
                         <b>Round {{ round.number }}:</b><br>
@@ -44,7 +47,7 @@
                             <small><b>Out:</b> <span style="display: inline-block; white-space: nowrap;">{{ round.players_out|join(', ') }}</span></small>
                         {% endif %}
                     </td>
-                    {% for player in players %}
+                    {% for player in league.players %}
                     <td></td>
                 {% endfor %}
                 </tr>

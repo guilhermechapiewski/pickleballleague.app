@@ -50,20 +50,11 @@ class LeagueRound:
         return f"Round {self.number}: {', '.join([str(game.players) for game in self.games])}"
 
 class League:
-    leagues = {}
-    
-    def __init__(self, player_names: str):
+    def __init__(self, name: str="", player_names: list[str]=[]):
         self.id = str(uuid.uuid4())
-        self.players = [Player(player.strip()) for player in player_names.split(",")]
+        self.name = name
+        self.players = [Player(player.strip()) for player in player_names.split(",")] if player_names else []
         self.schedule = []
-    
-    @classmethod
-    def get_league(cls, league_id: str):
-        return cls.leagues[league_id]
-    
-    @classmethod
-    def save_league(cls, league: 'League'):
-        cls.leagues[league.id] = league
 
     def reset_schedule(self):
         self.schedule = []
@@ -73,6 +64,8 @@ class League:
 
     def calculate_max_possible_unique_pairs(self):
         n = len(self.players)
+        if n < 4:
+            return 0
         r = 2
         return math.factorial(n) // (math.factorial(r) * math.factorial(n-r))
     
@@ -127,11 +120,3 @@ class League:
                     self.add_round(LeagueRound(i + 1, round_games, remaining_available_players))
         
         return self.schedule
-
-    def get_template_data(self):
-        return {
-            "id": self.id,
-            "players": self.players,
-            "schedule": self.schedule,
-            "width": 80/len(self.players)
-        }

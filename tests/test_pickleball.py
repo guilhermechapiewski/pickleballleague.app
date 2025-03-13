@@ -20,14 +20,14 @@ class TestGame(unittest.TestCase):
 
 class TestLeague(unittest.TestCase):
     def test_league(self):
-        league = League("John,Jane,Jim,Jill")
+        league = League(player_names="John,Jane,Jim,Jill")
         self.assertTrue([str(player) for player in league.players] == ["John", "Jane", "Jim", "Jill"])
 
-        league = League("GC, Juliano, Fariba, Galina, Igor, Igor 2, Peter, Yuri")
+        league = League(player_names="GC, Juliano, Fariba, Galina, Igor, Igor 2, Peter, Yuri")
         self.assertTrue([str(player) for player in league.players] == ["GC", "Juliano", "Fariba", "Galina", "Igor", "Igor 2", "Peter", "Yuri"])
 
     def test_generate_schedule(self):
-        league = League("GC, Juliano, Fariba, Galina, Igor, Yuri, Scott, Mark")
+        league = League(player_names="GC, Juliano, Fariba, Galina, Igor, Yuri, Scott, Mark")
         schedule = league.generate_schedule(rounds=5)
 
         # 5 rounds should have been generated
@@ -43,7 +43,7 @@ class TestLeague(unittest.TestCase):
                 self.assertEqual(len(set(game.players)), 4)
         
     def test_generate_schedule_with_4_players(self):
-        league = League("GC, Juliano, Fariba, Galina")
+        league = League(player_names="GC, Juliano, Fariba, Galina")
         schedule = league.generate_schedule(rounds=2)
         self.assertEqual(len(schedule), 2)
 
@@ -52,7 +52,7 @@ class TestLeague(unittest.TestCase):
             self.assertEqual(len(round.players_out), 0)
     
     def test_impossible_to_generate_schedule_with_4_players_and_10_rounds(self):
-        league = League("GC, Juliano, Fariba, Galina")
+        league = League(player_names="GC, Juliano, Fariba, Galina")
         
         # try to generate 10 rounds, but only 3 rounds should be possible given the number of players
         try:
@@ -63,7 +63,7 @@ class TestLeague(unittest.TestCase):
             self.fail("Expected ValueError to be raised")
     
     def test_generate_schedule_with_4_players_and_there_are_no_equal_games_across_rounds(self):
-        league = League("GC, Juliano, Fariba, Galina")
+        league = League(player_names="GC, Juliano, Fariba, Galina")
         schedule = league.generate_schedule(rounds=3)
 
         self.assertEqual(len(schedule), 3)
@@ -78,7 +78,7 @@ class TestLeague(unittest.TestCase):
                             f"Found equal games:\nRound {i+1}: {this_game}\nRound {j+1}: {another_game}")
 
     def test_generate_schedule_with_9_players(self):
-        league = League("GC, Juliano, Fariba, Galina, Igor, Yuri, Scott, Mark, John")
+        league = League(player_names="GC, Juliano, Fariba, Galina, Igor, Yuri, Scott, Mark, John")
         schedule = league.generate_schedule(rounds=5)
         self.assertEqual(len(schedule), 5)
 
@@ -92,7 +92,7 @@ class TestLeague(unittest.TestCase):
             self.assertFalse(player_out in round.games[1].players)
     
     def test_generate_schedule_with_10_players(self):
-        league = League("GC, Juliano, Fariba, Galina, Igor, Yuri, Scott, Mark, John, Jane")
+        league = League(player_names="GC, Juliano, Fariba, Galina, Igor, Yuri, Scott, Mark, John, Jane")
         schedule = league.generate_schedule()
         self.assertEqual(len(schedule), 7)
 
@@ -106,15 +106,15 @@ class TestLeague(unittest.TestCase):
                 self.assertFalse(player_out in round.games[1].players)
         
     def test_schedule_rounds_start_with_one(self):
-        league = League("GC, Juliano, Fariba, Galina, Igor, Yuri, Scott, Mark, John")
+        league = League(player_names="GC, Juliano, Fariba, Galina, Igor, Yuri, Scott, Mark, John")
         schedule = league.generate_schedule(rounds=5)
         self.assertEqual(schedule[0].number, 1)
     
     def test_calculate_max_possible_rounds(self):
         # 5 players
-        league = League("GC, Juliano, Fariba, Galina, Igor")
+        league = League(player_names="GC, Juliano, Fariba, Galina, Igor")
         self.assertEqual(league.calculate_max_possible_unique_pairs(), 10)
 
         # 6 players
-        league = League("GC, Juliano, Fariba, Galina, Igor, Yuri")
+        league = League(player_names="GC, Juliano, Fariba, Galina, Igor, Yuri")
         self.assertEqual(league.calculate_max_possible_unique_pairs(), 15)
