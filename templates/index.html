@@ -37,9 +37,15 @@
             padding: 40px 20px;
         }
 
-        @media (max-width: 768px) {
+        @media (min-height: 800px) {
             .hero {
                 min-height: 45vh;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .hero {
+                min-height: 40vh;
             }
         }
 
@@ -66,7 +72,7 @@
         }
 
         input[type="text"] {
-            width: 100%;
+            width: 98%;
             padding: 12px;
             border: none;
             border-radius: 4px;
@@ -102,13 +108,16 @@
     </div>
     <div class="container">
         <form method="POST" action="/create-league">
-            <div class="form-group">
-                <h4>Enter the player names separated by a comma:</h4>
-                <input type="text" name="player_names" placeholder="Player names">
-            </div>
-            <div class="form-group">
-                <input type="text" name="league_name" placeholder="League name (optional)">
-            </div>
+            <table style="width: 100%; padding: 0 0 20px;" cellspacing="0" cellpadding="5">
+                <tr>
+                    <td style="text-align: right; width: 10%;">Players:</td>
+                    <td><input type="text" name="player_names" placeholder="Player names separated by comma"></td>
+                </tr>
+                <tr>
+                    <td style="text-align: right;">League name:</td>
+                    <td><input type="text" name="league_name" placeholder="League name (optional)"></td>
+                </tr>
+            </table>
             <button type="submit">Submit</button>
         </form>
         <br>
