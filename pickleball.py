@@ -18,6 +18,10 @@ class Player:
     
     def to_object(self):
         return {"name": self.name}
+    
+    @staticmethod
+    def from_object(object: dict):
+        return Player(object["name"])
 
 class Game:
     def __init__(self, players: list[Player]):
@@ -42,6 +46,10 @@ class Game:
     
     def to_object(self):
         return {"players": [player.to_object() for player in self.players]}
+    
+    @staticmethod
+    def from_object(object: dict):
+        return Game([Player.from_object(player) for player in object["players"]])
 
 class LeagueRound:
     def __init__(self, number: int, games: list[Game], players_out: list[Player]):
@@ -64,6 +72,10 @@ class LeagueRound:
             "games": [game.to_object() for game in self.games],
             "players_out": [player.to_object() for player in self.players_out]
         }
+    
+    @staticmethod
+    def from_object(object: dict):
+        return LeagueRound(object["number"], [Game.from_object(game) for game in object["games"]], [Player.from_object(player) for player in object["players_out"]])
 
 class League:
     def __init__(self, name: str="", player_names: list[str]=[]):
@@ -72,6 +84,14 @@ class League:
         self.players = [Player(player.strip()) for player in player_names.split(",")] if player_names else []
         self.schedule = []
 
+    def set_id(self, id: str):
+        self.id = id
+
+    def set_schedule(self, schedule: list[LeagueRound]):
+        self.schedule = schedule
+    
+    def set_players(self, players: list[Player]):
+        self.players = players
     def reset_schedule(self):
         self.schedule = []
     
@@ -144,3 +164,11 @@ class League:
             "players": [player.to_object() for player in self.players],
             "schedule": [round.to_object() for round in self.schedule]
         }
+    
+    @staticmethod
+    def from_object(object: dict):
+        league = League(name=object["name"])
+        league.set_id(object["id"])
+        league.set_players([Player.from_object(player) for player in object["players"]])
+        league.set_schedule([LeagueRound.from_object(round) for round in object["schedule"]])
+        return league

@@ -16,6 +16,10 @@ class TestPlayer(unittest.TestCase):
     def test_player_to_object(self):
         player = Player("John")
         self.assertEqual(player.to_object(), {"name": "John"})
+    
+    def test_player_from_object(self):
+        player = Player.from_object({"name": "John"})
+        self.assertEqual(player.name, "John")
 
 class TestGame(unittest.TestCase):
     def test_game(self):
@@ -39,6 +43,12 @@ class TestGame(unittest.TestCase):
         self.assertEqual(game.to_object(), {"players": [
             {"name": "John"}, {"name": "Jane"}, {"name": "Jim"}, {"name": "Jill"}
         ]})
+    
+    def test_game_from_object(self):
+        game = Game.from_object({"players": [
+            {"name": "John"}, {"name": "Jane"}, {"name": "Jim"}, {"name": "Jill"}
+        ]})
+        self.assertEqual([player.name for player in game.players], ["John", "Jane", "Jim", "Jill"])
 
 class TestLeagueRound(unittest.TestCase):
     def test_league_round_to_object(self):
@@ -59,7 +69,21 @@ class TestLeagueRound(unittest.TestCase):
                 {"players": [{"name": "John"}, {"name": "Jane"}, {"name": "Jim"}, {"name": "Jill"}]}
             ],
             "players_out": [{"name": "GC"}]})
-        
+    
+    def test_league_round_from_object(self):
+        round = LeagueRound.from_object({
+            "number": 1,
+            "games": [
+                {"players": [{"name": "John"}, {"name": "Jane"}, {"name": "Jim"}, {"name": "Jill"}]}
+            ],
+            "players_out": [{"name": "GC"}]
+        })
+        self.assertEqual(round.number, 1)
+        self.assertEqual(len(round.games), 1)
+        self.assertEqual([player.name for player in round.games[0].players], ["John", "Jane", "Jim", "Jill"])
+        self.assertEqual(len(round.players_out), 1)
+        self.assertEqual(round.players_out[0].name, "GC")
+
 class TestLeague(unittest.TestCase):
     def test_league(self):
         league = League(player_names="John,Jane,Jim,Jill")
@@ -195,3 +219,28 @@ class TestLeague(unittest.TestCase):
         self.assertTrue(generated_league_object["schedule"][0]["games"][0]["players"][1]["name"] in player_names.split(", "))
         self.assertTrue(generated_league_object["schedule"][0]["games"][0]["players"][2]["name"] in player_names.split(", "))
         self.assertTrue(generated_league_object["schedule"][0]["games"][0]["players"][3]["name"] in player_names.split(", "))
+    
+    def test_league_from_object(self):
+        league = League.from_object({
+            "id": "123",
+            "name": "Test League",
+            "players": [ {"name": "GC"}, {"name": "Juliano"}, {"name": "Fariba"}, {"name": "Galina"}, {"name": "Aline"}],
+            "schedule": [
+                {
+                    "number": 1,
+                    "games": [
+                        {"players": [{"name": "Juliano"}, {"name": "Galina"}, {"name": "GC"}, {"name": "Fariba"}]}
+                    ],
+                    "players_out": [{"name": "Aline"}]
+                }
+            ]
+        })
+        self.assertEqual(league.id, "123")
+        self.assertEqual(league.name, "Test League")
+        self.assertEqual(len(league.players), 5)
+        self.assertEqual(len(league.schedule), 1)
+        self.assertEqual(league.schedule[0].number, 1)
+        self.assertEqual(len(league.schedule[0].games), 1)
+        self.assertEqual(len(league.schedule[0].players_out), 1)
+        self.assertEqual([player.name for player in league.schedule[0].games[0].players], ["Juliano", "Galina", "GC", "Fariba"])
+        self.assertEqual(league.schedule[0].players_out[0].name, "Aline")
