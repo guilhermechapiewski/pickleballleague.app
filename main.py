@@ -30,6 +30,8 @@ def create_league():
     rounds = 0
     if len(league.players) == 4:
         rounds = 3
+    elif len(league.players) == 5:
+        rounds = 5
     else:
         rounds = 7
 
