@@ -1,7 +1,7 @@
 from itertools import combinations
 import random
 import math
-
+import uuid
 
 class Player:
     def __init__(self, name: str):
@@ -50,10 +50,21 @@ class LeagueRound:
         return f"Round {self.number}: {', '.join([str(game.players) for game in self.games])}"
 
 class League:
+    leagues = {}
+    
     def __init__(self, player_names: str):
+        self.id = str(uuid.uuid4())
         self.players = [Player(player.strip()) for player in player_names.split(",")]
         self.schedule = []
     
+    @classmethod
+    def get_league(cls, league_id: str):
+        return cls.leagues[league_id]
+    
+    @classmethod
+    def save_league(cls, league: 'League'):
+        cls.leagues[league.id] = league
+
     def reset_schedule(self):
         self.schedule = []
     
@@ -119,6 +130,7 @@ class League:
 
     def get_template_data(self):
         return {
+            "id": self.id,
             "players": self.players,
             "schedule": self.schedule,
             "width": 80/len(self.players)

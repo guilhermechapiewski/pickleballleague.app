@@ -20,7 +20,7 @@ template_engine = TemplateEngine()
 def root():
     return template_engine.render("index", {"version": version})
 
-@app.route("/league", methods=["POST"])
+@app.route("/create-league", methods=["POST"])
 def create_league():
     player_names = flask.request.form["player_names"]
     logger.info(f"Creating league for [{player_names}]")
@@ -39,7 +39,22 @@ def create_league():
         return flask.redirect("/")
 
     league.generate_schedule(rounds=rounds)
-    return template_engine.render("league", league.get_template_data())
+    League.save_league(league)
+    
+    return flask.redirect(f"/league/{league.id}")
+
+@app.route("/league/<league_id>")
+def league(league_id):
+    try:
+        league = League.get_league(league_id)
+        return template_engine.render("league", league.get_template_data())
+    except KeyError:
+        return '''
+        <h1>League not found</h1>
+        <p>The league you are looking for does not exist.</p>
+        <p>Please check the URL and try again.</p>
+        <a href="/">Back to home</a>
+        '''
 
 if __name__ == "__main__":
     logger.info("Running AppEngine server locally")
