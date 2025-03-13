@@ -15,6 +15,9 @@ class Player:
     
     def __lt__(self, other_player):
         return self.name < other_player.name
+    
+    def to_object(self):
+        return {"name": self.name}
 
 class Game:
     def __init__(self, players: list[Player]):
@@ -36,6 +39,9 @@ class Game:
         other_game_sides.add(tuple(sorted(other_game.players[:2])))
         other_game_sides.add(tuple(sorted(other_game.players[2:])))
         return this_game_sides == other_game_sides
+    
+    def to_object(self):
+        return {"players": [player.to_object() for player in self.players]}
 
 class LeagueRound:
     def __init__(self, number: int, games: list[Game], players_out: list[Player]):
@@ -46,8 +52,18 @@ class LeagueRound:
     def number_of_games(self):
         return len(self.games)
     
+    def add_player_out(self, player: Player):
+        self.players_out.append(player)
+    
     def __str__(self):
         return f"Round {self.number}: {', '.join([str(game.players) for game in self.games])}"
+    
+    def to_object(self):
+        return {
+            "number": self.number,
+            "games": [game.to_object() for game in self.games],
+            "players_out": [player.to_object() for player in self.players_out]
+        }
 
 class League:
     def __init__(self, name: str="", player_names: list[str]=[]):
@@ -120,3 +136,11 @@ class League:
                     self.add_round(LeagueRound(i + 1, round_games, remaining_available_players))
         
         return self.schedule
+    
+    def to_object(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "players": [player.to_object() for player in self.players],
+            "schedule": [round.to_object() for round in self.schedule]
+        }
