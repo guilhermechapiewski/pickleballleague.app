@@ -26,7 +26,17 @@ def create_league():
     logger.info(f"Creating league for [{player_names}]")
 
     league = League(player_names)
-    league.generate_schedule()
+
+    rounds = 0
+    if len(league.players) == 4:
+        rounds = 3
+    else:
+        rounds = 7
+
+    if rounds == 0:
+        return flask.redirect("/")
+
+    league.generate_schedule(rounds=rounds)
     return template_engine.render("league", league.get_template_data())
 
 if __name__ == "__main__":
