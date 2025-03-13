@@ -1,8 +1,8 @@
 run: clean
-	@python3 main.py
+	@export DEV_ENVIRONMENT="true" && python3 main.py
 
 test: clean
-	@pytest
+	@export DEV_ENVIRONMENT="true" && pytest
 
 deploy: clean test create_deployment_info
 	@echo "Deploying to Google App Engine..."

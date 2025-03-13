@@ -13,10 +13,13 @@ class TestLeagueRepository(unittest.TestCase):
         
         retrieved_league = LeagueRepository.get_league(league_id)
 
+        print(retrieved_league.to_object())
+
         self.assertEqual(retrieved_league.name, league_name)
         for player in retrieved_league.players:
             self.assertTrue(player.name in league_player_names.split(", "))
     
     def test_get_league_that_does_not_exist(self):
         with self.assertRaises(KeyError):
-            LeagueRepository.get_league("non-existent-id")
+            league = LeagueRepository.get_league("non-existent-id")
+            self.assertIsNone(league)
