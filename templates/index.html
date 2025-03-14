@@ -100,6 +100,17 @@
             color: #fff;
         }
     </style>
+    <script language="javascript" type="text/javascript">
+        var validateForm = function() {
+            var playerNames = document.getElementById('player_names').value;
+            var players = playerNames.split(',').filter(name => name.trim().length > 0);
+            if (players.length < 4) {
+                alert('You need at least 4 players to create a league.');
+                return false;
+            }
+            return true;
+        }
+    </script>
 </head>
 
 <body>
@@ -107,11 +118,11 @@
         <h1>Create your own Pickleball league in seconds! 🏓</h1>
     </div>
     <div class="container">
-        <form method="POST" action="/create-league">
+        <form method="POST" action="/create-league" onsubmit="return validateForm()">
             <table style="width: 100%; padding: 0 0 20px;" cellspacing="0" cellpadding="5">
                 <tr>
                     <td style="text-align: right; width: 10%;">Players:</td>
-                    <td><input type="text" name="player_names" placeholder="Player names separated by comma"></td>
+                    <td><input type="text" id="player_names" name="player_names" placeholder="Player names separated by comma"></td>
                 </tr>
                 <tr>
                     <td style="text-align: right;">League name:</td>
