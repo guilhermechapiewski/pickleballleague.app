@@ -106,17 +106,15 @@ def save_league():
 def league(league_id):
     try:
         league = LeagueRepository.get_league(league_id)
-        return template_engine.render("league", {
+        return template_engine.render("league_ricky", {
             "league": league,
             "width": 80/len(league.players)
         })
     except KeyError:
-        return '''
-        <h1>League not found</h1>
-        <p>The league you are looking for does not exist.</p>
-        <p>Please check the URL and try again.</p>
-        <a href="/">Back to home</a>
-        '''
+        return template_engine.render("error", {
+            "title": "League not found",
+            "message": "The league you are looking for does not exist."
+        })
 
 if __name__ == "__main__":
     logger.info("Running AppEngine server locally")
