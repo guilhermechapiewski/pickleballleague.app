@@ -108,6 +108,16 @@
                 alert('You need at least 4 players to create a league.');
                 return false;
             }
+            // Check if the selected rounds are valid for the number of players
+            var rounds = parseInt(document.getElementById('rounds').value);
+            if (rounds >= 5 && rounds <= 6 && players.length < 5) {
+                alert('You need at least 5 players for '+rounds+' rounds.');
+                return false;
+            }
+            if (rounds >= 7 && players.length < 6) {
+                alert('You need at least 6 players for '+rounds+' rounds.');
+                return false;
+            }
             return true;
         }
     </script>
@@ -141,7 +151,7 @@
                 <tr>
                     <td style="text-align: right;">Rounds:</td>
                     <td>
-                        <select name="rounds">
+                        <select name="rounds" id="rounds">
                             <option value="0">Default (based on number of players)</option>
                             <option value="1">1</option>
                             <option value="2">2</option>
