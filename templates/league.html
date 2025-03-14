@@ -213,17 +213,45 @@
                         </td>
                         {% for player in league.players %}
                             {% if league.scoring_system.value == 'w_l' %}
-                                <td>
-                                    <select name="player_score_round{{ round.number }}_player{{ loop.index }}" id="player_score_round{{ round.number }}_player{{ loop.index }}">
-                                        <option value="0"></option>
-                                        <option value="w" {% for game in round.games %}{% if player.name in [game.players[0].name, game.players[1].name] and game.get_winner_team() == 1 %}selected{% elif player.name in [game.players[2].name, game.players[3].name] and game.get_winner_team() == 2 %}selected{% endif %}{% endfor %}>W</option>
-                                        <option value="l" {% for game in round.games %}{% if player.name in [game.players[0].name, game.players[1].name] and game.get_winner_team() == 2 %}selected{% elif player.name in [game.players[2].name, game.players[3].name] and game.get_winner_team() == 1 %}selected{% endif %}{% endfor %}>L</option>
-                                    </select>
+                                <td {% for game in round.games %}
+                                    {% if player.name in [game.players[0].name, game.players[1].name] and game.get_winner_team() == 1 %}
+                                        style="background-color: #90EE90;"
+                                    {% elif player.name in [game.players[2].name, game.players[3].name] and game.get_winner_team() == 2 %}
+                                        style="background-color: #90EE90;"
+                                    {% elif player.name in [game.players[0].name, game.players[1].name] and game.get_winner_team() == 2 %}
+                                        style="background-color: #FFCCCB;"
+                                    {% elif player.name in [game.players[2].name, game.players[3].name] and game.get_winner_team() == 1 %}
+                                        style="background-color: #FFCCCB;"
+                                    {% endif %}
+                                    {% endfor %}>
+                                    {% if player.name not in round.players_out|map(attribute='name')|list %}
+                                        <select name="player_score_round{{ round.number }}_player{{ loop.index }}" id="player_score_round{{ round.number }}_player{{ loop.index }}">
+                                            <option value="0"></option>
+                                            <option value="w" {% for game in round.games %}{% if player.name in [game.players[0].name, game.players[1].name] and game.get_winner_team() == 1 %}selected{% elif player.name in [game.players[2].name, game.players[3].name] and game.get_winner_team() == 2 %}selected{% endif %}{% endfor %}>W</option>
+                                            <option value="l" {% for game in round.games %}{% if player.name in [game.players[0].name, game.players[1].name] and game.get_winner_team() == 2 %}selected{% elif player.name in [game.players[2].name, game.players[3].name] and game.get_winner_team() == 1 %}selected{% endif %}{% endfor %}>L</option>
+                                        </select>
+                                    {% else %}
+                                        x
+                                    {% endif %}
                                 </td>
                             {% elif league.scoring_system.value == 'score' %}
-                            <td>
-                                <input type="number" name="player_score_round{{ round.number }}_player{{ loop.index }}" id="player_score_round{{ round.number }}_player{{ loop.index }}" min="0" max="100" step="1" value="{% for game in round.games %}{% if player.name in [game.players[0].name, game.players[1].name, game.players[2].name, game.players[3].name] %}{% if player.name in [game.players[0].name, game.players[1].name] and game.score[0] %}{{ game.score[0] }}{% elif player.name in [game.players[2].name, game.players[3].name] and game.score[1] %}{{ game.score[1] }}{% endif %}{% endif %}{% endfor %}">
-                            </td>
+                                <td {% for game in round.games %}
+                                    {% if player.name in [game.players[0].name, game.players[1].name] and game.get_winner_team() == 1 %}
+                                        style="background-color: #90EE90;"
+                                    {% elif player.name in [game.players[2].name, game.players[3].name] and game.get_winner_team() == 2 %}
+                                        style="background-color: #90EE90;"
+                                    {% elif player.name in [game.players[0].name, game.players[1].name] and game.get_winner_team() == 2 %}
+                                        style="background-color: #FFCCCB;"
+                                    {% elif player.name in [game.players[2].name, game.players[3].name] and game.get_winner_team() == 1 %}
+                                        style="background-color: #FFCCCB;"
+                                    {% endif %}
+                                    {% endfor %}>
+                                    {% if player.name not in round.players_out|map(attribute='name')|list %}
+                                        <input type="number" name="player_score_round{{ round.number }}_player{{ loop.index }}" id="player_score_round{{ round.number }}_player{{ loop.index }}" min="0" max="100" step="1" value="{% for game in round.games %}{% if player.name in [game.players[0].name, game.players[1].name, game.players[2].name, game.players[3].name] %}{% if player.name in [game.players[0].name, game.players[1].name] and game.score[0] %}{{ game.score[0] }}{% elif player.name in [game.players[2].name, game.players[3].name] and game.score[1] %}{{ game.score[1] }}{% endif %}{% endif %}{% endfor %}">
+                                    {% else %}
+                                        x
+                                    {% endif %}
+                                </td>
                             {% else %}
                                 <td></td>
                             {% endif %}
