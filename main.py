@@ -2,7 +2,7 @@ import sys
 import logging
 import flask
 from template import TemplateEngine
-from pickleball import League
+from pickleball import League, ScoringSystem
 from db import LeagueRepository
 
 try:
@@ -28,19 +28,25 @@ def create_league():
     logger.info(f"Creating league name=[{league_name}] for players=[{player_names}]")
 
     league = League(name=league_name, player_names=player_names)
-
-    rounds = 0
-    if len(league.players) == 4:
-        rounds = 3
-    elif len(league.players) == 5:
-        rounds = 5
-    elif len(league.players) >= 6:
-        rounds = 7
-
+    league.set_scoring_system(ScoringSystem(flask.request.form["scoring_system"]))
+    
+    rounds = int(flask.request.form["rounds"])
     if rounds == 0:
+        if len(league.players) == 4:
+            rounds = 3
+        elif len(league.players) == 5:
+            rounds = 5
+        elif len(league.players) >= 6:
+            rounds = 7
+    
+    if len(league.players) < 4:
         logger.error(f"Invalid number of players: {len(league.players)}")
         return flask.redirect("/")
-
+    
+    if (rounds > 4 and len(league.players) <= 4) or (rounds > 6 and len(league.players) <= 5):
+        logger.error(f"Invalid number of rounds: {rounds} for {len(league.players)} players")
+        return flask.redirect("/")
+    
     league.generate_schedule(rounds=rounds)
     LeagueRepository.save_league(league)
     logger.info(f"League created successfully: {league.id}")

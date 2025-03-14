@@ -1,5 +1,5 @@
 import unittest
-from pickleball import League, Player, Game, LeagueRound
+from pickleball import League, Player, Game, LeagueRound, ScoringSystem
 
 class TestPlayer(unittest.TestCase):
     def test_player(self):
@@ -23,58 +23,88 @@ class TestPlayer(unittest.TestCase):
 
 class TestGame(unittest.TestCase):
     def test_game(self):
-        game = Game(["John", "Jane", "Jim", "Jill"])
+        game = Game(["John", "Jane", "Jim", "Jill"], ScoringSystem.NONE)
         self.assertEqual(game.players, ["John", "Jane", "Jim", "Jill"])
     
     def test_game_must_have_4_players(self):
         with self.assertRaises(ValueError):
-            Game(["John", "Jane", "Jim"])
+            Game(["John", "Jane", "Jim"], ScoringSystem.NONE)
     
     def test_game_equality(self):
-        game1 = Game(["John", "Jane", "Jim", "Jill"])
-        game2 = Game(["Jane", "John", "Jim", "Jill"])
+        game1 = Game(["John", "Jane", "Jim", "Jill"], ScoringSystem.NONE)
+        game2 = Game(["Jane", "John", "Jim", "Jill"], ScoringSystem.NONE)
         self.assertTrue(game1 == game2)
 
-        game3 = Game(["John", "Jim", "Jane", "Jill"])
+        game3 = Game(["John", "Jim", "Jane", "Jill"], ScoringSystem.NONE)
         self.assertFalse(game1 == game3)
     
     def test_game_to_object(self):
-        game = Game([Player("John"), Player("Jane"), Player("Jim"), Player("Jill")])
+        game = Game([Player("John"), Player("Jane"), Player("Jim"), Player("Jill")], ScoringSystem.NONE)
         self.assertEqual(game.to_object(), {"players": [
             {"name": "John"}, {"name": "Jane"}, {"name": "Jim"}, {"name": "Jill"}
-        ]})
+        ], "scoring_system": "none", "score": [0, 0], "winner_team": 0})
     
     def test_game_from_object(self):
         game = Game.from_object({"players": [
             {"name": "John"}, {"name": "Jane"}, {"name": "Jim"}, {"name": "Jill"}
-        ]})
+        ], "scoring_system": "none", "score": [0, 0], "winner_team": 0})
         self.assertEqual([player.name for player in game.players], ["John", "Jane", "Jim", "Jill"])
+    
+    def test_game_score(self):
+        game = Game([Player("John"), Player("Jane"), Player("Jim"), Player("Jill")], ScoringSystem.NONE)
+        self.assertEqual(game.get_score(), [0, 0])
+        self.assertEqual(game.get_winner_team(), 0)
+        self.assertEqual(game.get_winner_team_players(), [])
+        
+        game.set_score([11, 2])
+        self.assertEqual(game.get_score(), [11, 2])
+        self.assertEqual(game.get_winner_team(), 1)
+        self.assertEqual([player.name for player in game.get_winner_team_players()], ["John", "Jane"])
+
+        game.set_score([1, 11])
+        self.assertEqual(game.get_score(), [1, 11])
+        self.assertEqual(game.get_winner_team(), 2)
+        self.assertEqual([player.name for player in game.get_winner_team_players()], ["Jim", "Jill"])
+    
+    def test_game_winner_based_on_score(self):
+        game = Game([Player("John"), Player("Jane"), Player("Jim"), Player("Jill")], ScoringSystem.NONE)
+        self.assertEqual(game.get_winner_team(), 0)
+
+        game.set_score([10, 2])
+        self.assertEqual(game.get_winner_team(), 0)
+        self.assertEqual(game.get_winner_team_players(), [])
+        
+        game.set_score([11, 2])
+        self.assertEqual(game.get_winner_team(), 1)
+        self.assertEqual([player.name for player in game.get_winner_team_players()], ["John", "Jane"])
 
 class TestLeagueRound(unittest.TestCase):
     def test_league_round_to_object(self):
-        round = LeagueRound(1, [Game([Player("John"), Player("Jane"), Player("Jim"), Player("Jill")]), Game([Player("John"), Player("Jane"), Player("Jim"), Player("Jill")])], [])
+        round = LeagueRound(1, [Game([Player("John"), Player("Jane"), Player("Jim"), Player("Jill")], ScoringSystem.NONE), Game([Player("John"), Player("Jane"), Player("Jim"), Player("Jill")], ScoringSystem.NONE)], [])
         self.assertEqual(round.to_object(), {
             "number": 1,
             "games": [
-                {"players": [{"name": "John"}, {"name": "Jane"}, {"name": "Jim"}, {"name": "Jill"}]},
-                {"players": [{"name": "John"}, {"name": "Jane"}, {"name": "Jim"}, {"name": "Jill"}]}
+                {"players": [{"name": "John"}, {"name": "Jane"}, {"name": "Jim"}, {"name": "Jill"}], "score": [0, 0], "winner_team": 0, "scoring_system": "none"},
+                {"players": [{"name": "John"}, {"name": "Jane"}, {"name": "Jim"}, {"name": "Jill"}], "score": [0, 0], "winner_team": 0, "scoring_system": "none"}
             ],
-            "players_out": []})
+            "players_out": []
+        })
         
         round.add_player_out(Player("GC"))
         self.assertEqual(round.to_object(), {
             "number": 1,
             "games": [
-                {"players": [{"name": "John"}, {"name": "Jane"}, {"name": "Jim"}, {"name": "Jill"}]},
-                {"players": [{"name": "John"}, {"name": "Jane"}, {"name": "Jim"}, {"name": "Jill"}]}
+                {"players": [{"name": "John"}, {"name": "Jane"}, {"name": "Jim"}, {"name": "Jill"}], "score": [0, 0], "winner_team": 0, "scoring_system": "none"},
+                {"players": [{"name": "John"}, {"name": "Jane"}, {"name": "Jim"}, {"name": "Jill"}], "score": [0, 0], "winner_team": 0, "scoring_system": "none"}
             ],
-            "players_out": [{"name": "GC"}]})
+            "players_out": [{"name": "GC"}]
+        })
     
     def test_league_round_from_object(self):
         round = LeagueRound.from_object({
             "number": 1,
             "games": [
-                {"players": [{"name": "John"}, {"name": "Jane"}, {"name": "Jim"}, {"name": "Jill"}]}
+                {"players": [{"name": "John"}, {"name": "Jane"}, {"name": "Jim"}, {"name": "Jill"}], "score": [0, 0], "winner_team": 0, "scoring_system": "none"},
             ],
             "players_out": [{"name": "GC"}]
         })
@@ -205,7 +235,7 @@ class TestLeague(unittest.TestCase):
                     ],
                     "players_out": []
                 }
-            ]
+            ], "scoring_system": "none"
         }
         
         self.assertEqual(generated_league_object["id"], league_object["id"])
@@ -219,6 +249,8 @@ class TestLeague(unittest.TestCase):
         self.assertTrue(generated_league_object["schedule"][0]["games"][0]["players"][1]["name"] in player_names.split(", "))
         self.assertTrue(generated_league_object["schedule"][0]["games"][0]["players"][2]["name"] in player_names.split(", "))
         self.assertTrue(generated_league_object["schedule"][0]["games"][0]["players"][3]["name"] in player_names.split(", "))
+
+        self.assertEqual(generated_league_object["scoring_system"], league_object["scoring_system"])
     
     def test_league_from_object(self):
         league = League.from_object({
@@ -229,11 +261,12 @@ class TestLeague(unittest.TestCase):
                 {
                     "number": 1,
                     "games": [
-                        {"players": [{"name": "Juliano"}, {"name": "Galina"}, {"name": "GC"}, {"name": "Fariba"}]}
+                        {"players": [{"name": "Juliano"}, {"name": "Galina"}, {"name": "GC"}, {"name": "Fariba"}], "score": [0, 0], "winner_team": 0, "scoring_system": "w_l"}
                     ],
                     "players_out": [{"name": "Aline"}]
                 }
-            ]
+            ],
+            "scoring_system": "w_l"
         })
         self.assertEqual(league.id, "123")
         self.assertEqual(league.name, "Test League")
@@ -244,3 +277,4 @@ class TestLeague(unittest.TestCase):
         self.assertEqual(len(league.schedule[0].players_out), 1)
         self.assertEqual([player.name for player in league.schedule[0].games[0].players], ["Juliano", "Galina", "GC", "Fariba"])
         self.assertEqual(league.schedule[0].players_out[0].name, "Aline")
+        self.assertEqual(league.scoring_system.value, "w_l")

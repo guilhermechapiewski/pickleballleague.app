@@ -39,13 +39,13 @@
 
         @media (min-height: 800px) {
             .hero {
-                min-height: 45vh;
+                min-height: 42vh;
             }
         }
         
         @media (max-width: 768px) {
             .hero {
-                min-height: 40vh;
+                min-height: 35vh;
             }
         }
 
@@ -71,7 +71,7 @@
             margin-bottom: 20px;
         }
 
-        input[type="text"] {
+        input[type="text"], select {
             width: 98%;
             padding: 12px;
             border: none;
@@ -116,6 +116,34 @@
                 <tr>
                     <td style="text-align: right;">League name:</td>
                     <td><input type="text" name="league_name" placeholder="League name (optional)"></td>
+                </tr>
+                <tr>
+                    <td style="text-align: right;">Scoring system:</td>
+                    <td>
+                        <select name="scoring_system">
+                            <option value="none">None (good for printing)</option>
+                            <option value="w_l">W/L (track wins and losses only)</option>
+                            <option value="score">Score (track full score)</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: right;">Rounds:</td>
+                    <td>
+                        <select name="rounds">
+                            <option value="0">Default (based on number of players)</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5 (5+ players required)</option>
+                            <option value="6">6 (5+ players required)</option>
+                            <option value="7">7 (6+ players required)</option>
+                            <option value="8">8 (6+ players required)</option>
+                            <option value="9">9 (6+ players required)</option>
+                            <option value="10">10 (6+ players required)</option>
+                        </select>
+                    </td>
                 </tr>
             </table>
             <button type="submit">Submit</button>

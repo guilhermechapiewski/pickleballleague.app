@@ -2,6 +2,12 @@ from itertools import combinations
 import random
 import math
 import uuid
+from enum import Enum
+
+class ScoringSystem(Enum):
+    W_L = "w_l"
+    SCORE = "score"
+    NONE = "none"
 
 class Player:
     def __init__(self, name: str):
@@ -24,11 +30,14 @@ class Player:
         return Player(object["name"])
 
 class Game:
-    def __init__(self, players: list[Player]):
+    def __init__(self, players: list[Player], scoring_system: ScoringSystem):
         if len(players) != 4:
             raise ValueError("Game must have 4 players")
         self.players = players
-    
+        self.scoring_system = scoring_system
+        self.score = [0, 0]
+        self.winner_team = 0
+
     def __str__(self):
         return f"{self.players[0]}/{self.players[1]} vs. {self.players[2]}/{self.players[3]}"
 
@@ -44,12 +53,56 @@ class Game:
         other_game_sides.add(tuple(sorted(other_game.players[2:])))
         return this_game_sides == other_game_sides
     
+    def set_score(self, score: list[int]):
+        if len(score) != 2:
+            raise ValueError("Score must have 2 values")
+        
+        self.score = score
+        
+        if score[0] >= 11 or score[1] >= 11:
+            if score[0] > score[1]:
+                self.set_winner_team(1)
+            elif score[0] < score[1]:
+                self.set_winner_team(2)
+            else:
+                self.set_winner_team(0)
+
+    def get_score(self):
+        return self.score
+    
+    def set_winner_team(self, winner_team: int):
+        if winner_team not in [1, 2, 0]:
+            raise ValueError("Winner team must be 1 or 2 (or 0 for draw/no winner)")
+        self.winner_team = winner_team
+    
+    def get_winner_team(self):
+        return self.winner_team
+
+    def get_winner_team_players(self):
+        if self.get_winner_team() == 1:
+            return [self.players[0], self.players[1]]
+        elif self.get_winner_team() == 2:
+            return [self.players[2], self.players[3]]
+        else:
+            return []
+    
+    def set_scoring_system(self, scoring_system: ScoringSystem):
+        self.scoring_system = scoring_system
+
     def to_object(self):
-        return {"players": [player.to_object() for player in self.players]}
+        return {
+            "players": [player.to_object() for player in self.players], 
+            "scoring_system": self.scoring_system.value,
+            "score": self.score,
+            "winner_team": self.winner_team
+        }
     
     @staticmethod
     def from_object(object: dict):
-        return Game([Player.from_object(player) for player in object["players"]])
+        game = Game([Player.from_object(player) for player in object["players"]], ScoringSystem(object["scoring_system"]))
+        game.set_score(object["score"])
+        game.set_winner_team(object["winner_team"])
+        return game
 
 class LeagueRound:
     def __init__(self, number: int, games: list[Game], players_out: list[Player]):
@@ -83,6 +136,7 @@ class League:
         self.name = name
         self.players = [Player(player.strip()) for player in player_names.split(",")] if player_names else []
         self.schedule = []
+        self.scoring_system = ScoringSystem.NONE
 
     def set_id(self, id: str):
         self.id = id
@@ -92,6 +146,13 @@ class League:
     
     def set_players(self, players: list[Player]):
         self.players = players
+
+    def set_scoring_system(self, scoring_system: ScoringSystem):
+        self.scoring_system = scoring_system
+        for round in self.schedule:
+            for game in round.games:
+                game.set_scoring_system(scoring_system)
+
     def reset_schedule(self):
         self.schedule = []
     
@@ -138,7 +199,7 @@ class League:
                         if all(player in remaining_available_players for player in players_combination):
                             players = list(players_combination)
                             random.shuffle(players)
-                            round_games.append(Game(players))
+                            round_games.append(Game(players, self.scoring_system))
 
                             all_possible_players_combinations.remove(players_combination)
                             
@@ -162,7 +223,8 @@ class League:
             "id": self.id,
             "name": self.name,
             "players": [player.to_object() for player in self.players],
-            "schedule": [round.to_object() for round in self.schedule]
+            "schedule": [round.to_object() for round in self.schedule],
+            "scoring_system": self.scoring_system.value
         }
     
     @staticmethod
@@ -171,4 +233,5 @@ class League:
         league.set_id(object["id"])
         league.set_players([Player.from_object(player) for player in object["players"]])
         league.set_schedule([LeagueRound.from_object(round) for round in object["schedule"]])
+        league.set_scoring_system(ScoringSystem(object["scoring_system"]))
         return league

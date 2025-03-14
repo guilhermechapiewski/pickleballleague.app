@@ -1,13 +1,167 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pickleball League</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 32px;
+        }
+        
+        .league-table {
+            width: 100%;
+            border-collapse: collapse;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid #3498db;
+        }
+        
+        .league-table th, .league-table td {
+            padding: 5px 5px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        
+        .league-table th {
+            background-color: #2c3e50;
+            color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 14px;
+            border: 1px solid #1a2530;
+        }
+        
+        .league-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        .league-table tr:hover {
+            background-color: #d4e6f1;
+        }
+        
+        .round-cell {
+            text-align: left;
+            background-color: #d6eaf8;
+            border-right: 2px solid #3498db !important;
+            padding: 5px 5px;
+            line-height: 1.4;
+            white-space: nowrap;
+        }
+        
+        .round-number {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+            font-size: 15px;
+        }
+        
+        .game {
+            margin-bottom: 4px;
+        }
+        
+        .team {
+            display: inline-block;
+            background-color: #f8f9fa;
+            padding: 1px 6px;
+            border-radius: 3px;
+            margin: 1px;
+            border: 1px solid #bdc3c7;
+            font-size: 13px;
+        }
+        
+        .vs {
+            font-weight: bold;
+            color: #34495e;
             font-size: 12px;
+        }
+        
+        .players-out {
+            margin-top: 5px;
+            font-size: 11px;
+            color: #34495e;
+            font-weight: 500;
+        }
+        
+        .players-out-label {
+            font-weight: bold;
+        }
+        
+        .footer {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .footer a {
+            display: inline-block;
+            margin: 0 10px;
+            padding: 8px 16px;
+            background-color: #2c3e50;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        .footer a:hover {
+            background-color: #1a2530;
+        }
+        
+        @media print {
+            body {
+                background-color: white;
+                padding: 0;
+            }
+            
+            .league-table {
+                box-shadow: none;
+                border: 1px solid #000;
+            }
+            
+            .league-table th, .league-table td {
+                border: 1px solid #000;
+            }
+            
+            .footer {
+                display: none;
+            }
+            
+            .league-table th {
+                background-color: #d6eaf8 !important;
+                color: #000 !important;
+                border: 1px solid #000 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            
+            .round-cell {
+                background-color: #f2f2f2 !important;
+                border-right: 2px solid #000 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            
+            .team {
+                border: 1px solid #000;
+            }
         }
     </style>
     <script>
-        print_page = function() {
-            
+        function printPage() {
             // Force landscape printing
             var style = document.createElement('style');
             style.type = 'text/css';
@@ -15,47 +169,72 @@
             style.innerHTML = '@page { size: landscape; }';
             document.head.appendChild(style);
 
-            // Hide footer
-            document.getElementById("footer").style.display = "none";
             window.print();
-            document.getElementById("footer").style.display = "block";
         }
     </script>
-    <body>
+</head>
+<body>
+    <div class="container">
         {% if league.name %}
             <h1>{{ league.name }}</h1>
         {% endif %}
-        <table style="width: 100%;" border="1">
-            <tr>
-                <th style="width: 20%; white-space: nowrap;" rowspan="2">Rounds</th>
-                <th style="width: 80%; white-space: nowrap;" colspan="{{ league.players|length }}">Player Scores</th>
-            </tr>
-            <tr>
-                {% for player in league.players %}
-                    <th style="width: {{ width }}%; white-space: nowrap;">{{ player }}</th>
-                {% endfor %}
-            </tr>
-            {% for round in league.schedule %}
+        
+        <table class="league-table">
+            <thead>
                 <tr>
-                    <td>
-                        <b>Round {{ round.number }}:</b><br>
-                        {% for game in round.games %}
-                            <span style="display: inline-block; white-space: nowrap;">{{ game.players[0].name }}/{{ game.players[1].name }} vs. {{ game.players[2].name }}/{{ game.players[3].name }}</span><br>
-                        {% endfor %}
-                        {% if round.players_out %}
-                            <br>
-                            <small><b>Out:</b> <span style="display: inline-block; white-space: nowrap;">{{ round.players_out|join(', ') }}</span></small>
-                        {% endif %}
-                    </td>
-                    {% for player in league.players %}
-                    <td></td>
-                {% endfor %}
+                    <th style="width: 20%; white-space: nowrap;" rowspan="2">Rounds</th>
+                    <th style="width: 80%; white-space: nowrap;" colspan="{{ league.players|length }}">Player Scores</th>
                 </tr>
-            {% endfor %}
+                <tr>
+                    {% for player in league.players %}
+                        <th style="width: {{ width }}%; white-space: nowrap;">{{ player }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for round in league.schedule %}
+                    <tr>
+                        <td class="round-cell">
+                            <div class="round-number">Round {{ round.number }}</div>
+                            {% for game in round.games %}
+                                <div class="game">
+                                    <span class="team">{{ game.players[0].name }}/{{ game.players[1].name }}</span>
+                                    <span class="vs">vs</span>
+                                    <span class="team">{{ game.players[2].name }}/{{ game.players[3].name }}</span>
+                                </div>
+                            {% endfor %}
+                            {% if round.players_out %}
+                                <div class="players-out">
+                                    <span class="players-out-label">Out:</span> {{ round.players_out|join(', ') }}
+                                </div>
+                            {% endif %}
+                        </td>
+                        {% for player in league.players %}
+                            {% if league.scoring_system.value == 'w_l' %}
+                                <td>
+                                    <select name="player_score" id="player_score">
+                                        <option value="0"></option>
+                                        <option value="w">W</option>
+                                        <option value="l">L</option>
+                                    </select>
+                                </td>
+                            {% elif league.scoring_system.value == 'score' %}
+                            <td>
+                                <input type="number" name="player_score" id="player_score" min="0" max="100" step="1">
+                            </td>
+                            {% else %}
+                                <td></td>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
         </table>
-        <br>
-        <div id="footer">
-            <a href="#" onclick="print_page()">Print</a> | <a href="/">New League</a>
+        
+        <div id="footer" class="footer">
+            <a href="#" onclick="printPage()">Print</a>
+            <a href="/">New League</a>
         </div>
-    </body>
+    </div>
+</body>
 </html>
