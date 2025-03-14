@@ -215,10 +215,16 @@ class TestLeague(unittest.TestCase):
         league = League(player_names="GC, Juliano, Fariba, Galina, Igor, Yuri")
         self.assertEqual(league.calculate_max_possible_unique_pairs(), 15)
     
+    def test_league_set_invalid_template(self):
+        league = League(player_names="GC, Juliano, Fariba, Galina")
+        with self.assertRaises(ValueError):
+            league.set_template("invalid-template")
+
     def test_league_to_object(self):
         player_names="GC, Juliano, Fariba, Galina"
         league = League(name="Test League", player_names=player_names)
         league.generate_schedule(rounds=1)
+        league.set_template("irina-fariba")
         
         generated_league_object = league.to_object()
         league_object = {
@@ -235,7 +241,7 @@ class TestLeague(unittest.TestCase):
                     ],
                     "players_out": []
                 }
-            ], "scoring_system": "none"
+            ], "scoring_system": "none", "template": "irina-fariba"
         }
         
         self.assertEqual(generated_league_object["id"], league_object["id"])
@@ -251,6 +257,7 @@ class TestLeague(unittest.TestCase):
         self.assertTrue(generated_league_object["schedule"][0]["games"][0]["players"][3]["name"] in player_names.split(", "))
 
         self.assertEqual(generated_league_object["scoring_system"], league_object["scoring_system"])
+        self.assertEqual(generated_league_object["template"], league_object["template"])
     
     def test_league_from_object(self):
         league = League.from_object({
@@ -266,7 +273,8 @@ class TestLeague(unittest.TestCase):
                     "players_out": [{"name": "Aline"}]
                 }
             ],
-            "scoring_system": "w_l"
+            "scoring_system": "w_l",
+            "template": "ricky"
         })
         self.assertEqual(league.id, "123")
         self.assertEqual(league.name, "Test League")

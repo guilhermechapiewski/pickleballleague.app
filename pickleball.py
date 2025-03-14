@@ -137,6 +137,7 @@ class League:
         self.players = [Player(player.strip()) for player in player_names.split(",")] if player_names else []
         self.schedule = []
         self.scoring_system = ScoringSystem.NONE
+        self.template = "ricky"
 
     def set_id(self, id: str):
         self.id = id
@@ -166,6 +167,11 @@ class League:
         r = 2
         return math.factorial(n) // (math.factorial(r) * math.factorial(n-r))
     
+    def set_template(self, template: str):
+        if template not in ["ricky", "irina-fariba"]:
+            raise ValueError("Invalid template name.")
+        self.template = template
+
     def generate_schedule(self, rounds: int=7):
         max_unique_pairs = self.calculate_max_possible_unique_pairs()
         if rounds > max_unique_pairs:
@@ -224,7 +230,8 @@ class League:
             "name": self.name,
             "players": [player.to_object() for player in self.players],
             "schedule": [round.to_object() for round in self.schedule],
-            "scoring_system": self.scoring_system.value
+            "scoring_system": self.scoring_system.value,
+            "template": self.template
         }
     
     @staticmethod
@@ -234,4 +241,5 @@ class League:
         league.set_players([Player.from_object(player) for player in object["players"]])
         league.set_schedule([LeagueRound.from_object(round) for round in object["schedule"]])
         league.set_scoring_system(ScoringSystem(object["scoring_system"]))
+        league.set_template(object["template"])
         return league
