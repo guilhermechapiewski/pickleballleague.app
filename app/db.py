@@ -1,6 +1,6 @@
 import os
 import logging
-from pickleball import League
+from app.pickleball import League
 from google.cloud import datastore
 
 class LeagueRepository:

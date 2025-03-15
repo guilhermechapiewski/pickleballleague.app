@@ -1,5 +1,5 @@
 import unittest
-from pickleball import League, Player, Match, LeagueRound, ScoringSystem
+from app.pickleball import League, Player, Match, LeagueRound, ScoringSystem
 
 class TestPlayer(unittest.TestCase):
     def test_player(self):

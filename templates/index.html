@@ -132,6 +132,19 @@
                 alert('You need at least 6 players for '+rounds+' rounds.');
                 return false;
             }
+            // Check if player names are unique
+            var uniqueNames = new Set();
+            for (var i = 0; i < players.length; i++) {
+                var trimmedName = players[i].trim();
+                if (trimmedName === '') continue;
+                
+                if (uniqueNames.has(trimmedName)) {
+                    alert('Player names must be unique. "' + trimmedName + '" appears more than once.');
+                    return false;
+                }
+                uniqueNames.add(trimmedName);
+            }
+
             return true;
         }
 

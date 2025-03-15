@@ -1,6 +1,6 @@
 import unittest
-from db import LeagueRepository
-from pickleball import League
+from app.db import LeagueRepository
+from app.pickleball import League
 
 class TestLeagueRepository(unittest.TestCase):
     def test_save_and_get_league(self):
