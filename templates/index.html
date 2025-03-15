@@ -17,9 +17,11 @@
     <meta property="og:url" content="https://pickleballleague.app/">
     <meta name="twitter:card" content="summary">
 
+    <meta name="google-signin-client_id" content="873677737409-pkh5rfq6ejpr8dieqalnshjk09tfo9f0.apps.googleusercontent.com">
+
     <style>
         body {
-            font-family: 'Source Sans Pro', sans-serif;
+            font-family: sans-serif;
             margin: 0;
             background: #000;
             color: #fff;
@@ -39,7 +41,7 @@
 
         @media (min-height: 800px) {
             .hero {
-                min-height: 42vh;
+                min-height: 35vh;
             }
         }
         
@@ -50,9 +52,9 @@
         }
 
         .hero h1 {
-            font-size: 48px;
+            font-size: 36px;
             margin: 0;
-            font-family: 'Playfair Display', serif;
+            font-family: sans-serif;
         }
 
         .container {
@@ -99,7 +101,48 @@
         .version a {
             color: #fff;
         }
+        
+        .g-signin2 {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+
+        .loggedin-user-info {
+            position: absolute;
+            top: 26px;
+            right: 150px;
+            z-index: 100;
+            font-size: 12px;
+            color: #fff;
+            opacity: 0.7;
+            background-color: #000;
+            padding: 5px 10px;
+            border-radius: 4px;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: none;
+        }
+
+        .loggedin-user-email {
+            font-weight: bold;
+            text-overflow: ellipsis;
+            font-size: 10px;
+        }
+
+        .loggedin-user-account a {
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .loggedin-user-account a:hover {
+            text-decoration: underline;
+        }
     </style>
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
     <script language="javascript" type="text/javascript">
         var validateForm = function() {
             var playerNames = document.getElementById('player_names').value;
@@ -120,10 +163,18 @@
             }
             return true;
         }
+
+        function onSignIn(googleUser) {
+            var profile = googleUser.getBasicProfile();
+            document.getElementById('loggedin-user-email').innerHTML = profile.getEmail();
+            document.getElementById('loggedin-user-info').style.display = 'block';
+        }
     </script>
 </head>
 
 <body>
+    <div class="loggedin-user-info"><span class="loggedin-user-account"><a href="/profile">Profile</a></span> | <span id="loggedin-user-email" class="loggedin-user-email">@</span></div>
+    <div class="g-signin2" data-onsuccess="onSignIn"></div>
     <div class="hero">
         <h1>Create your own Pickleball league in seconds! 🏓</h1>
     </div>
