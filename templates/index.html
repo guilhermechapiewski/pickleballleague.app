@@ -167,7 +167,7 @@
             const responsePayload = decodeJwtResponse(response.credential);
             console.log("Google Account ID: " + responsePayload.sub);
             document.getElementById('loggedin-user-email').innerHTML = responsePayload.email;
-            document.getElementById('loggedin-user-info').style.display = 'block';
+            document.getElementsByClassName('loggedin-user-info')[0].style.display = 'block';
         }
 
         var decodeJwtResponse = function(token) {
