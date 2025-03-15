@@ -163,10 +163,21 @@
             return true;
         }
 
-        function handleCredentialResponse(googleUser) {
-            var profile = googleUser.getBasicProfile();
-            document.getElementById('loggedin-user-email').innerHTML = profile.getEmail();
+        function handleCredentialResponse(response) {
+            const responsePayload = decodeJwtResponse(response.credential);\
+            console.log("Google Account ID: " + responsePayload.sub);
+            document.getElementById('loggedin-user-email').innerHTML = responsePayload.email;
             document.getElementById('loggedin-user-info').style.display = 'block';
+        }
+
+        function decodeJwtResponse(token) {
+            let base64Url = token.split('.')[1];
+            let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            let jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+
+            return JSON.parse(jsonPayload);
         }
     </script>
 </head>
@@ -174,11 +185,25 @@
 <body>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <div class="loggedin-user-info"><span class="loggedin-user-account"><a href="/profile">Profile</a></span> | <span id="loggedin-user-email" class="loggedin-user-email">@</span></div>
+    
     <div id="g_id_onload"
-         data-client_id="873677737409-pkh5rfq6ejpr8dieqalnshjk09tfo9f0.apps.googleusercontent.com"
-         data-callback="handleCredentialResponse">
+        data-client_id="873677737409-pkh5rfq6ejpr8dieqalnshjk09tfo9f0.apps.googleusercontent.com"
+        data-context="use"
+        data-ux_mode="popup"
+        data-callback="handleCredentialResponse"
+        data-auto_select="true"
+        data-itp_support="true">
     </div>
-    <div class="g_id_signin" data-type="standard"></div>
+
+    <div class="g_id_signin"
+        data-type="standard"
+        data-shape="pill"
+        data-theme="outline"
+        data-text="signin"
+        data-size="medium"
+        data-logo_alignment="left">
+    </div>
+
     <div class="hero">
         <h1>Create your own Pickleball league in seconds! 🏓</h1>
     </div>
