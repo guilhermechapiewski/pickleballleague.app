@@ -1,5 +1,5 @@
 import unittest
-from pickleball import League, Player, Game, LeagueRound, ScoringSystem
+from pickleball import League, Player, Match, LeagueRound, ScoringSystem
 
 class TestPlayer(unittest.TestCase):
     def test_player(self):
@@ -21,69 +21,69 @@ class TestPlayer(unittest.TestCase):
         player = Player.from_object({"name": "John"})
         self.assertEqual(player.name, "John")
 
-class TestGame(unittest.TestCase):
-    def test_game(self):
-        game = Game(["John", "Jane", "Jim", "Jill"], ScoringSystem.NONE)
-        self.assertEqual(game.players, ["John", "Jane", "Jim", "Jill"])
+class TestMatch(unittest.TestCase):
+    def test_match(self):
+        match = Match(["John", "Jane", "Jim", "Jill"], ScoringSystem.NONE)
+        self.assertEqual(match.players, ["John", "Jane", "Jim", "Jill"])
     
-    def test_game_must_have_4_players(self):
+    def test_match_must_have_4_players(self):
         with self.assertRaises(ValueError):
-            Game(["John", "Jane", "Jim"], ScoringSystem.NONE)
+            Match(["John", "Jane", "Jim"], ScoringSystem.NONE)
     
-    def test_game_equality(self):
-        game1 = Game(["John", "Jane", "Jim", "Jill"], ScoringSystem.NONE)
-        game2 = Game(["Jane", "John", "Jim", "Jill"], ScoringSystem.NONE)
-        self.assertTrue(game1 == game2)
+    def test_match_equality(self):
+        match1 = Match(["John", "Jane", "Jim", "Jill"], ScoringSystem.NONE)
+        match2 = Match(["Jane", "John", "Jim", "Jill"], ScoringSystem.NONE)
+        self.assertTrue(match1 == match2)
 
-        game3 = Game(["John", "Jim", "Jane", "Jill"], ScoringSystem.NONE)
-        self.assertFalse(game1 == game3)
+        match3 = Match(["John", "Jim", "Jane", "Jill"], ScoringSystem.NONE)
+        self.assertFalse(match1 == match3)
     
-    def test_game_to_object(self):
-        game = Game([Player("John"), Player("Jane"), Player("Jim"), Player("Jill")], ScoringSystem.NONE)
-        self.assertEqual(game.to_object(), {"players": [
+    def test_match_to_object(self):
+        match = Match([Player("John"), Player("Jane"), Player("Jim"), Player("Jill")], ScoringSystem.NONE)
+        self.assertEqual(match.to_object(), {"players": [
             {"name": "John"}, {"name": "Jane"}, {"name": "Jim"}, {"name": "Jill"}
         ], "scoring_system": "none", "score": [0, 0], "winner_team": 0})
     
-    def test_game_from_object(self):
-        game = Game.from_object({"players": [
+    def test_match_from_object(self):
+        match = Match.from_object({"players": [
             {"name": "John"}, {"name": "Jane"}, {"name": "Jim"}, {"name": "Jill"}
         ], "scoring_system": "none", "score": [0, 0], "winner_team": 0})
-        self.assertEqual([player.name for player in game.players], ["John", "Jane", "Jim", "Jill"])
+        self.assertEqual([player.name for player in match.players], ["John", "Jane", "Jim", "Jill"])
     
-    def test_game_score(self):
-        game = Game([Player("John"), Player("Jane"), Player("Jim"), Player("Jill")], ScoringSystem.NONE)
-        self.assertEqual(game.get_score(), [0, 0])
-        self.assertEqual(game.get_winner_team(), 0)
-        self.assertEqual(game.get_winner_team_players(), [])
+    def test_match_score(self):
+        match = Match([Player("John"), Player("Jane"), Player("Jim"), Player("Jill")], ScoringSystem.NONE)
+        self.assertEqual(match.get_score(), [0, 0])
+        self.assertEqual(match.get_winner_team(), 0)
+        self.assertEqual(match.get_winner_team_players(), [])
         
-        game.set_score([11, 2])
-        self.assertEqual(game.get_score(), [11, 2])
-        self.assertEqual(game.get_winner_team(), 1)
-        self.assertEqual([player.name for player in game.get_winner_team_players()], ["John", "Jane"])
+        match.set_score([11, 2])
+        self.assertEqual(match.get_score(), [11, 2])
+        self.assertEqual(match.get_winner_team(), 1)
+        self.assertEqual([player.name for player in match.get_winner_team_players()], ["John", "Jane"])
 
-        game.set_score([1, 11])
-        self.assertEqual(game.get_score(), [1, 11])
-        self.assertEqual(game.get_winner_team(), 2)
-        self.assertEqual([player.name for player in game.get_winner_team_players()], ["Jim", "Jill"])
+        match.set_score([1, 11])
+        self.assertEqual(match.get_score(), [1, 11])
+        self.assertEqual(match.get_winner_team(), 2)
+        self.assertEqual([player.name for player in match.get_winner_team_players()], ["Jim", "Jill"])
     
-    def test_game_winner_based_on_score(self):
-        game = Game([Player("John"), Player("Jane"), Player("Jim"), Player("Jill")], ScoringSystem.NONE)
-        self.assertEqual(game.get_winner_team(), 0)
+    def test_match_winner_based_on_score(self):
+        match = Match([Player("John"), Player("Jane"), Player("Jim"), Player("Jill")], ScoringSystem.NONE)
+        self.assertEqual(match.get_winner_team(), 0)
 
-        game.set_score([10, 2])
-        self.assertEqual(game.get_winner_team(), 0)
-        self.assertEqual(game.get_winner_team_players(), [])
+        match.set_score([10, 2])
+        self.assertEqual(match.get_winner_team(), 0)
+        self.assertEqual(match.get_winner_team_players(), [])
         
-        game.set_score([11, 2])
-        self.assertEqual(game.get_winner_team(), 1)
-        self.assertEqual([player.name for player in game.get_winner_team_players()], ["John", "Jane"])
+        match.set_score([11, 2])
+        self.assertEqual(match.get_winner_team(), 1)
+        self.assertEqual([player.name for player in match.get_winner_team_players()], ["John", "Jane"])
 
 class TestLeagueRound(unittest.TestCase):
     def test_league_round_to_object(self):
-        round = LeagueRound(1, [Game([Player("John"), Player("Jane"), Player("Jim"), Player("Jill")], ScoringSystem.NONE), Game([Player("John"), Player("Jane"), Player("Jim"), Player("Jill")], ScoringSystem.NONE)], [])
+        round = LeagueRound(1, [Match([Player("John"), Player("Jane"), Player("Jim"), Player("Jill")], ScoringSystem.NONE), Match([Player("John"), Player("Jane"), Player("Jim"), Player("Jill")], ScoringSystem.NONE)], [])
         self.assertEqual(round.to_object(), {
             "number": 1,
-            "games": [
+            "matches": [
                 {"players": [{"name": "John"}, {"name": "Jane"}, {"name": "Jim"}, {"name": "Jill"}], "score": [0, 0], "winner_team": 0, "scoring_system": "none"},
                 {"players": [{"name": "John"}, {"name": "Jane"}, {"name": "Jim"}, {"name": "Jill"}], "score": [0, 0], "winner_team": 0, "scoring_system": "none"}
             ],
@@ -93,7 +93,7 @@ class TestLeagueRound(unittest.TestCase):
         round.add_player_out(Player("GC"))
         self.assertEqual(round.to_object(), {
             "number": 1,
-            "games": [
+            "matches": [
                 {"players": [{"name": "John"}, {"name": "Jane"}, {"name": "Jim"}, {"name": "Jill"}], "score": [0, 0], "winner_team": 0, "scoring_system": "none"},
                 {"players": [{"name": "John"}, {"name": "Jane"}, {"name": "Jim"}, {"name": "Jill"}], "score": [0, 0], "winner_team": 0, "scoring_system": "none"}
             ],
@@ -103,14 +103,14 @@ class TestLeagueRound(unittest.TestCase):
     def test_league_round_from_object(self):
         round = LeagueRound.from_object({
             "number": 1,
-            "games": [
+            "matches": [
                 {"players": [{"name": "John"}, {"name": "Jane"}, {"name": "Jim"}, {"name": "Jill"}], "score": [0, 0], "winner_team": 0, "scoring_system": "none"},
             ],
             "players_out": [{"name": "GC"}]
         })
         self.assertEqual(round.number, 1)
-        self.assertEqual(len(round.games), 1)
-        self.assertEqual([player.name for player in round.games[0].players], ["John", "Jane", "Jim", "Jill"])
+        self.assertEqual(len(round.matches), 1)
+        self.assertEqual([player.name for player in round.matches[0].players], ["John", "Jane", "Jim", "Jill"])
         self.assertEqual(len(round.players_out), 1)
         self.assertEqual(round.players_out[0].name, "GC")
 
@@ -130,13 +130,13 @@ class TestLeague(unittest.TestCase):
         self.assertEqual(len(schedule), 5)
 
         for round in schedule:
-            # with 8 players,each round has 2 games
-            self.assertEqual(round.number_of_games(), 2)
+            # with 8 players,each round has 2 matches
+            self.assertEqual(round.number_of_matches(), 2)
 
-            # each game has 4 players
-            for game in round.games:
-                self.assertEqual(len(game.players), 4)
-                self.assertEqual(len(set(game.players)), 4)
+            # each match has 4 players
+            for match in round.matches:
+                self.assertEqual(len(match.players), 4)
+                self.assertEqual(len(set(match.players)), 4)
         
     def test_generate_schedule_with_4_players(self):
         league = League(player_names="GC, Juliano, Fariba, Galina")
@@ -144,7 +144,7 @@ class TestLeague(unittest.TestCase):
         self.assertEqual(len(schedule), 2)
 
         for round in schedule:
-            self.assertEqual(round.number_of_games(), 1)
+            self.assertEqual(round.number_of_matches(), 1)
             self.assertEqual(len(round.players_out), 0)
     
     def test_impossible_to_generate_schedule_with_4_players_and_10_rounds(self):
@@ -158,20 +158,20 @@ class TestLeague(unittest.TestCase):
         else:
             self.fail("Expected ValueError to be raised")
     
-    def test_generate_schedule_with_4_players_and_there_are_no_equal_games_across_rounds(self):
+    def test_generate_schedule_with_4_players_and_there_are_no_equal_matches_across_rounds(self):
         league = League(player_names="GC, Juliano, Fariba, Galina")
         schedule = league.generate_schedule(rounds=3)
 
         self.assertEqual(len(schedule), 3)
 
-        # check that no two games are equal across all rounds
+        # check that no two matches are equal across all rounds
         for i in range(len(schedule)):
-            for this_game in schedule[i].games:
-                # Check against all games in subsequent rounds
+            for this_match in schedule[i].matches:
+                # Check against all matches in subsequent rounds
                 for j in range(i + 1, len(schedule)):
-                    for another_game in schedule[j].games:
-                        self.assertFalse(this_game == another_game, 
-                            f"Found equal games:\nRound {i+1}: {this_game}\nRound {j+1}: {another_game}")
+                    for another_match in schedule[j].matches:
+                        self.assertFalse(this_match == another_match, 
+                            f"Found equal matches:\nRound {i+1}: {this_match}\nRound {j+1}: {another_match}")
 
     def test_generate_schedule_with_9_players(self):
         league = League(player_names="GC, Juliano, Fariba, Galina, Igor, Yuri, Scott, Mark, John")
@@ -179,13 +179,13 @@ class TestLeague(unittest.TestCase):
         self.assertEqual(len(schedule), 5)
 
         for round in schedule:
-            self.assertEqual(round.number_of_games(), 2)
+            self.assertEqual(round.number_of_matches(), 2)
             self.assertEqual(len(round.players_out), 1)
             
             player_out = round.players_out.pop()
             self.assertTrue(player_out in league.players)
-            self.assertFalse(player_out in round.games[0].players)
-            self.assertFalse(player_out in round.games[1].players)
+            self.assertFalse(player_out in round.matches[0].players)
+            self.assertFalse(player_out in round.matches[1].players)
     
     def test_generate_schedule_with_10_players(self):
         league = League(player_names="GC, Juliano, Fariba, Galina, Igor, Yuri, Scott, Mark, John, Jane")
@@ -193,13 +193,13 @@ class TestLeague(unittest.TestCase):
         self.assertEqual(len(schedule), 7)
 
         for round in schedule:
-            self.assertEqual(round.number_of_games(), 2)
+            self.assertEqual(round.number_of_matches(), 2)
             self.assertEqual(len(round.players_out), 2)
 
             for player_out in round.players_out:
                 self.assertTrue(player_out in league.players)
-                self.assertFalse(player_out in round.games[0].players)
-                self.assertFalse(player_out in round.games[1].players)
+                self.assertFalse(player_out in round.matches[0].players)
+                self.assertFalse(player_out in round.matches[1].players)
         
     def test_schedule_rounds_start_with_one(self):
         league = League(player_names="GC, Juliano, Fariba, Galina, Igor, Yuri, Scott, Mark, John")
@@ -225,12 +225,12 @@ class TestLeague(unittest.TestCase):
         league.set_scoring_system(ScoringSystem.SCORE)
         league.generate_schedule(rounds=2)
         
-        league.schedule[0].games[0].set_score([11, 0])
-        league.schedule[1].games[0].set_score([11, 0])
+        league.schedule[0].matches[0].set_score([11, 0])
+        league.schedule[1].matches[0].set_score([11, 0])
 
-        game_winner_team_players = []
-        game_winner_team_players.extend(league.schedule[0].games[0].get_winner_team_players())
-        game_winner_team_players.extend(league.schedule[1].games[0].get_winner_team_players())
+        match_winner_team_players = []
+        match_winner_team_players.extend(league.schedule[0].matches[0].get_winner_team_players())
+        match_winner_team_players.extend(league.schedule[1].matches[0].get_winner_team_players())
 
         scores = {
             "GC": 0,
@@ -239,7 +239,7 @@ class TestLeague(unittest.TestCase):
             "Galina": 0
         }
 
-        for player in game_winner_team_players:
+        for player in match_winner_team_players:
             scores[player.name] += 11
 
         scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
@@ -265,7 +265,7 @@ class TestLeague(unittest.TestCase):
             "schedule": [
                 {
                     "number": 1,
-                    "games": [
+                    "matches": [
                         {"players": [
                             {"name": "GC"}, {"name": "Juliano"}, {"name": "Fariba"}, {"name": "Galina"}
                         ]}
@@ -282,10 +282,10 @@ class TestLeague(unittest.TestCase):
         self.assertEqual(generated_league_object["schedule"][0]["number"], league_object["schedule"][0]["number"])
         self.assertEqual(generated_league_object["schedule"][0]["players_out"], league_object["schedule"][0]["players_out"])
 
-        self.assertTrue(generated_league_object["schedule"][0]["games"][0]["players"][0]["name"] in player_names.split(", "))
-        self.assertTrue(generated_league_object["schedule"][0]["games"][0]["players"][1]["name"] in player_names.split(", "))
-        self.assertTrue(generated_league_object["schedule"][0]["games"][0]["players"][2]["name"] in player_names.split(", "))
-        self.assertTrue(generated_league_object["schedule"][0]["games"][0]["players"][3]["name"] in player_names.split(", "))
+        self.assertTrue(generated_league_object["schedule"][0]["matches"][0]["players"][0]["name"] in player_names.split(", "))
+        self.assertTrue(generated_league_object["schedule"][0]["matches"][0]["players"][1]["name"] in player_names.split(", "))
+        self.assertTrue(generated_league_object["schedule"][0]["matches"][0]["players"][2]["name"] in player_names.split(", "))
+        self.assertTrue(generated_league_object["schedule"][0]["matches"][0]["players"][3]["name"] in player_names.split(", "))
 
         self.assertEqual(generated_league_object["scoring_system"], league_object["scoring_system"])
         self.assertEqual(generated_league_object["template"], league_object["template"])
@@ -298,7 +298,7 @@ class TestLeague(unittest.TestCase):
             "schedule": [
                 {
                     "number": 1,
-                    "games": [
+                    "matches": [
                         {"players": [{"name": "Juliano"}, {"name": "Galina"}, {"name": "GC"}, {"name": "Fariba"}], "score": [0, 0], "winner_team": 0, "scoring_system": "w_l"}
                     ],
                     "players_out": [{"name": "Aline"}]
@@ -312,8 +312,8 @@ class TestLeague(unittest.TestCase):
         self.assertEqual(len(league.players), 5)
         self.assertEqual(len(league.schedule), 1)
         self.assertEqual(league.schedule[0].number, 1)
-        self.assertEqual(len(league.schedule[0].games), 1)
+        self.assertEqual(len(league.schedule[0].matches), 1)
         self.assertEqual(len(league.schedule[0].players_out), 1)
-        self.assertEqual([player.name for player in league.schedule[0].games[0].players], ["Juliano", "Galina", "GC", "Fariba"])
+        self.assertEqual([player.name for player in league.schedule[0].matches[0].players], ["Juliano", "Galina", "GC", "Fariba"])
         self.assertEqual(league.schedule[0].players_out[0].name, "Aline")
         self.assertEqual(league.scoring_system.value, "w_l")

@@ -70,7 +70,7 @@
             font-size: 15px;
         }
         
-        .game {
+        .match {
             margin-bottom: 4px;
         }
         
@@ -194,25 +194,25 @@
             // Create a mapping of teammates for each round
             {% for round in league.schedule %}
                 teammateMap["{{ round.number }}"] = {};
-                {% for game in round.games %}
+                {% for match in round.matches %}
                     // Team 1
-                    teammateMap["{{ round.number }}"]["{{ game.players[0].name }}"] = {
-                        teammate: "{{ game.players[1].name }}",
-                        teammateIndex: playerIndices["{{ game.players[1].name }}"]
+                    teammateMap["{{ round.number }}"]["{{ match.players[0].name }}"] = {
+                        teammate: "{{ match.players[1].name }}",
+                        teammateIndex: playerIndices["{{ match.players[1].name }}"]
                     };
-                    teammateMap["{{ round.number }}"]["{{ game.players[1].name }}"] = {
-                        teammate: "{{ game.players[0].name }}",
-                        teammateIndex: playerIndices["{{ game.players[0].name }}"]
+                    teammateMap["{{ round.number }}"]["{{ match.players[1].name }}"] = {
+                        teammate: "{{ match.players[0].name }}",
+                        teammateIndex: playerIndices["{{ match.players[0].name }}"]
                     };
                     
                     // Team 2
-                    teammateMap["{{ round.number }}"]["{{ game.players[2].name }}"] = {
-                        teammate: "{{ game.players[3].name }}",
-                        teammateIndex: playerIndices["{{ game.players[3].name }}"]
+                    teammateMap["{{ round.number }}"]["{{ match.players[2].name }}"] = {
+                        teammate: "{{ match.players[3].name }}",
+                        teammateIndex: playerIndices["{{ match.players[3].name }}"]
                     };
-                    teammateMap["{{ round.number }}"]["{{ game.players[3].name }}"] = {
-                        teammate: "{{ game.players[2].name }}",
-                        teammateIndex: playerIndices["{{ game.players[2].name }}"]
+                    teammateMap["{{ round.number }}"]["{{ match.players[3].name }}"] = {
+                        teammate: "{{ match.players[2].name }}",
+                        teammateIndex: playerIndices["{{ match.players[2].name }}"]
                     };
                 {% endfor %}
             {% endfor %}
@@ -290,11 +290,11 @@
                     <tr>
                         <td class="round-cell">
                             <div class="round-number">Round {{ round.number }}</div>
-                            {% for game in round.games %}
-                                <div class="game">
-                                    <span class="team">{{ game.players[0].name }}/{{ game.players[1].name }}</span>
+                            {% for match in round.matches %}
+                                <div class="match">
+                                    <span class="team">{{ match.players[0].name }}/{{ match.players[1].name }}</span>
                                     <span class="vs">vs</span>
-                                    <span class="team">{{ game.players[2].name }}/{{ game.players[3].name }}</span>
+                                    <span class="team">{{ match.players[2].name }}/{{ match.players[3].name }}</span>
                                 </div>
                             {% endfor %}
                             {% if round.players_out %}
@@ -308,22 +308,22 @@
                             {% set ns2 = namespace(w="") %}
                             {% set ns3 = namespace(l="") %}
                             {% set ns4 = namespace(score="") %}
-                            {% for game in round.games %}
-                                {% if player.name in [game.players[0].name, game.players[1].name] %}
-                                    {% set ns4.score = game.score[0] %}
-                                    {% if game.get_winner_team() == 1 %}
+                            {% for match in round.matches %}
+                                {% if player.name in [match.players[0].name, match.players[1].name] %}
+                                    {% set ns4.score = match.score[0] %}
+                                    {% if match.get_winner_team() == 1 %}
                                         {% set ns1.color = "#90EE90" %}
                                         {% set ns2.w = "selected" %}
-                                    {% elif game.get_winner_team() == 2 %}
+                                    {% elif match.get_winner_team() == 2 %}
                                         {% set ns1.color = "#FFCCCB" %}
                                         {% set ns3.l = "selected" %}
                                     {% endif %}
-                                {% elif player.name in [game.players[2].name, game.players[3].name] %}
-                                    {% set ns4.score = game.score[1] %}
-                                    {% if game.get_winner_team() == 1 %}
+                                {% elif player.name in [match.players[2].name, match.players[3].name] %}
+                                    {% set ns4.score = match.score[1] %}
+                                    {% if match.get_winner_team() == 1 %}
                                         {% set ns1.color = "#FFCCCB" %}
                                         {% set ns3.l = "selected" %}
-                                    {% elif game.get_winner_team() == 2 %}
+                                    {% elif match.get_winner_team() == 2 %}
                                         {% set ns1.color = "#90EE90" %}
                                         {% set ns2.w = "selected" %}
                                     {% endif %}

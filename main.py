@@ -70,32 +70,32 @@ def save_league():
                 pass
 
             if player_score:
-                for game in round.games:
-                    player_names = [p.name for p in game.players]
+                for match in round.matches:
+                    player_names = [p.name for p in match.players]
                     
                     if player.name in player_names:
                         
-                        if game.scoring_system == ScoringSystem.SCORE:
-                            game_score = game.score
+                        if match.scoring_system == ScoringSystem.SCORE:
+                            match_score = match.score
                             
                             if player.name in player_names[:2]:
-                                game_score[0] = int(player_score)
+                                match_score[0] = int(player_score)
                             else:
-                                game_score[1] = int(player_score)
+                                match_score[1] = int(player_score)
                             
-                            game.set_score(game_score)
+                            match.set_score(match_score)
                         
-                        if game.scoring_system == ScoringSystem.W_L:
+                        if match.scoring_system == ScoringSystem.W_L:
                             if player.name in player_names[:2]:
                                 if player_score == "w":
-                                    game.set_winner_team(1)
+                                    match.set_winner_team(1)
                                 if player_score == "l":
-                                    game.set_winner_team(2)
+                                    match.set_winner_team(2)
                             else:
                                 if player_score == "w":
-                                    game.set_winner_team(2)
+                                    match.set_winner_team(2)
                                 if player_score == "l":
-                                    game.set_winner_team(1)
+                                    match.set_winner_team(1)
             
             player_index += 1
     

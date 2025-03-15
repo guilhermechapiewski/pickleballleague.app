@@ -29,10 +29,10 @@ class Player:
     def from_object(object: dict):
         return Player(object["name"])
 
-class Game:
+class Match:
     def __init__(self, players: list[Player], scoring_system: ScoringSystem):
         if len(players) != 4:
-            raise ValueError("Game must have 4 players")
+            raise ValueError("Match must have 4 players")
         self.players = players
         self.scoring_system = scoring_system
         self.score = [0, 0]
@@ -44,14 +44,14 @@ class Game:
     def __repr__(self):
         return self.__str__()
 
-    def __eq__(self, other_game):
-        this_game_sides = set()
-        this_game_sides.add(tuple(sorted(self.players[:2])))
-        this_game_sides.add(tuple(sorted(self.players[2:])))
-        other_game_sides = set()
-        other_game_sides.add(tuple(sorted(other_game.players[:2])))
-        other_game_sides.add(tuple(sorted(other_game.players[2:])))
-        return this_game_sides == other_game_sides
+    def __eq__(self, other_match):
+        this_match_sides = set()
+        this_match_sides.add(tuple(sorted(self.players[:2])))
+        this_match_sides.add(tuple(sorted(self.players[2:])))
+        other_match_sides = set()
+        other_match_sides.add(tuple(sorted(other_match.players[:2])))
+        other_match_sides.add(tuple(sorted(other_match.players[2:])))
+        return this_match_sides == other_match_sides
     
     def set_score(self, score: list[int]):
         if len(score) != 2:
@@ -99,36 +99,36 @@ class Game:
     
     @staticmethod
     def from_object(object: dict):
-        game = Game([Player.from_object(player) for player in object["players"]], ScoringSystem(object["scoring_system"]))
-        game.set_score(object["score"])
-        game.set_winner_team(object["winner_team"])
-        return game
+        match = Match([Player.from_object(player) for player in object["players"]], ScoringSystem(object["scoring_system"]))
+        match.set_score(object["score"])
+        match.set_winner_team(object["winner_team"])
+        return match
 
 class LeagueRound:
-    def __init__(self, number: int, games: list[Game], players_out: list[Player]):
+    def __init__(self, number: int, matches: list[Match], players_out: list[Player]):
         self.number = number
-        self.games = games
+        self.matches = matches
         self.players_out = players_out
     
-    def number_of_games(self):
-        return len(self.games)
+    def number_of_matches(self):
+        return len(self.matches)
     
     def add_player_out(self, player: Player):
         self.players_out.append(player)
     
     def __str__(self):
-        return f"Round {self.number}: {', '.join([str(game.players) for game in self.games])}"
+        return f"Round {self.number}: {', '.join([str(match.players) for match in self.matches])}"
     
     def to_object(self):
         return {
             "number": self.number,
-            "games": [game.to_object() for game in self.games],
+            "matches": [match.to_object() for match in self.matches],
             "players_out": [player.to_object() for player in self.players_out]
         }
     
     @staticmethod
     def from_object(object: dict):
-        return LeagueRound(object["number"], [Game.from_object(game) for game in object["games"]], [Player.from_object(player) for player in object["players_out"]])
+        return LeagueRound(object["number"], [Match.from_object(match) for match in object["matches"]], [Player.from_object(player) for player in object["players_out"]])
 
 class League:
     def __init__(self, name: str="", player_names: list[str]=[]):
@@ -151,8 +151,8 @@ class League:
     def set_scoring_system(self, scoring_system: ScoringSystem):
         self.scoring_system = scoring_system
         for round in self.schedule:
-            for game in round.games:
-                game.set_scoring_system(scoring_system)
+            for match in round.matches:
+                match.set_scoring_system(scoring_system)
 
     def reset_schedule(self):
         self.schedule = []
@@ -184,28 +184,28 @@ class League:
             # Get all possible combinations of 4 players
             all_possible_players_combinations = list(combinations(self.players, 4))
             
-            # Shuffle the list of possible games to randomize schedule generation
+            # Shuffle the list of possible  matches to randomize schedule generation
             random.shuffle(all_possible_players_combinations)
             
             # Generate rounds
             for i in range(rounds):
-                round_games = []
+                round_matches = []
                 remaining_available_players = set(self.players)
                 
-                # Keep adding games until we can't add more
+                # Keep adding matches until we can't add more
                 while len(remaining_available_players) >= 4:
                     # If we run out of possible combinations, start over
                     if len(all_possible_players_combinations) == 0:
                         all_possible_players_combinations = list(combinations(self.players, 4))
                         random.shuffle(all_possible_players_combinations)
                     
-                    # Find a valid game from remaining combinations
+                    # Find a valid match from remaining combinations
                     for players_combination in all_possible_players_combinations:
-                        # Check if all players in this game are still available
+                        # Check if all players in this match are still available
                         if all(player in remaining_available_players for player in players_combination):
                             players = list(players_combination)
                             random.shuffle(players)
-                            round_games.append(Game(players, self.scoring_system))
+                            round_matches.append(Match(players, self.scoring_system))
 
                             all_possible_players_combinations.remove(players_combination)
                             
@@ -215,12 +215,12 @@ class League:
                             break
                 
                 # Only add non-empty rounds
-                if round_games:
-                    # if the round has only one game, and that game is already in the schedule, skip this round
-                    if len(round_games) == 1 and round_games[0] in [round.games[0] for round in self.schedule]:
+                if round_matches:
+                    # if the round has only one match, and that match is already in the schedule, skip this round
+                    if len(round_matches) == 1 and round_matches[0] in [round.matches[0] for round in self.schedule]:
                         continue
                         
-                    self.add_round(LeagueRound(i + 1, round_games, remaining_available_players))
+                    self.add_round(LeagueRound(i + 1, round_matches, remaining_available_players))
         
         return self.schedule
     
@@ -238,18 +238,18 @@ class League:
 
         # Calculate scores and wins for each player
         for round in self.schedule:
-            for game in round.games:
-                winner_team = game.get_winner_team()
+            for match in round.matches:
+                winner_team = match.get_winner_team()
                 if winner_team:
-                    for i, player in enumerate(game.players):
+                    for i, player in enumerate(match.players):
                         player_idx = next((idx for idx, p in enumerate(rankings) if p["name"] == player.name), None)
                         if player_idx is not None:
                             # Add score
                             if self.scoring_system == ScoringSystem.SCORE:
                                 if i < 2:  # Team 1
-                                    rankings[player_idx]["total_score"] += game.score[0] if game.score and len(game.score) > 0 else 0
+                                    rankings[player_idx]["total_score"] += match.score[0] if match.score and len(match.score) > 0 else 0
                                 else:  # Team 2
-                                    rankings[player_idx]["total_score"] += game.score[1] if game.score and len(game.score) > 1 else 0
+                                    rankings[player_idx]["total_score"] += match.score[1] if match.score and len(match.score) > 1 else 0
                             
                             # Add win/loss
                             if (i < 2 and winner_team == 1) or (i >= 2 and winner_team == 2):
@@ -259,8 +259,8 @@ class League:
         
         # Calculate win percentage for each player
         for player in rankings:
-            total_games = player["wins"] + player["losses"]
-            player["win_percentage"] = (player["wins"] / total_games * 100) if total_games > 0 else 0
+            total_matches = player["wins"] + player["losses"]
+            player["win_percentage"] = (player["wins"] / total_matches * 100) if total_matches > 0 else 0
         
         # Sort rankings by wins (descending) and then by total score (descending)
         rankings.sort(key=lambda x: (x["wins"], x["total_score"]), reverse=True)
