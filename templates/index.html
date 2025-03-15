@@ -163,14 +163,14 @@
             return true;
         }
 
-        function handleCredentialResponse(response) {
-            const responsePayload = decodeJwtResponse(response.credential);\
+        var handleCredentialResponse = function(response) {
+            const responsePayload = decodeJwtResponse(response.credential);
             console.log("Google Account ID: " + responsePayload.sub);
             document.getElementById('loggedin-user-email').innerHTML = responsePayload.email;
             document.getElementById('loggedin-user-info').style.display = 'block';
         }
 
-        function decodeJwtResponse(token) {
+        var decodeJwtResponse = function(token) {
             let base64Url = token.split('.')[1];
             let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
             let jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
