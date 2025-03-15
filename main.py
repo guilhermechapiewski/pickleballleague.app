@@ -66,7 +66,7 @@ def save_league():
                 player_score = flask.request.form[f"player_score_round{round.number}_player{player_index}"]
             except KeyError:
                 pass
-        
+
             if player_score:
                 for game in round.games:
                     player_names = [p.name for p in game.players]
@@ -75,9 +75,6 @@ def save_league():
                         
                         if game.scoring_system == ScoringSystem.SCORE:
                             game_score = game.score
-
-                            if len(game_score) == 0:
-                                game_score = [0, 0]
                             
                             if player.name in player_names[:2]:
                                 game_score[0] = int(player_score)
