@@ -163,6 +163,22 @@
             return true;
         }
 
+        {% if dev_environment %}
+        var handleCredentialResponseDEV = function() {
+            const devUserEmail = "gc@pickleballleague.app";
+            const devUserId = "1234567890";
+            
+            console.log("Google Account ID (DEV): " + devUserId);
+            document.getElementById('loggedin-user-email').innerHTML = devUserEmail;
+            document.getElementsByClassName('loggedin-user-info')[0].style.display = 'block';
+            
+            const expirationDate = new Date();
+            expirationDate.setDate(expirationDate.getDate() + 1);
+            document.cookie = `userEmail=${devUserEmail}; expires=${expirationDate.toUTCString()}; path=/`;
+            document.cookie = `userId=${devUserId}; expires=${expirationDate.toUTCString()}; path=/`;
+            console.log("DEV User login information saved to cookies");
+        }
+        {% else %}
         var handleCredentialResponse = function(response) {
             const responsePayload = decodeJwtResponse(response.credential);
             const userEmail = responsePayload.email;
@@ -179,6 +195,7 @@
             document.cookie = `userId=${userId}; expires=${expirationDate.toUTCString()}; path=/`;
             console.log("User login information saved to cookies");
         }
+        {% endif %}
 
         var decodeJwtResponse = function(token) {
             let base64Url = token.split('.')[1];
@@ -202,6 +219,13 @@
             }
             return null;
         }
+
+        var signOut = function() {
+            document.cookie = "userEmail=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            document.cookie = "userId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            document.getElementsByClassName('loggedin-user-info')[0].style.display = 'none';
+            document.getElementById('loggedin-user-email').innerHTML = '';
+        }
         
         window.onload = function() {
             const userInfo = getUserInfoFromCookies();
@@ -215,9 +239,19 @@
 </head>
 
 <body>
+    <div class="loggedin-user-info"><span class="loggedin-user-account"><a href="/profile">Profile</a></span> | <span class="loggedin-user-account"><a href="#" onclick="signOut()">Sign out</a></span> | <span id="loggedin-user-email" class="loggedin-user-email">@</span></div>
+    {% if dev_environment %}
+    <div class="g_id_signin"
+        data-type="standard"
+        data-shape="pill"
+        data-theme="outline"
+        data-text="signin"
+        data-size="medium"
+        data-logo_alignment="left">
+        <button onclick="handleCredentialResponseDEV()" style="height: 30px; padding: 6px;">Sign in (DEV ENV)</button>
+    </div>
+    {% else %}
     <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <div class="loggedin-user-info"><span class="loggedin-user-account"><a href="/profile">Profile</a></span> | <span id="loggedin-user-email" class="loggedin-user-email">@</span></div>
-    
     <div id="g_id_onload"
         data-client_id="873677737409-pkh5rfq6ejpr8dieqalnshjk09tfo9f0.apps.googleusercontent.com"
         data-context="use"
@@ -235,7 +269,7 @@
         data-size="medium"
         data-logo_alignment="left">
     </div>
-
+    {% endif %}
     <div class="hero">
         <h1>Create your own Pickleball league in seconds! 🏓</h1>
     </div>

@@ -1,4 +1,4 @@
-import sys
+import os
 import logging
 import flask
 from template import TemplateEngine
@@ -10,6 +10,8 @@ try:
 except ImportError:
     version = type('Version', (), {'git_commit': 'HEAD', 'deploy_timestamp': 'N/A'})()
 
+DEV_ENVIRONMENT = os.environ.get("DEV_ENVIRONMENT") == "true"
+
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(name)s] [%(levelname)s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
@@ -19,7 +21,7 @@ template_engine = TemplateEngine()
 
 @app.route("/")
 def root():
-    return template_engine.render("index", {"version": version})
+    return template_engine.render("index", {"version": version, "dev_environment": DEV_ENVIRONMENT})
 
 @app.route("/create-league", methods=["POST"])
 def create_league():
