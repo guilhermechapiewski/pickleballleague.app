@@ -219,6 +219,37 @@ class TestLeague(unittest.TestCase):
         league = League(player_names="GC, Juliano, Fariba, Galina")
         with self.assertRaises(ValueError):
             league.set_template("invalid-template")
+    
+    def test_league_get_player_rankings(self):
+        league = League(player_names="GC, Juliano, Fariba, Galina")
+        league.set_scoring_system(ScoringSystem.SCORE)
+        league.generate_schedule(rounds=2)
+        
+        league.schedule[0].games[0].set_score([11, 0])
+        league.schedule[1].games[0].set_score([11, 0])
+
+        game_winner_team_players = []
+        game_winner_team_players.extend(league.schedule[0].games[0].get_winner_team_players())
+        game_winner_team_players.extend(league.schedule[1].games[0].get_winner_team_players())
+
+        scores = {
+            "GC": 0,
+            "Juliano": 0,
+            "Fariba": 0,
+            "Galina": 0
+        }
+
+        for player in game_winner_team_players:
+            scores[player.name] += 11
+
+        scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
+
+        rankings = league.get_player_rankings()
+        self.assertEqual(len(rankings), 4)
+        self.assertEqual(rankings[0]["name"], scores[0][0])
+        self.assertEqual(rankings[1]["name"], scores[1][0])
+        self.assertEqual(rankings[2]["name"], scores[2][0])
+        self.assertEqual(rankings[3]["name"], scores[3][0])
 
     def test_league_to_object(self):
         player_names="GC, Juliano, Fariba, Galina"

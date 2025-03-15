@@ -224,6 +224,49 @@ class League:
         
         return self.schedule
     
+    def get_player_rankings(self):
+        rankings = []
+        
+        for player in self.players:
+            rankings.append({
+                "name": player.name,
+                "total_score": 0,
+                "wins": 0,
+                "losses": 0,
+                "win_percentage": 1
+            })
+
+        # Calculate scores and wins for each player
+        for round in self.schedule:
+            for game in round.games:
+                winner_team = game.get_winner_team()
+                if winner_team:
+                    for i, player in enumerate(game.players):
+                        player_idx = next((idx for idx, p in enumerate(rankings) if p["name"] == player.name), None)
+                        if player_idx is not None:
+                            # Add score
+                            if self.scoring_system == ScoringSystem.SCORE:
+                                if i < 2:  # Team 1
+                                    rankings[player_idx]["total_score"] += game.score[0] if game.score and len(game.score) > 0 else 0
+                                else:  # Team 2
+                                    rankings[player_idx]["total_score"] += game.score[1] if game.score and len(game.score) > 1 else 0
+                            
+                            # Add win/loss
+                            if (i < 2 and winner_team == 1) or (i >= 2 and winner_team == 2):
+                                rankings[player_idx]["wins"] += 1
+                            else:
+                                rankings[player_idx]["losses"] += 1
+        
+        # Calculate win percentage for each player
+        for player in rankings:
+            total_games = player["wins"] + player["losses"]
+            player["win_percentage"] = (player["wins"] / total_games * 100) if total_games > 0 else 0
+        
+        # Sort rankings by wins (descending) and then by total score (descending)
+        rankings.sort(key=lambda x: (x["wins"], x["total_score"]), reverse=True)
+
+        return rankings
+    
     def to_object(self):
         return {
             "id": self.id,

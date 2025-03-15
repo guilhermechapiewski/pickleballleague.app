@@ -159,6 +159,10 @@
                 border: 1px solid #000;
             }
         }
+    
+        {% if league.scoring_system.value != 'none' %}
+            {% include 'templates/_ranking_styles.css' %}
+        {% endif %}
     </style>
     <script>
         function printPage() {
@@ -268,5 +272,8 @@
         </div>
     </div>
     </form>
+    {% if league.scoring_system.value != 'none' %}
+        {% include 'templates/_ranking.html' %}
+    {% endif %}
 </body>
 </html>
