@@ -114,6 +114,10 @@ def league(league_id):
             "message": "The league you are looking for does not exist."
         })
 
+@app.route("/profile")
+def profile():
+    return template_engine.render("profile", {})
+
 if __name__ == "__main__":
     logger.info("Running AppEngine server locally")
     app.run(host="127.0.0.1", port=8080, debug=True)
