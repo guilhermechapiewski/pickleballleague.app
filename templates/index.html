@@ -111,8 +111,8 @@
 
         .loggedin-user-info {
             position: absolute;
-            top: 60px;
-            right: 10px;
+            top: 15px;
+            right: 105px;
             z-index: 100;
             font-size: 12px;
             color: #fff;
@@ -165,9 +165,19 @@
 
         var handleCredentialResponse = function(response) {
             const responsePayload = decodeJwtResponse(response.credential);
-            console.log("Google Account ID: " + responsePayload.sub);
-            document.getElementById('loggedin-user-email').innerHTML = responsePayload.email;
+            const userEmail = responsePayload.email;
+            const userId = responsePayload.sub;
+
+            console.log("Google Account ID: " + userId);
+            document.getElementById('loggedin-user-email').innerHTML = userEmail;
             document.getElementsByClassName('loggedin-user-info')[0].style.display = 'block';
+            
+            // Save user info in a cookie for 30 days
+            const expirationDate = new Date();
+            expirationDate.setDate(expirationDate.getDate() + 30);
+            document.cookie = `userEmail=${userEmail}; expires=${expirationDate.toUTCString()}; path=/`;
+            document.cookie = `userId=${userId}; expires=${expirationDate.toUTCString()}; path=/`;
+            console.log("User login information saved to cookies");
         }
 
         var decodeJwtResponse = function(token) {
@@ -178,6 +188,28 @@
             }).join(''));
 
             return JSON.parse(jsonPayload);
+        }
+
+        var getUserInfoFromCookies = function() {
+            const cookies = document.cookie.split('; ');
+            const userEmailCookie = cookies.find(row => row.startsWith('userEmail='));
+            const userIdCookie = cookies.find(row => row.startsWith('userId='));
+            
+            if (userEmailCookie && userIdCookie) {
+                const userEmail = userEmailCookie.split('=')[1];
+                const userId = userIdCookie.split('=')[1];
+                return { userEmail, userId };
+            }
+            return null;
+        }
+        
+        window.onload = function() {
+            const userInfo = getUserInfoFromCookies();
+            if (userInfo) {
+                document.getElementById('loggedin-user-email').innerHTML = userInfo.userEmail;
+                document.getElementsByClassName('loggedin-user-info')[0].style.display = 'block';
+                console.log("User login information loaded from cookies");
+            }
         }
     </script>
 </head>
