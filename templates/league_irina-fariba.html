@@ -175,6 +175,94 @@
 
             window.print();
         }
+
+        // Store teammate relationships for each player in each round
+        const teammateMap = {};
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            initTeammateMap();
+            addScoreEventListeners();
+        });
+        
+        function initTeammateMap() {
+            // Create a mapping of player names to their indices
+            const playerIndices = {};
+            {% for player in league.players %}
+                playerIndices["{{ player }}"] = {{ loop.index }};
+            {% endfor %}
+            
+            // Create a mapping of teammates for each round
+            {% for round in league.schedule %}
+                teammateMap["{{ round.number }}"] = {};
+                {% for game in round.games %}
+                    // Team 1
+                    teammateMap["{{ round.number }}"]["{{ game.players[0].name }}"] = {
+                        teammate: "{{ game.players[1].name }}",
+                        teammateIndex: playerIndices["{{ game.players[1].name }}"]
+                    };
+                    teammateMap["{{ round.number }}"]["{{ game.players[1].name }}"] = {
+                        teammate: "{{ game.players[0].name }}",
+                        teammateIndex: playerIndices["{{ game.players[0].name }}"]
+                    };
+                    
+                    // Team 2
+                    teammateMap["{{ round.number }}"]["{{ game.players[2].name }}"] = {
+                        teammate: "{{ game.players[3].name }}",
+                        teammateIndex: playerIndices["{{ game.players[3].name }}"]
+                    };
+                    teammateMap["{{ round.number }}"]["{{ game.players[3].name }}"] = {
+                        teammate: "{{ game.players[2].name }}",
+                        teammateIndex: playerIndices["{{ game.players[2].name }}"]
+                    };
+                {% endfor %}
+            {% endfor %}
+        }
+        
+        function addScoreEventListeners() {
+            // Add event listeners to all score inputs and selects
+            {% for round in league.schedule %}
+                {% for player in league.players %}
+                    {% if player.name not in round.players_out|map(attribute='name')|list %}
+                        const inputId{{ round.number }}_{{ loop.index }} = "player_score_round{{ round.number }}_player{{ loop.index }}";
+                        const inputElement{{ round.number }}_{{ loop.index }} = document.getElementById(inputId{{ round.number }}_{{ loop.index }});
+                        if (inputElement{{ round.number }}_{{ loop.index }}) {
+                            // For number inputs (score system)
+                            if (inputElement{{ round.number }}_{{ loop.index }}.type === 'number') {
+                                inputElement{{ round.number }}_{{ loop.index }}.addEventListener('input', function() {
+                                    syncTeammateScore("{{ round.number }}", "{{ player }}", this.value);
+                                });
+                            }
+                            // For select elements (w/l system)
+                            else if (inputElement{{ round.number }}_{{ loop.index }}.tagName === 'SELECT') {
+                                inputElement{{ round.number }}_{{ loop.index }}.addEventListener('change', function() {
+                                    syncTeammateScore("{{ round.number }}", "{{ player }}", this.value);
+                                });
+                            }
+                        }
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
+        }
+        
+        function syncTeammateScore(roundNumber, playerName, value) {
+            // Check if this player has a teammate in this round
+            if (teammateMap[roundNumber] && teammateMap[roundNumber][playerName]) {
+                const teammateInfo = teammateMap[roundNumber][playerName];
+                const teammateInputId = `player_score_round${roundNumber}_player${teammateInfo.teammateIndex}`;
+                const teammateInput = document.getElementById(teammateInputId);
+                
+                if (teammateInput) {
+                    // Update the teammate's input with the same value
+                    teammateInput.value = value;
+                    
+                    // If it's a select element, need to trigger change event for any dependent logic
+                    if (teammateInput.tagName === 'SELECT') {
+                        const event = new Event('change', { bubbles: true });
+                        teammateInput.dispatchEvent(event);
+                    }
+                }
+            }
+        }
     </script>
 </head>
 <body>
