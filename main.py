@@ -118,7 +118,7 @@ def league(league_id):
 
 @app.route("/profile")
 def profile():
-    return template_engine.render("profile", {})
+    return template_engine.render("profile", {"dev_environment": DEV_ENVIRONMENT})
 
 if __name__ == "__main__":
     logger.info("Running AppEngine server locally")

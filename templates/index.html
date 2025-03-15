@@ -91,6 +91,16 @@
             cursor: pointer;
         }
 
+        .primary-button {
+            background: #ca0363;
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
         .version {
             font-size: 12px;
             color: #fff;
@@ -102,45 +112,7 @@
             color: #fff;
         }
         
-        .g_id_signin {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 100;
-        }
-
-        .loggedin-user-info {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 101;
-            font-size: 12px;
-            color: #ffffff;
-            opacity: 1;
-            background-color: #ca0363;
-            padding: 10px 10px;
-            border-radius: 4px;
-            max-width: 220px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            display: none;
-        }
-
-        .loggedin-user-email {
-            font-weight: bold;
-            text-overflow: ellipsis;
-            font-size: 10px;
-        }
-
-        .loggedin-user-account a {
-            color: #fff;
-            text-decoration: none;
-        }
-
-        .loggedin-user-account a:hover {
-            text-decoration: underline;
-        }
+        {% include 'templates/_auth.css' %}
     </style>
     <script language="javascript" type="text/javascript">
         var validateForm = function() {
@@ -163,113 +135,12 @@
             return true;
         }
 
-        {% if dev_environment %}
-        var handleCredentialResponseDEV = function() {
-            const devUserEmail = "gc@pickleballleague.app";
-            const devUserId = "1234567890";
-            
-            console.log("Google Account ID (DEV): " + devUserId);
-            document.getElementById('loggedin-user-email').innerHTML = devUserEmail;
-            document.getElementsByClassName('loggedin-user-info')[0].style.display = 'block';
-            
-            const expirationDate = new Date();
-            expirationDate.setDate(expirationDate.getDate() + 1);
-            document.cookie = `userEmail=${devUserEmail}; expires=${expirationDate.toUTCString()}; path=/`;
-            document.cookie = `userId=${devUserId}; expires=${expirationDate.toUTCString()}; path=/`;
-            console.log("DEV User login information saved to cookies");
-        }
-        {% else %}
-        var handleCredentialResponse = function(response) {
-            const responsePayload = decodeJwtResponse(response.credential);
-            const userEmail = responsePayload.email;
-            const userId = responsePayload.sub;
-
-            console.log("Google Account ID: " + userId);
-            document.getElementById('loggedin-user-email').innerHTML = userEmail;
-            document.getElementsByClassName('loggedin-user-info')[0].style.display = 'block';
-            
-            // Save user info in a cookie for 30 days
-            const expirationDate = new Date();
-            expirationDate.setDate(expirationDate.getDate() + 30);
-            document.cookie = `userEmail=${userEmail}; expires=${expirationDate.toUTCString()}; path=/`;
-            document.cookie = `userId=${userId}; expires=${expirationDate.toUTCString()}; path=/`;
-            console.log("User login information saved to cookies");
-        }
-        {% endif %}
-
-        var decodeJwtResponse = function(token) {
-            let base64Url = token.split('.')[1];
-            let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-            let jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-            }).join(''));
-
-            return JSON.parse(jsonPayload);
-        }
-
-        var getUserInfoFromCookies = function() {
-            const cookies = document.cookie.split('; ');
-            const userEmailCookie = cookies.find(row => row.startsWith('userEmail='));
-            const userIdCookie = cookies.find(row => row.startsWith('userId='));
-            
-            if (userEmailCookie && userIdCookie) {
-                const userEmail = userEmailCookie.split('=')[1];
-                const userId = userIdCookie.split('=')[1];
-                return { userEmail, userId };
-            }
-            return null;
-        }
-
-        var signOut = function() {
-            document.cookie = "userEmail=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-            document.cookie = "userId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-            document.getElementsByClassName('loggedin-user-info')[0].style.display = 'none';
-            document.getElementById('loggedin-user-email').innerHTML = '';
-        }
-        
-        window.onload = function() {
-            const userInfo = getUserInfoFromCookies();
-            if (userInfo) {
-                document.getElementById('loggedin-user-email').innerHTML = userInfo.userEmail;
-                document.getElementsByClassName('loggedin-user-info')[0].style.display = 'block';
-                console.log("User login information loaded from cookies");
-            }
-        }
+        {% include 'templates/_auth.js' %}
     </script>
 </head>
 
 <body>
-    <div class="loggedin-user-info"><span class="loggedin-user-account"><a href="/profile">Profile</a></span> | <span class="loggedin-user-account"><a href="#" onclick="signOut()">Sign out</a></span> | <span id="loggedin-user-email" class="loggedin-user-email">@</span></div>
-    {% if dev_environment %}
-    <div class="g_id_signin"
-        data-type="standard"
-        data-shape="pill"
-        data-theme="outline"
-        data-text="signin"
-        data-size="medium"
-        data-logo_alignment="left">
-        <button onclick="handleCredentialResponseDEV()" style="height: 30px; padding: 6px;">Sign in (DEV ENV)</button>
-    </div>
-    {% else %}
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <div id="g_id_onload"
-        data-client_id="873677737409-pkh5rfq6ejpr8dieqalnshjk09tfo9f0.apps.googleusercontent.com"
-        data-context="use"
-        data-ux_mode="popup"
-        data-callback="handleCredentialResponse"
-        data-auto_select="true"
-        data-itp_support="true">
-    </div>
-
-    <div class="g_id_signin"
-        data-type="standard"
-        data-shape="pill"
-        data-theme="outline"
-        data-text="signin"
-        data-size="medium"
-        data-logo_alignment="left">
-    </div>
-    {% endif %}
+    {% include 'templates/_auth.html' %}
     <div class="hero">
         <h1>Create your own Pickleball league in seconds! 🏓</h1>
     </div>
@@ -322,7 +193,7 @@
                     </td>
                 </tr>
             </table>
-            <button type="submit">Create league</button>
+            <button type="submit" class="primary-button">Create league</button>
         </form>
         <br>
         <div class="version">

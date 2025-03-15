@@ -6,40 +6,33 @@
     <title>Pickleball League App - Profile</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            margin: 0;
-            padding: 20px;
-            background-color: #f9f9f9;
+            font-family: sans-serif;
+            margin: 50;
+            color: #000;
+            background: #fff;
         }
-        
-        h1 {
-            color: #2c3e50;
-            margin-bottom: 30px;
-            font-size: 32px;
-        }
-        
-        a {
-            display: inline-block;
-            margin: 0 10px;
-            padding: 8px 16px;
-            background-color: #2c3e50;
-            color: white;
-            text-decoration: none;
+
+        .primary-button {
+            background: #ca0363;
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
             border-radius: 4px;
-            transition: background-color 0.3s;
+            cursor: pointer;
         }
-        
-        a:hover {
-            background-color: #1a2530;
-        }
+
+        {% include 'templates/_auth.css' %}
     </style>
+    <script language="javascript" type="text/javascript">
+        {% include 'templates/_auth.js' %}
+    </script>
 </head>
 <body>
+    {% include 'templates/_auth.html' %}
     <h1>Pickleball League Profile</h1>
     <p>Still working on it! Here you will be able to see all the leagues you have created, your overall scores and wins/losses over time, and more.</p>
     <p>Please check back later.</p>
-    <a href="/">Back to home</a>
+    <a href="/"><button class="primary-button">Back to home</button></a>
 </body>
 </html>

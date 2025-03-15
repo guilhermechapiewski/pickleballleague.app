@@ -1,0 +1,49 @@
+.g_id_signin {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 100;
+}
+
+.loggedin-user-info {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 101;
+    font-size: 12px;
+    color: #ffffff;
+    opacity: 1;
+    background-color: #ca0363;
+    padding: 10px 10px;
+    border-radius: 4px;
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: none;
+}
+
+.loggedin-user-email {
+    font-weight: bold;
+    text-overflow: ellipsis;
+    font-size: 10px;
+}
+
+.loggedin-user-account a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.loggedin-user-account a:hover {
+    text-decoration: underline;
+}
+
+button {
+    background: #fff;
+    color: #000;
+    border: none;
+    padding: 12px 24px;
+    font-size: 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}

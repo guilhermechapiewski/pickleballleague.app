@@ -1,0 +1,31 @@
+    <div class="loggedin-user-info"><span class="loggedin-user-account"><a href="/profile">Profile</a></span> | <span class="loggedin-user-account"><a href="#" onclick="signOut()">Sign out</a></span> | <span id="loggedin-user-email" class="loggedin-user-email">@</span></div>
+    {% if dev_environment %}
+    <div class="g_id_signin"
+        data-type="standard"
+        data-shape="pill"
+        data-theme="outline"
+        data-text="signin"
+        data-size="medium"
+        data-logo_alignment="left">
+        <button onclick="handleCredentialResponseDEV()" style="height: 30px; padding: 6px;">Sign in (DEV ENV)</button>
+    </div>
+    {% else %}
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <div id="g_id_onload"
+        data-client_id="873677737409-pkh5rfq6ejpr8dieqalnshjk09tfo9f0.apps.googleusercontent.com"
+        data-context="use"
+        data-ux_mode="popup"
+        data-callback="handleCredentialResponse"
+        data-auto_select="true"
+        data-itp_support="true">
+    </div>
+
+    <div class="g_id_signin"
+        data-type="standard"
+        data-shape="pill"
+        data-theme="outline"
+        data-text="signin"
+        data-size="medium"
+        data-logo_alignment="left">
+    </div>
+    {% endif %}
