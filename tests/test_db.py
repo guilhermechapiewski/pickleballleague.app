@@ -21,9 +21,8 @@ class TestLeagueRepository(unittest.TestCase):
             self.assertTrue(player.name in league_player_names.split(", "))
     
     def test_get_league_that_does_not_exist(self):
-        with self.assertRaises(KeyError):
-            league = LeagueRepository.get_league("non-existent-id")
-            self.assertIsNone(league)
+        league = LeagueRepository.get_league("non-existent-id")
+        self.assertIsNone(league)
     
 class TestUserRepository(unittest.TestCase):
     def test_save_and_get_user(self):
@@ -56,8 +55,7 @@ class TestUserRepository(unittest.TestCase):
         self.assertEqual(retrieved_user.google_id, "123")
         self.assertEqual(retrieved_user.email, "test@test.com")
         self.assertEqual(retrieved_user.league_ids, ["123-abc-456", "456-def-789"])
-        
+
     def test_get_user_that_does_not_exist(self):
-        with self.assertRaises(KeyError):
-            user = UserRepository.get_user("non-existent-id")
-            self.assertIsNone(user)
+        user = UserRepository.get_user("non-existent-id")
+        self.assertIsNone(user)
