@@ -3,7 +3,9 @@ import random
 import math
 import uuid
 from enum import Enum
+from datetime import datetime
 from app.user import User
+
 class ScoringSystem(Enum):
     W_L = "w_l"
     SCORE = "score"
@@ -148,6 +150,7 @@ class League:
     def __init__(self, name: str="", player_names: list[str]=[]):
         self.id = str(uuid.uuid4())
         self.name = name
+        self.date_created = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.players = [Player(player.strip()) for player in player_names.split(",")] if player_names else []
         self.schedule = []
         self.scoring_system = ScoringSystem.NONE
@@ -186,6 +189,9 @@ class League:
         if template not in ["ricky", "irina-fariba"]:
             raise ValueError("Invalid template name.")
         self.template = template
+    
+    def set_date_created(self, date_created: str):
+        self.date_created = date_created
 
     def generate_schedule(self, rounds: int=7):
         max_unique_pairs = self.calculate_max_possible_unique_pairs()
@@ -304,6 +310,7 @@ class League:
         return {
             "id": self.id,
             "name": self.name,
+            "date_created": self.date_created,
             "owner": self.owner.to_object() if self.owner else None,
             "players": [player.to_object() for player in self.players],
             "schedule": [round.to_object() for round in self.schedule],
@@ -315,6 +322,7 @@ class League:
     def from_object(object: dict):
         league = League(name=object["name"])
         league.set_id(object["id"])
+        league.set_date_created(object["date_created"])
         if "owner" in object and object["owner"] is not None and "email" in object["owner"]:
             user = User(object["owner"]["email"])
             league.set_owner(user)

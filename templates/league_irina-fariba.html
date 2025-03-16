@@ -274,9 +274,9 @@
     <input type="hidden" name="league_id" value="{{ league.id }}">
     <div class="container">
         {% if league.name %}
-            <h1>{{ league.name }}</h1>
+            <h1>{{ league.name }} (created on {{ league.date_created }})</h1>
         {% else %}
-            <h1>League</h1>
+            <h1>League created on {{ league.date_created }}</h1>
         {% endif %}
         {% if league.owner %}
             <p><b>Owner:</b> {{ league.owner.email }}</p>

@@ -287,6 +287,7 @@ class TestLeague(unittest.TestCase):
         league_object = {
             "id": league.id,
             "name": "Test League",
+            "date_created": league.date_created,
             "players": [ {"name": "GC"}, {"name": "Juliano"}, {"name": "Fariba"}, {"name": "Galina"}],
             "schedule": [
                 {
@@ -303,6 +304,7 @@ class TestLeague(unittest.TestCase):
         
         self.assertEqual(generated_league_object["id"], league_object["id"])
         self.assertEqual(generated_league_object["name"], league_object["name"])
+        self.assertEqual(generated_league_object["date_created"], league_object["date_created"])
         self.assertEqual(generated_league_object["players"], league_object["players"])
         
         self.assertEqual(generated_league_object["schedule"][0]["number"], league_object["schedule"][0]["number"])
@@ -328,6 +330,7 @@ class TestLeague(unittest.TestCase):
         league_object = {
             "id": league.id,
             "name": "Test League",
+            "date_created": league.date_created,
             "owner": {
                 "id": user.id
             },
@@ -347,6 +350,7 @@ class TestLeague(unittest.TestCase):
         
         self.assertEqual(generated_league_object["id"], league_object["id"])
         self.assertEqual(generated_league_object["name"], league_object["name"])
+        self.assertEqual(generated_league_object["date_created"], league_object["date_created"])
         self.assertEqual(generated_league_object["players"], league_object["players"])
         
         self.assertEqual(generated_league_object["schedule"][0]["number"], league_object["schedule"][0]["number"])
@@ -366,6 +370,7 @@ class TestLeague(unittest.TestCase):
         league = League.from_object({
             "id": "123",
             "name": "Test League",
+            "date_created": "2025-03-16 12:00:00",
             "players": [ {"name": "GC"}, {"name": "Juliano"}, {"name": "Fariba"}, {"name": "Galina"}, {"name": "Aline"}],
             "schedule": [
                 {
@@ -381,6 +386,7 @@ class TestLeague(unittest.TestCase):
         })
         self.assertEqual(league.id, "123")
         self.assertEqual(league.name, "Test League")
+        self.assertEqual(league.date_created, "2025-03-16 12:00:00")
         self.assertEqual(len(league.players), 5)
         self.assertEqual(len(league.schedule), 1)
         self.assertEqual(league.schedule[0].number, 1)
@@ -394,6 +400,7 @@ class TestLeague(unittest.TestCase):
         league = League.from_object({
             "id": "123",
             "name": "Test League",
+            "date_created": "2025-03-16 12:00:00",
             "owner": {
                 "email": "test@test.com"
             },
@@ -412,6 +419,7 @@ class TestLeague(unittest.TestCase):
         })
         self.assertEqual(league.id, "123")
         self.assertEqual(league.name, "Test League")
+        self.assertEqual(league.date_created, "2025-03-16 12:00:00")
         self.assertEqual(len(league.players), 5)
         self.assertEqual(len(league.schedule), 1)
         self.assertEqual(league.schedule[0].number, 1)

@@ -191,8 +191,17 @@ def profile():
     # get full user object from database
     user = UserRepository.get_user(user.email)
 
+    leagues = []
+    for league_id in user.league_ids:
+        league = LeagueRepository.get_league(league_id)
+        leagues.append(league)
+
     logger.info(f"User: {user.to_object()}")
-    return template_engine.render("profile", {"dev_environment": DEV_ENVIRONMENT, "user": user})
+    return template_engine.render("profile", {
+        "dev_environment": DEV_ENVIRONMENT, 
+        "user": user, 
+        "leagues": leagues
+    })
 
 if __name__ == "__main__":
     logger.info("Running AppEngine server locally")

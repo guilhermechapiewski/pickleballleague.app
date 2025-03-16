@@ -22,6 +22,38 @@
             cursor: pointer;
         }
 
+        .league-table {
+            border-collapse: collapse;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid #3498db;
+        }
+        
+        .league-table th, .league-table td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        
+        .league-table th {
+            background-color: #2c3e50;
+            color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 14px;
+            border: 1px solid #1a2530;
+        }
+        
+        .league-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        .league-table tr:hover {
+            background-color: #d4e6f1;
+        }
+
         {% include 'templates/_auth.css' %}
     </style>
     <script language="javascript" type="text/javascript">
@@ -32,15 +64,29 @@
     {% include 'templates/_auth.html' %}
     <h1>Pickleball League Profile</h1>
     {% if user.league_ids %}
-    <h4>Your leagues</h2>
-    <ul>
-        {% for league_id in user.league_ids %}
-        <li><a href="/league/{{ league_id }}">{{ league_id }}</a></li>
-        {% endfor %}
-    </ul>
+    <h3>Your leagues</h3>
+    <table class="league-table">
+        <thead>
+            <tr>
+                <th style="text-align: left; padding: 8px; border-bottom: 1px solid #ddd;">League Name</th>
+                <th style="text-align: left; padding: 8px; border-bottom: 1px solid #ddd;">Created On</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for league in leagues %}
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd;">
+                    <a href="/league/{{ league.id }}">{% if league.name %}{{ league.name }}{% else %}Unnamed league{% endif %}</a>
+                </td>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd;">{{ league.date_created }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
     {% else %}
     <p>You have not created any leagues yet.</p>
     {% endif %}
+    <br>
     <a href="/"><button class="primary-button">Home</button></a>
 </body>
 </html>
