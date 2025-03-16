@@ -208,8 +208,9 @@
     </style>
     <script language="javascript" type="text/javascript">
         var validateForm = function() {
-            var playerNames = document.getElementById('player_names').value;
-            var players = playerNames.split(',').filter(name => name.trim().length > 0);
+            var playerNames = document.getElementById('player_names').value.replace(/,\s*$/, '');
+            var players = playerNames.split(',').filter(name => name.trim().length > 0);            
+            document.getElementById('player_names').value = players;
             if (players.length < 4) {
                 alert('You need at least 4 players to create a league.');
                 return false;

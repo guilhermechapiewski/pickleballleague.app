@@ -3,9 +3,9 @@ import logging
 import flask
 from app.template import TemplateEngine
 from app.pickleball import League, ScoringSystem
-from app.db import LeagueRepository, UserRepository
+from app.db import LeagueRepository, UserRepository, ShortLinkRepository
 from app.user import User
-
+from app.links import ShortLink
 DEV_ENVIRONMENT = os.environ.get("DEV_ENVIRONMENT") == "true"
 
 try:
@@ -118,23 +118,34 @@ def create_league():
 @app.route("/save_league", methods=["POST"])
 def save_league():
     league_id = flask.request.form["league_id"]
+    
+    # first check if the short link exists
+    short_link = ShortLinkRepository.get_short_link(league_id)
+    if short_link:
+        league_id = short_link.destination_link
+    
     league = LeagueRepository.get_league(league_id)
 
+    # first check if the short link needs to be updated
     update_league_id = flask.request.form["update_league_id"]
     new_league_id = flask.request.form["new_league_id"]
     if update_league_id and new_league_id and update_league_id == "1":
-        other_league = LeagueRepository.get_league(new_league_id)
-        if other_league:
-            logger.error(f"League already exists: {new_league_id}")
+        # check if the new short link already exists
+        short_link = ShortLinkRepository.get_short_link(new_league_id)
+        if short_link:
+            logger.error(f"Short link already exists: {new_league_id}")
             return template_engine.render("error", {
-                "title": "Error: League already exists",
-                "message": "The league you are looking for already exists. Please check the URL and try again.",
+                "title": "Error: Short link already exists",
+                "message": "The short link you are looking for already exists. Please check the URL and try again.",
                 "action_name": "Back",
                 "action_url": f"/league/{league_id}"
             })
         else:
-            league.id = new_league_id
+            short_link = ShortLink(new_league_id, league.id)
+            ShortLinkRepository.save_short_link(short_link)
+            league.set_short_link(new_league_id)
     
+    # now update the league scores
     for round in league.schedule:
         player_index = 1
         for player in league.players:
@@ -175,12 +186,18 @@ def save_league():
             player_index += 1
     
     LeagueRepository.save_league(league)
-    return flask.redirect(f"/league/{league.id}")
+    return flask.redirect(f"/league/{league.id}" if not league.short_link else f"/league/{league.short_link}")
 
 @app.route("/league/<league_id>")
 def league(league_id):
     user = get_auth_user()
     try:
+        # first check if a short link exists to get the actual league_id
+        short_link = ShortLinkRepository.get_short_link(league_id)
+        if short_link:
+            league_id = short_link.destination_link
+        
+        # retrieve league
         league = LeagueRepository.get_league(league_id)
         return template_engine.render(f"league_{league.template}", {
             "league": league,
@@ -239,7 +256,8 @@ def profile():
     return template_engine.render("profile", {
         "dev_environment": DEV_ENVIRONMENT, 
         "user": user, 
-        "leagues": leagues
+        "leagues": leagues,
+        "domain_name": flask.request.host
     })
 
 if __name__ == "__main__":

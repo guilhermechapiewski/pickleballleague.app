@@ -2,6 +2,7 @@ import os
 import logging
 from app.pickleball import League
 from app.user import User
+from app.links import ShortLink
 from google.cloud import datastore
 
 DEV_ENVIRONMENT = os.environ.get("DEV_ENVIRONMENT") == "true"
@@ -85,3 +86,38 @@ class UserRepository:
             persistent_user = datastore.Entity(key=complete_key)
             persistent_user.update(user.to_object())
             client.put(persistent_user)
+
+class ShortLinkRepository:
+    logger = logging.getLogger(__name__)
+    stored_objects = {}
+
+    @classmethod
+    def get_short_link(cls, link: str) -> 'ShortLink':
+        if DEV_ENVIRONMENT:
+            cls.logger.info(f"DEV MEMORY DB: Getting short link {link}")
+            if link in cls.stored_objects.keys():
+                short_link = ShortLink.from_object(cls.stored_objects[link])
+                cls.logger.info(f"DEV MEMORY DB: Retrieved short link: {short_link}")
+                return short_link
+            else:
+                return None
+        else:
+            client = datastore.Client()
+            key = client.key("ShortLink", link)
+            short_link = client.get(key)
+            if short_link:
+                return ShortLink.from_object(short_link)
+            else:
+                return None
+    
+    @classmethod
+    def save_short_link(cls, short_link: 'ShortLink'):
+        if DEV_ENVIRONMENT:
+            cls.logger.info(f"DEV MEMORY DB: Saving short link {short_link.link}")
+            cls.stored_objects[short_link.link] = short_link.to_object()
+        else:
+            client = datastore.Client()
+            complete_key = client.key("ShortLink", short_link.link)
+            persistent_short_link = datastore.Entity(key=complete_key)
+            persistent_short_link.update(short_link.to_object())
+            client.put(persistent_short_link)

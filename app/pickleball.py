@@ -13,6 +13,8 @@ class ScoringSystem(Enum):
 
 class Player:
     def __init__(self, name: str):
+        if name is None or len(name) == 0:
+            raise ValueError("Player name cannot be empty")
         self.name = name
 
     def __str__(self):
@@ -156,6 +158,7 @@ class League:
         self.scoring_system = ScoringSystem.NONE
         self.template = "ricky"
         self.owner = None
+        self.short_link = None #string only
         
     def set_id(self, id: str):
         self.id = id
@@ -190,6 +193,10 @@ class League:
             raise ValueError("Invalid template name.")
         self.template = template
     
+    def set_short_link(self, short_link: str):
+        if short_link is not None and len(short_link) > 0:
+            self.short_link = short_link
+
     def set_date_created(self, date_created: str):
         self.date_created = date_created
 
@@ -315,7 +322,8 @@ class League:
             "players": [player.to_object() for player in self.players],
             "schedule": [round.to_object() for round in self.schedule],
             "scoring_system": self.scoring_system.value,
-            "template": self.template
+            "template": self.template,
+            "short_link": self.short_link if self.short_link else None
         }
     
     @staticmethod
@@ -330,4 +338,6 @@ class League:
         league.set_schedule([LeagueRound.from_object(round) for round in object["schedule"]])
         league.set_scoring_system(ScoringSystem(object["scoring_system"]))
         league.set_template(object["template"])
+        if "short_link" in object and object["short_link"] is not None:
+            league.set_short_link(object["short_link"])
         return league

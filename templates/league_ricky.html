@@ -358,10 +358,10 @@
         <p>
             <div class="link-container">
                 <b>Link:</b> 
-                <div class="link-show-container"><a href="https://{{ domain_name }}/league/{{ league.id }}">https://{{ domain_name }}/league/{{ league.id }}</a></div>
-                <div class="link-edit-container">https://{{ domain_name }}/league/<input type="text" id="new_league_id" name="new_league_id" class="link-input" value="{{ league.id }}"><input type="hidden" id="original_league_id" name="original_league_id" value="{{ league.id }}"><input type="hidden" id="update_league_id" name="update_league_id" value=""> <button class="small-button" onclick="return saveLink()">Save 💾</button></div>
+                <div class="link-show-container"><a href="http://{{ domain_name }}/league/{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}">https://{{ domain_name }}/league/{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}</a></div>
+                <div class="link-edit-container">http://{{ domain_name }}/league/<input type="text" id="new_league_id" name="new_league_id" class="link-input" value="{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}"><input type="hidden" id="original_league_id" name="original_league_id" value="{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}"><input type="hidden" id="update_league_id" name="update_league_id" value=""> <button class="small-button" onclick="return saveLink()">Save 💾</button></div>
                 &nbsp;&nbsp;
-                <button id="copy-link" class="small-button" onclick="return copyLink('https://{{ domain_name }}/league/{{ league.id }}');">Copy 🔗</button>
+                <button id="copy-link" class="small-button" onclick="return copyLink('http://{{ domain_name }}/league/{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}');">Copy 🔗</button>
                 <button id="edit-link" class="small-button" onclick="return editLink();">Edit ✎ᝰ</button>
             </div>
         </p>

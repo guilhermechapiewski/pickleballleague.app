@@ -128,6 +128,15 @@ class TestLeague(unittest.TestCase):
         league = League(player_names="GC, Juliano, Fariba, Galina, Igor, Igor 2, Peter, Yuri")
         self.assertTrue([str(player) for player in league.players] == ["GC", "Juliano", "Fariba", "Galina", "Igor", "Igor 2", "Peter", "Yuri"])
 
+    def test_league_player_names_cannot_be_empty(self):
+        league = League(player_names="")
+        self.assertEqual(len(league.players), 0)
+
+        with self.assertRaises(ValueError):
+            League(player_names="GC, , Fariba, Galina")
+        with self.assertRaises(ValueError):
+            League(player_names="GC, Juliano, Fariba, ")
+
     def test_generate_schedule(self):
         league = League(player_names="GC, Juliano, Fariba, Galina, Igor, Yuri, Scott, Mark")
         schedule = league.generate_schedule(rounds=5)

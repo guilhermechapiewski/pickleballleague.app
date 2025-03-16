@@ -1,7 +1,8 @@
 import unittest
-from app.db import LeagueRepository, UserRepository
+from app.db import LeagueRepository, UserRepository, ShortLinkRepository
 from app.pickleball import League
 from app.user import User
+from app.links import ShortLink
 
 class TestLeagueRepository(unittest.TestCase):
     def test_save_and_get_league(self):
@@ -77,3 +78,19 @@ class TestUserRepository(unittest.TestCase):
     def test_get_user_that_does_not_exist(self):
         user = UserRepository.get_user("non-existent-id")
         self.assertIsNone(user)
+
+class TestShortLinkRepository(unittest.TestCase):
+    def test_save_and_get_short_link(self):
+        self.assertIsNone(ShortLinkRepository.get_short_link("short-link-url"))
+
+        short_link = ShortLink(link="short-link-url", destination_link="123-abc-456")
+        ShortLinkRepository.save_short_link(short_link)
+
+        retrieved_short_link = ShortLinkRepository.get_short_link("short-link-url")
+        self.assertEqual(retrieved_short_link.link, "short-link-url")
+        self.assertEqual(retrieved_short_link.destination_link, "123-abc-456")
+
+    def test_get_short_link_that_does_not_exist(self):
+        short_link = ShortLinkRepository.get_short_link("non-existent-id")
+        self.assertIsNone(short_link)
+        
