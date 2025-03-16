@@ -1,3 +1,13 @@
+button {
+    background: #fff;
+    color: #000;
+    border: none;
+    padding: 12px 24px;
+    font-size: 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
 .g_id_signin {
     position: absolute;
     top: 10px;
@@ -6,7 +16,7 @@
 }
 
 .loggedin-user-info {
-    position: absolute;
+    position: fixed;
     top: 10px;
     right: 10px;
     z-index: 101;
@@ -21,29 +31,87 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     display: none;
+    z-index: 9999;
 }
 
-.loggedin-user-email {
-    font-weight: bold;
-    text-overflow: ellipsis;
-    font-size: 10px;
+.menu-container {
+    position: relative;
 }
-
-.loggedin-user-account a {
-    color: #fff;
+.menu-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    z-index: 10000;
+}
+.hamburger {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.hamburger span {
+    display: block;
+    width: 20px;
+    height: 2px;
+    background-color: #333;
+    transition: all 0.3s ease;
+}
+.menu-content {
+    position: fixed;
+    top: 55px;
+    right: 10px;
+    background-color: #ca0363;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    min-width: 120px;
+    z-index: 10000;
+    padding: 4px 0;
+    transform-origin: top;
+    transform: scaleY(0);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.15s ease-out;
+}
+.menu-content.show {
+    transform: scaleY(1);
+    opacity: 1;
+    visibility: visible;
+}
+.menu-item {
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    transform: translateY(-10px);
+    opacity: 0;
+    transition: all 0.15s ease-out;
+}
+.menu-content.show .menu-item {
+    transform: translateY(0);
+    opacity: 1;
+}
+.menu-content.show .menu-item:nth-child(1) { transition-delay: 0.02s; }
+.menu-content.show .menu-item:nth-child(2) { transition-delay: 0.04s; }
+.menu-content.show .menu-item:nth-child(3) { transition-delay: 0.06s; }
+.menu-item:last-child {
+    border-bottom: none;
+}
+.menu-item, .menu-item a {
+    color: white;
     text-decoration: none;
+    display: block;
+    font-size: 12px;
 }
 
-.loggedin-user-account a:hover {
+.menu-item a {
     text-decoration: underline;
 }
 
-button {
-    background: #fff;
-    color: #000;
-    border: none;
-    padding: 12px 24px;
-    font-size: 16px;
-    border-radius: 4px;
-    cursor: pointer;
+.menu-item a:hover {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.menu-item span {
+    font-weight: bold;
 }

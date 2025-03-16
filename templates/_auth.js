@@ -32,7 +32,23 @@ var signOut = function() {
 window.onload = function() {
     var userEmail = document.getElementById('user_email').value;
     if (userEmail) {
-        document.getElementById('loggedin-user-email').innerHTML = userEmail;
+        document.getElementById('loggedin-user-email').innerHTML = "Logged in as:<br><span>" + userEmail + "</span>";
         document.getElementsByClassName('loggedin-user-info')[0].style.display = 'block';
     }
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    const menuButton = document.getElementById('menuButton');
+    const menu = document.getElementById('userMenu');
+    
+    menuButton.addEventListener('click', function(e) {
+        e.stopPropagation();
+        menu.classList.toggle('show');
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!menu.contains(e.target) && !menuButton.contains(e.target)) {
+            menu.classList.remove('show');
+        }
+    });
+});
