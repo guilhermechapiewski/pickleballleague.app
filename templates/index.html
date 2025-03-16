@@ -153,6 +153,56 @@
         .version a {
             color: #fff;
         }
+
+        /* Suggestions styles */
+        .suggestions-container {
+            position: absolute;
+            background: white;
+            border: 1px solid #ddd;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 999999;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 4px;
+            text-align: left;
+            -webkit-overflow-scrolling: touch;
+            width: 100%;
+            top: 100%;
+            left: 0;
+            margin-top: 2px;
+        }
+
+        .suggestion-item {
+            padding: 12px;
+            cursor: pointer;
+            color: black;
+            transition: background-color 0.2s;
+            text-align: left;
+            font-size: 14px;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        .suggestion-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        .clear-suggestions {
+            padding: 12px;
+            cursor: pointer;
+            color: #ca0363;
+            transition: background-color 0.2s;
+            text-align: left;
+            font-size: 14px;
+            border-bottom: 1px solid #ddd;
+            font-weight: bold;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        .clear-suggestions:hover {
+            background-color: #f0f0f0;
+        }
         
         {% include 'templates/_auth.css' %}
     </style>
@@ -187,8 +237,170 @@
                 uniqueNames.add(trimmedName);
             }
 
+            // Save players to localStorage
+            savePlayers(players);
+
             return true;
         }
+
+        // Function to save players to localStorage
+        function savePlayers(players) {
+            let savedPlayers = JSON.parse(localStorage.getItem('savedPlayers') || '[]');
+            players.forEach(player => {
+                const trimmedPlayer = player.trim();
+                if (trimmedPlayer && !savedPlayers.includes(trimmedPlayer)) {
+                    savedPlayers.push(trimmedPlayer);
+                }
+            });
+            localStorage.setItem('savedPlayers', JSON.stringify(savedPlayers));
+        }
+
+        // Function to get saved players from localStorage
+        function getSavedPlayers() {
+            return JSON.parse(localStorage.getItem('savedPlayers') || '[]');
+        }
+
+        // Function to create and show suggestions
+        function showSuggestions(input) {
+            const savedPlayers = getSavedPlayers();
+            
+            // Don't show suggestions if there are no saved players
+            if (savedPlayers.length === 0) {
+                const suggestionsContainer = document.getElementById('player-suggestions');
+                if (suggestionsContainer) {
+                    suggestionsContainer.style.display = 'none';
+                }
+                return;
+            }
+
+            const currentValue = input.value.toLowerCase();
+            const hasComma = input.value.includes(',');
+            
+            // Create suggestions container if it doesn't exist
+            let suggestionsContainer = document.getElementById('player-suggestions');
+            if (!suggestionsContainer) {
+                suggestionsContainer = document.createElement('div');
+                suggestionsContainer.id = 'player-suggestions';
+                suggestionsContainer.className = 'suggestions-container';
+            }
+
+            // Find the parent cell and append the container
+            const parentCell = input.closest('td');
+            if (parentCell) {
+                parentCell.style.position = 'relative';
+                if (!suggestionsContainer.parentNode) {
+                    parentCell.appendChild(suggestionsContainer);
+                }
+            }
+
+            // Clear previous suggestions
+            suggestionsContainer.innerHTML = '';
+
+            // Get currently used players and the current input value
+            const currentPlayers = input.value.split(',').map(p => p.trim()).filter(p => p);
+
+            // Add clear button if there are saved players
+            if (savedPlayers.length > 0) {
+                const clearButton = document.createElement('div');
+                clearButton.textContent = 'Clear player suggestions';
+                clearButton.className = 'clear-suggestions';
+                clearButton.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    localStorage.removeItem('savedPlayers');
+                    showSuggestions(input);
+                };
+                suggestionsContainer.appendChild(clearButton);
+            }
+
+            // Show all available suggestions (not already used)
+            let matches = savedPlayers.filter(player => !currentPlayers.includes(player));
+            
+            // Sort matches alphabetically
+            matches.sort((a, b) => a.localeCompare(b));
+
+            matches.forEach(player => {
+                const div = document.createElement('div');
+                div.textContent = player;
+                div.className = 'suggestion-item';
+                div.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (!currentPlayers.includes(player)) {
+                        // Add the selected player to the input
+                        const newValue = currentPlayers.join(', ') + 
+                            (currentPlayers.length > 0 ? ', ' : '') + player;
+                        input.value = newValue;
+                        // Keep focus on input and show suggestions
+                        input.focus();
+                        // Add a comma and space to trigger new suggestions
+                        input.value = newValue + ', ';
+                        // Move cursor to end
+                        input.selectionStart = input.selectionEnd = input.value.length;
+                        // Show suggestions immediately
+                        showSuggestions(input);
+                    }
+                };
+                suggestionsContainer.appendChild(div);
+            });
+
+            // Show suggestions if there are matches
+            suggestionsContainer.style.display = matches.length > 0 ? 'block' : 'none';
+        }
+
+        // Add event listeners when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const playerInput = document.getElementById('player_names');
+            
+            // Show suggestions on input
+            playerInput.addEventListener('input', function() {
+                showSuggestions(this);
+            });
+
+            // Show suggestions on focus
+            playerInput.addEventListener('focus', function() {
+                showSuggestions(this);
+            });
+
+            // Handle mobile keyboard events
+            window.addEventListener('resize', function() {
+                const suggestions = document.getElementById('player-suggestions');
+                if (suggestions && suggestions.style.display === 'block') {
+                    showSuggestions(playerInput);
+                }
+            });
+
+            // Handle scroll events
+            window.addEventListener('scroll', function() {
+                const suggestions = document.getElementById('player-suggestions');
+                if (suggestions && suggestions.style.display === 'block') {
+                    showSuggestions(playerInput);
+                }
+            });
+
+            // Hide suggestions when clicking outside
+            document.addEventListener('click', function(e) {
+                const suggestions = document.getElementById('player-suggestions');
+                if (suggestions && !e.target.closest('#player_names') && !e.target.closest('#player-suggestions')) {
+                    suggestions.style.display = 'none';
+                }
+            });
+
+            // Handle touch events
+            document.addEventListener('touchstart', function(e) {
+                const suggestions = document.getElementById('player-suggestions');
+                if (suggestions && !e.target.closest('#player_names') && !e.target.closest('#player-suggestions')) {
+                    suggestions.style.display = 'none';
+                }
+            });
+
+            // Prevent form submission on enter key in the input
+            playerInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                }
+            });
+        });
 
         {% include 'templates/_auth.js' %}
     </script>
