@@ -39,28 +39,70 @@
             padding: 40px 20px;
         }
 
-        @media (min-height: 800px) {
-            .hero {
-                min-height: 35vh;
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .hero {
-                min-height: 30vh;
-            }
-        }
-
         .hero h1 {
             font-size: 36px;
             margin: 0;
             font-family: sans-serif;
         }
 
+        .description {
+            font-size: 15px;
+            line-height: 1.6;
+            padding: 20px;
+            margin: 15px auto;
+            max-width: 90%;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            color: #f8f8f8;
+            border-left: 4px solid #ca0363;
+            text-align: left;
+        }
+        
+        @media (max-width: 768px) {
+            .hero {
+                min-height: 30vh;
+            }
+            
+            .description {
+                font-size: 14px;
+                padding: 15px;
+                max-width: 95%;
+                margin: 10px auto;
+            }
+        }
+
+        @media (min-height: 800px) {
+            .hero {
+                min-height: 32vh;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 30px;
+                min-height: 20vh;
+            }
+            
+            .description {
+                font-size: 12px;
+                padding: 12px;
+                max-width: 100%;
+                margin: 8px auto;
+                line-height: 1.4;
+            }
+        }
+        
+        .description strong {
+            color: #fff;
+            font-weight: 600;
+            font-style: italic;
+        }
+
         .container {
             max-width: 800px;
             margin: 0 auto;
-            padding: 40px 20px;
+            padding: 0px 20px;
             text-align: center;
         }
 
@@ -157,6 +199,7 @@
     <div class="hero">
         <h1>Create your own Pickleball league in seconds! 🏓</h1>
     </div>
+    <div class="description"><strong>Elevate your pickleball tournaments! 🏓 </strong>Easily create custom leagues to <strong>track scores</strong>, <strong>monitor wins and losses</strong>, and create <strong>organized match schedules</strong> for your group. <strong>Share instant access</strong> with other players, allowing <strong>everyone to view and update results in real-time.</strong> No more confusion or paper shuffling — enjoy geeking out on stats without the hassle! 🥳🎉</div>
     <div class="container">
         <form method="POST" action="/create-league" onsubmit="return validateForm()">
             <table style="width: 100%; padding: 0 0 20px;" cellspacing="0" cellpadding="5">
