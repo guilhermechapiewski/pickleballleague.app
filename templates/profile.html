@@ -22,6 +22,12 @@
             cursor: pointer;
         }
 
+        .delete-button {
+            background: #fff4f4;
+            border: 1px solid #ffb6b6;
+            cursor: pointer;
+        }
+
         .league-table {
             border-collapse: collapse;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
@@ -57,6 +63,13 @@
         {% include 'templates/_auth.css' %}
     </style>
     <script language="javascript" type="text/javascript">
+        function deleteLeague(leagueId, leagueName, leagueDateCreated) {
+            if (confirm('Are you sure you want to delete this league?\n\nLeague Name: ' + leagueName + '\nCreated On: ' + leagueDateCreated)) {
+                window.location.href = '/league/' + leagueId + '/delete';
+            }
+            return false;
+        }
+        
         {% include 'templates/_auth.js' %}
     </script>
 </head>
@@ -70,6 +83,7 @@
             <tr>
                 <th style="text-align: left; padding: 8px; border-bottom: 1px solid #ddd;">League Name</th>
                 <th style="text-align: left; padding: 8px; border-bottom: 1px solid #ddd;">Created On</th>
+                <th style="text-align: left; padding: 8px; border-bottom: 1px solid #ddd;">Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -79,6 +93,9 @@
                     <a href="/league/{{ league.id }}">{% if league.name %}{{ league.name }}{% else %}Unnamed league{% endif %}</a>
                 </td>
                 <td style="padding: 8px; border-bottom: 1px solid #ddd;">{{ league.date_created }}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd;">
+                    <a href="/league/{{ league.id }}/delete"><button class="delete-button" onclick="return deleteLeague('{{ league.id }}', '{% if league.name %}{{ league.name }}{% else %}Unnamed league{% endif %}', '{{ league.date_created }}')">🗑</button></a>
+                </td>
             </tr>
             {% endfor %}
         </tbody>

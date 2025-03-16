@@ -179,6 +179,28 @@ def league(league_id):
             "message": "The league you are looking for does not exist. Please check the URL and try again."
         })
 
+@app.route("/league/<league_id>/delete")
+def delete_league(league_id):
+    user = get_auth_user()
+    league = LeagueRepository.get_league(league_id)
+    if league:
+        if league.owner.email == user.email:
+            LeagueRepository.delete_league(league_id)
+            user = UserRepository.get_user(user.email)
+            user.remove_league(league_id)
+            UserRepository.save_user(user)
+            return flask.redirect("/profile")
+        else:
+            return template_engine.render("error", {
+                "title": "Error: League not found",
+                "message": "You are not the owner of this league."
+            })
+    else:
+        return template_engine.render("error", {
+            "title": "Error: League not found",
+            "message": "The league you are trying to delete does not exist."
+        })
+
 @app.route("/profile")
 def profile():
     user = get_auth_user()

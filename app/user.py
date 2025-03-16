@@ -13,6 +13,9 @@ class User:
     def get_leagues(self):
         return self.league_ids
     
+    def remove_league(self, league_id: str):
+        self.league_ids.remove(league_id)
+    
     def to_object(self):
         return {
             "id": self.id,

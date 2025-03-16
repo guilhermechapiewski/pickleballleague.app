@@ -39,6 +39,15 @@ class LeagueRepository:
             persistent_league.update(league.to_object())
             client.put(persistent_league)
     
+    @classmethod
+    def delete_league(cls, league_id: str):
+        if DEV_ENVIRONMENT:
+            cls.logger.info(f"DEV MEMORY DB: Deleting league {league_id}")
+            del cls.stored_objects[league_id]
+        else:
+            client = datastore.Client()
+            client.delete(client.key("League", league_id))
+            
 class UserRepository:
     logger = logging.getLogger(__name__)
     stored_objects = {}

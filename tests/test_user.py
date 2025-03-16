@@ -19,3 +19,13 @@ class TestUser(unittest.TestCase):
         self.assertEqual(user.google_id, "123")
         self.assertEqual(user.email, "test@test.com")
         self.assertEqual(user.get_leagues(), ["456", "789"])
+
+    def test_user_remove_league(self):
+        user = User("test@test.com", "123")
+        user.add_league("456")
+        user.add_league("789")
+        self.assertEqual(user.get_leagues(), ["456", "789"])
+        user.remove_league("456")
+        self.assertEqual(user.get_leagues(), ["789"])
+        user.remove_league("789")
+        self.assertEqual(user.get_leagues(), [])
