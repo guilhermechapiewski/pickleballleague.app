@@ -119,6 +119,21 @@ def create_league():
 def save_league():
     league_id = flask.request.form["league_id"]
     league = LeagueRepository.get_league(league_id)
+
+    update_league_id = flask.request.form["update_league_id"]
+    new_league_id = flask.request.form["new_league_id"]
+    if update_league_id and new_league_id and update_league_id == "1":
+        other_league = LeagueRepository.get_league(new_league_id)
+        if other_league:
+            logger.error(f"League already exists: {new_league_id}")
+            return template_engine.render("error", {
+                "title": "Error: League already exists",
+                "message": "The league you are looking for already exists. Please check the URL and try again.",
+                "action_name": "Back",
+                "action_url": f"/league/{league_id}"
+            })
+        else:
+            league.id = new_league_id
     
     for round in league.schedule:
         player_index = 1
@@ -160,7 +175,7 @@ def save_league():
             player_index += 1
     
     LeagueRepository.save_league(league)
-    return flask.redirect(f"/league/{league_id}")
+    return flask.redirect(f"/league/{league.id}")
 
 @app.route("/league/<league_id>")
 def league(league_id):
@@ -171,9 +186,11 @@ def league(league_id):
             "league": league,
             "width": 80/len(league.players),
             "user": user,
-            "dev_environment": DEV_ENVIRONMENT
+            "dev_environment": DEV_ENVIRONMENT,
+            "domain_name": flask.request.host
         })
-    except Exception:
+    except Exception as e:
+        logger.error(f"Error: {e}")
         return template_engine.render("error", {
             "title": "Error: League not found",
             "message": "The league you are looking for does not exist. Please check the URL and try again."

@@ -17,6 +17,47 @@
             text-align: left;
             font-size: 32px;
         }
+
+        p {
+            font-size: 12px;
+        }
+
+        .small-button {
+            font-size: 12px;
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        .small-button:hover {
+            background-color: #1a2530;
+        }
+
+        .small-button:active {
+            background-color: #00881e;
+        }
+
+        .link-container {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .link-show-container {
+            font-size: 12px;
+            display: block;
+        }
+
+        .link-edit-container {
+            font-size: 12px;
+            display: none;
+        }
+
+        .link-input {
+            width: 250px;
+        }
         
         .league-table {
             width: 100%;
@@ -183,7 +224,7 @@
             addScoreEventListeners();
         });
         
-        function initTeammateMap() {
+        var initTeammateMap = function() {
             // Create a mapping of player names to their indices
             const playerIndices = {};
             {% for player in league.players %}
@@ -217,7 +258,7 @@
             {% endfor %}
         }
         
-        function addScoreEventListeners() {
+        var addScoreEventListeners = function() {
             // Add event listeners to all score inputs and selects
             {% for round in league.schedule %}
                 {% for player in league.players %}
@@ -243,7 +284,7 @@
             {% endfor %}
         }
         
-        function syncTeammateScore(roundNumber, playerName, value) {
+        var syncTeammateScore = function(roundNumber, playerName, value) {
             // Check if this player has a teammate in this round
             if (teammateMap[roundNumber] && teammateMap[roundNumber][playerName]) {
                 const teammateInfo = teammateMap[roundNumber][playerName];
@@ -263,6 +304,41 @@
             }
         }
 
+        var copyLink = function(link) {
+            navigator.clipboard.writeText(link);
+            return false;
+        }
+
+        var editLink = function() {
+            document.getElementsByClassName("link-show-container")[0].style.display = "none";
+            document.getElementsByClassName("link-edit-container")[0].style.display = "block";
+            document.getElementById("new_league_id").focus();
+            return false;
+        }
+
+        var saveLink = function() {
+            if ((document.getElementById("new_league_id").value != document.getElementById("original_league_id").value) &&
+                    (document.getElementById("new_league_id").value.length > 0))  
+                {
+                var new_league_id = document.getElementById("new_league_id").value;
+                // Replace spaces and underscores with dashes
+                new_league_id = new_league_id.replace(/[\s_]/g, '-');
+                // Replace multiple dashes with a single dash
+                new_league_id = new_league_id.replace(/-+/g, '-');
+                // Replace dashes at the beginning and end with an empty string
+                new_league_id = new_league_id.replace(/^-+|-+$/g, '');
+                // Replace any non-alphanumeric characters (besides dashes) with an empty string
+                new_league_id = new_league_id.replace(/[^a-zA-Z0-9-]/g, '');
+                document.getElementById("new_league_id").value = new_league_id;
+                document.getElementById("update_league_id").value = "1";
+                document.getElementById("league_form").submit();
+                return true;
+            }
+            document.getElementsByClassName("link-edit-container")[0].style.display = "none";
+            document.getElementsByClassName("link-show-container")[0].style.display = "block";
+            return false;
+        }
+
         {% include 'templates/_auth.js' %}
     </script>
 </head>
@@ -277,8 +353,18 @@
             <h1>League created on {{ league.date_created }}</h1>
         {% endif %}
         {% if league.owner %}
-            <p><b>Owner:</b> {{ league.owner.email }}</p>
+            <p><b>Created by:</b> {{ league.owner.email }}</p>
         {% endif %}
+        <p>
+            <div class="link-container">
+                <b>Link:</b> 
+                <div class="link-show-container"><a href="https://{{ domain_name }}/league/{{ league.id }}">https://{{ domain_name }}/league/{{ league.id }}</a></div>
+                <div class="link-edit-container">https://{{ domain_name }}/league/<input type="text" id="new_league_id" name="new_league_id" class="link-input" value="{{ league.id }}"><input type="hidden" id="original_league_id" name="original_league_id" value="{{ league.id }}"><input type="hidden" id="update_league_id" name="update_league_id" value=""> <button class="small-button" onclick="return saveLink()">Save 💾</button></div>
+                &nbsp;&nbsp;
+                <button id="copy-link" class="small-button" onclick="return copyLink('https://{{ domain_name }}/league/{{ league.id }}');">Copy 🔗</button>
+                <button id="edit-link" class="small-button" onclick="return editLink();">Edit ✎ᝰ</button>
+            </div>
+        </p>
         <table class="league-table">
             <thead>
                 <tr>

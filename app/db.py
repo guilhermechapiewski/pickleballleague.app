@@ -14,8 +14,10 @@ class LeagueRepository:
     def get_league(cls, league_id: str) -> 'League':
         if DEV_ENVIRONMENT:
             cls.logger.info(f"DEV MEMORY DB: Getting league {league_id}")
-            if league_id in cls.stored_objects:
-                return League.from_object(cls.stored_objects[league_id])
+            if league_id in cls.stored_objects.keys():
+                league = League.from_object(cls.stored_objects[league_id])
+                cls.logger.info(f"DEV MEMORY DB: Retrieved league: {league}")
+                return league
             else:
                 return None
         else:
@@ -56,8 +58,10 @@ class UserRepository:
     def get_user(cls, email: str) -> 'User':
         if DEV_ENVIRONMENT:
             cls.logger.info(f"DEV MEMORY DB: Getting user {email}")
-            if email in cls.stored_objects:
-                return User.from_object(cls.stored_objects[email])
+            if email in cls.stored_objects.keys():
+                user = User.from_object(cls.stored_objects[email])
+                cls.logger.info(f"DEV MEMORY DB: Retrieved user: {user}")
+                return user
             else:
                 return None
         else:
