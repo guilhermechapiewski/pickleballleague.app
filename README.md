@@ -1,10 +1,10 @@
 # pickleballleague.app
 
-## What is this?
+## About
 
-A simple web application that generates a schedule for a pickleball league.
+Create pickleball leagues to track scores, wins/losses or simply to have an organized printout to organize matches while on the court. Share the league links with your friends so that everybody can see and update scores.
 
-You can find the live app at https://pickleballleague.app
+Live app available at https://pickleballleague.app
 
 ## Bugs and Feature requests
 
