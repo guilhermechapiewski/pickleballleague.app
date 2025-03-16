@@ -29,3 +29,13 @@
         data-logo_alignment="left">
     </div>
     {% endif %}
+    {% if not user %}
+    <form id="auth-form" method="POST" action="/sign-in">
+        <input type="hidden" id="user_google_id" name="user_google_id">
+        <input type="hidden" id="user_email" name="user_email">
+    </form>
+    {% else %}
+    <form id="auth-form" method="POST" action="/sign-out">
+        <input type="hidden" id="user_email" name="user_email" value="{{ user.email }}">
+    </form>
+    {% endif %}

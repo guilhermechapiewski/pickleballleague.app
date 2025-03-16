@@ -3,7 +3,7 @@ import random
 import math
 import uuid
 from enum import Enum
-
+from app.user import User
 class ScoringSystem(Enum):
     W_L = "w_l"
     SCORE = "score"
@@ -21,6 +21,21 @@ class Player:
     
     def __lt__(self, other_player):
         return self.name < other_player.name
+    
+    def __gt__(self, other_player):
+        return self.name > other_player.name
+    
+    def __le__(self, other_player):
+        return self.name <= other_player.name
+    
+    def __ge__(self, other_player):
+        return self.name >= other_player.name
+    
+    def __hash__(self):
+        return hash(self.name)
+    
+    def __eq__(self, other_player):
+        return self.name == other_player.name
     
     def to_object(self):
         return {"name": self.name}
@@ -45,13 +60,12 @@ class Match:
         return self.__str__()
 
     def __eq__(self, other_match):
-        this_match_sides = set()
-        this_match_sides.add(tuple(sorted(self.players[:2])))
-        this_match_sides.add(tuple(sorted(self.players[2:])))
-        other_match_sides = set()
-        other_match_sides.add(tuple(sorted(other_match.players[:2])))
-        other_match_sides.add(tuple(sorted(other_match.players[2:])))
-        return this_match_sides == other_match_sides
+        this_match_side1 = sorted(self.players[:2])
+        this_match_side2 = sorted(self.players[2:])
+        other_match_side1 = sorted(other_match.players[:2])
+        other_match_side2 = sorted(other_match.players[2:])
+        return (this_match_side1 == other_match_side1 and this_match_side2 == other_match_side2) or \
+            (this_match_side1 == other_match_side2 and this_match_side2 == other_match_side1)
     
     def set_score(self, score: list[int]):
         if len(score) != 2:
@@ -138,7 +152,8 @@ class League:
         self.schedule = []
         self.scoring_system = ScoringSystem.NONE
         self.template = "ricky"
-
+        self.owner = None
+        
     def set_id(self, id: str):
         self.id = id
 
@@ -187,8 +202,10 @@ class League:
             # Shuffle the list of possible  matches to randomize schedule generation
             random.shuffle(all_possible_players_combinations)
             
+            generated_rounds = []
+
             # Generate rounds
-            for i in range(rounds):
+            while len(generated_rounds) < rounds:
                 round_matches = []
                 remaining_available_players = set(self.players)
                 
@@ -214,16 +231,29 @@ class League:
                                 remaining_available_players.remove(player)
                             break
                 
-                # Only add non-empty rounds
+                # Only add non-empty, non-duplicate rounds
                 if round_matches:
-                    # if the round has only one match, and that match is already in the schedule, skip this round
-                    if len(round_matches) == 1 and round_matches[0] in [round.matches[0] for round in self.schedule]:
-                        continue
-                        
-                    self.add_round(LeagueRound(i + 1, round_matches, remaining_available_players))
-        
-        return self.schedule
+                    is_duplicate = False
+                    for existing_round_matches, _ in generated_rounds:
+                        for existing_round_match in existing_round_matches:
+                            for new_match in round_matches:
+                                if existing_round_match == new_match:
+                                    is_duplicate = True
+                                    break
+                        if is_duplicate:
+                            break
+                    
+                    if not is_duplicate:
+                        generated_rounds.append((round_matches, remaining_available_players))
+            
+            # Add rounds to schedule
+            round_number = 1
+            for round_matches, remaining_available_players in generated_rounds:
+                self.add_round(LeagueRound(round_number, round_matches, remaining_available_players))
+                round_number += 1
     
+        return self.schedule
+
     def get_player_rankings(self):
         rankings = []
         
@@ -267,10 +297,14 @@ class League:
 
         return rankings
     
+    def set_owner(self, owner: User):
+        self.owner = owner
+    
     def to_object(self):
         return {
             "id": self.id,
             "name": self.name,
+            "owner": self.owner.to_object() if self.owner else None,
             "players": [player.to_object() for player in self.players],
             "schedule": [round.to_object() for round in self.schedule],
             "scoring_system": self.scoring_system.value,
@@ -281,6 +315,9 @@ class League:
     def from_object(object: dict):
         league = League(name=object["name"])
         league.set_id(object["id"])
+        if "owner" in object and object["owner"] is not None and "email" in object["owner"]:
+            user = User(object["owner"]["email"])
+            league.set_owner(user)
         league.set_players([Player.from_object(player) for player in object["players"]])
         league.set_schedule([LeagueRound.from_object(round) for round in object["schedule"]])
         league.set_scoring_system(ScoringSystem(object["scoring_system"]))

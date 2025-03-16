@@ -31,8 +31,16 @@
 <body>
     {% include 'templates/_auth.html' %}
     <h1>Pickleball League Profile</h1>
-    <p>Still working on it! Here you will be able to see all the leagues you have created, your overall scores and wins/losses over time, and more.</p>
-    <p>Please check back later.</p>
-    <a href="/"><button class="primary-button">Back to home</button></a>
+    {% if user.league_ids %}
+    <h4>Your leagues</h2>
+    <ul>
+        {% for league_id in user.league_ids %}
+        <li><a href="/league/{{ league_id }}">{{ league_id }}</a></li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>You have not created any leagues yet.</p>
+    {% endif %}
+    <a href="/"><button class="primary-button">Home</button></a>
 </body>
 </html>

@@ -1,7 +1,8 @@
-from app.pickleball import League
+import uuid
 
 class User:
-    def __init__(self, google_id: str, email: str):
+    def __init__(self, email: str="", google_id: str=""):
+        self.id = str(uuid.uuid4())
         self.google_id = google_id
         self.email = email
         self.league_ids = []
@@ -14,6 +15,7 @@ class User:
     
     def to_object(self):
         return {
+            "id": self.id,
             "google_id": self.google_id,
             "email": self.email,
             "league_ids": self.league_ids
@@ -21,7 +23,11 @@ class User:
 
     @staticmethod
     def from_object(object: dict):
-        user = User(object["google_id"], object["email"])
-        for league_id in object["league_ids"]:
-            user.add_league(league_id)
+        user = User()
+        user.id = object["id"] if "id" in object else ""
+        user.google_id = object["google_id"] if "google_id" in object else ""
+        user.email = object["email"]
+        if "league_ids" in object and object["league_ids"] is not None:
+            for league_id in object["league_ids"]:
+                user.add_league(league_id)
         return user

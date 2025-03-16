@@ -16,8 +16,7 @@
         
         h1 {
             color: #2c3e50;
-            text-align: center;
-            margin-bottom: 30px;
+            text-align: left;
             font-size: 32px;
         }
         
@@ -163,6 +162,8 @@
         {% if league.scoring_system.value != 'none' %}
             {% include 'templates/_ranking_styles.css' %}
         {% endif %}
+
+        {% include 'templates/_auth.css' %}
     </style>
     <script>
         function printPage() {
@@ -263,16 +264,23 @@
                 }
             }
         }
+
+        {% include 'templates/_auth.js' %}
     </script>
 </head>
 <body>
-    <form name="league_form" action="/save_league" method="post">
+    {% include 'templates/_auth.html' %}
+    <form id="league_form" name="league_form" action="/save_league" method="post">
     <input type="hidden" name="league_id" value="{{ league.id }}">
     <div class="container">
         {% if league.name %}
             <h1>{{ league.name }}</h1>
+        {% else %}
+            <h1>League</h1>
         {% endif %}
-        
+        {% if league.owner %}
+            <p><b>Owner:</b> {{ league.owner.email }}</p>
+        {% endif %}
         <table class="league-table">
             <thead>
                 <tr>
@@ -360,8 +368,8 @@
         
         <div id="footer" class="footer">
             <a href="#" onclick="printPage()">Print</a>
-            {% if league.scoring_system.value != 'none' %}<a href="#" onclick="document.querySelector('form').submit()">Save</a>{% endif %}
-            <a href="/">New League</a>
+            {% if league.scoring_system.value != 'none' %}<a href="#" onclick="document.getElementById('league_form').submit()">Save</a>{% endif %}
+            <a href="/">Home</a>
         </div>
     </div>
     </form>

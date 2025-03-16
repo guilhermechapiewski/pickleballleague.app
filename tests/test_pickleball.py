@@ -1,6 +1,6 @@
 import unittest
 from app.pickleball import League, Player, Match, LeagueRound, ScoringSystem
-
+from app.user import User
 class TestPlayer(unittest.TestCase):
     def test_player(self):
         player = Player("John")
@@ -37,6 +37,12 @@ class TestMatch(unittest.TestCase):
 
         match3 = Match(["John", "Jim", "Jane", "Jill"], ScoringSystem.NONE)
         self.assertFalse(match1 == match3)
+
+        match4 = Match(["Galina", "GC", "Fariba", "Juliano"], ScoringSystem.NONE)
+        self.assertFalse(match1 == match4)
+
+        match5 = Match(["Fariba", "Juliano", "GC", "Galina"], ScoringSystem.NONE)
+        self.assertTrue(match4 == match5)
     
     def test_match_to_object(self):
         match = Match([Player("John"), Player("Jane"), Player("Jim"), Player("Jill")], ScoringSystem.NONE)
@@ -200,7 +206,21 @@ class TestLeague(unittest.TestCase):
                 self.assertTrue(player_out in league.players)
                 self.assertFalse(player_out in round.matches[0].players)
                 self.assertFalse(player_out in round.matches[1].players)
+    
+    def test_generate_schedule_with_4_players_and_very_short_names(self):
+        league = League(player_names="a, b, c, d")
+        schedule = league.generate_schedule(rounds=3)
+        self.assertEqual(len(schedule), 3)
+
+        for i, round in enumerate(schedule):
+            self.assertEqual(round.number, i+1)
+            self.assertEqual(round.number_of_matches(), 1)
         
+        round_number = 1
+        for round in schedule:
+            self.assertEqual(round.number, round_number)
+            round_number += 1
+
     def test_schedule_rounds_start_with_one(self):
         league = League(player_names="GC, Juliano, Fariba, Galina, Igor, Yuri, Scott, Mark, John")
         schedule = league.generate_schedule(rounds=5)
@@ -251,6 +271,12 @@ class TestLeague(unittest.TestCase):
         self.assertEqual(rankings[2]["name"], scores[2][0])
         self.assertEqual(rankings[3]["name"], scores[3][0])
 
+    def test_league_set_owner(self):
+        league = League(player_names="GC, Juliano, Fariba, Galina")
+        user = User("123", "test@test.com")
+        league.set_owner(user)
+        self.assertEqual(league.owner, user)
+
     def test_league_to_object(self):
         player_names="GC, Juliano, Fariba, Galina"
         league = League(name="Test League", player_names=player_names)
@@ -290,6 +316,52 @@ class TestLeague(unittest.TestCase):
         self.assertEqual(generated_league_object["scoring_system"], league_object["scoring_system"])
         self.assertEqual(generated_league_object["template"], league_object["template"])
     
+    def test_league_to_object_with_owner(self):
+        player_names="GC, Juliano, Fariba, Galina"
+        league = League(name="Test League", player_names=player_names)
+        league.generate_schedule(rounds=1)
+        league.set_template("irina-fariba")
+        user = User("123", "test@test.com")
+        league.set_owner(user)
+        
+        generated_league_object = league.to_object()
+        league_object = {
+            "id": league.id,
+            "name": "Test League",
+            "owner": {
+                "id": user.id
+            },
+            "players": [ {"name": "GC"}, {"name": "Juliano"}, {"name": "Fariba"}, {"name": "Galina"}],
+            "schedule": [
+                {
+                    "number": 1,
+                    "matches": [
+                        {"players": [
+                            {"name": "GC"}, {"name": "Juliano"}, {"name": "Fariba"}, {"name": "Galina"}
+                        ]}
+                    ],
+                    "players_out": []
+                }
+            ], "scoring_system": "none", "template": "irina-fariba"
+        }
+        
+        self.assertEqual(generated_league_object["id"], league_object["id"])
+        self.assertEqual(generated_league_object["name"], league_object["name"])
+        self.assertEqual(generated_league_object["players"], league_object["players"])
+        
+        self.assertEqual(generated_league_object["schedule"][0]["number"], league_object["schedule"][0]["number"])
+        self.assertEqual(generated_league_object["schedule"][0]["players_out"], league_object["schedule"][0]["players_out"])
+
+        self.assertTrue(generated_league_object["schedule"][0]["matches"][0]["players"][0]["name"] in player_names.split(", "))
+        self.assertTrue(generated_league_object["schedule"][0]["matches"][0]["players"][1]["name"] in player_names.split(", "))
+        self.assertTrue(generated_league_object["schedule"][0]["matches"][0]["players"][2]["name"] in player_names.split(", "))
+        self.assertTrue(generated_league_object["schedule"][0]["matches"][0]["players"][3]["name"] in player_names.split(", "))
+
+        self.assertEqual(generated_league_object["scoring_system"], league_object["scoring_system"])
+        self.assertEqual(generated_league_object["template"], league_object["template"])
+
+        self.assertEqual(generated_league_object["owner"]["id"], league_object["owner"]["id"])
+    
     def test_league_from_object(self):
         league = League.from_object({
             "id": "123",
@@ -317,3 +389,35 @@ class TestLeague(unittest.TestCase):
         self.assertEqual([player.name for player in league.schedule[0].matches[0].players], ["Juliano", "Galina", "GC", "Fariba"])
         self.assertEqual(league.schedule[0].players_out[0].name, "Aline")
         self.assertEqual(league.scoring_system.value, "w_l")
+    
+    def test_league_from_object_with_owner(self):
+        league = League.from_object({
+            "id": "123",
+            "name": "Test League",
+            "owner": {
+                "email": "test@test.com"
+            },
+            "players": [ {"name": "GC"}, {"name": "Juliano"}, {"name": "Fariba"}, {"name": "Galina"}, {"name": "Aline"}],
+            "schedule": [
+                {
+                    "number": 1,
+                    "matches": [
+                        {"players": [{"name": "Juliano"}, {"name": "Galina"}, {"name": "GC"}, {"name": "Fariba"}], "score": [0, 0], "winner_team": 0, "scoring_system": "w_l"}
+                    ],
+                    "players_out": [{"name": "Aline"}]
+                }
+            ],
+            "scoring_system": "w_l",
+            "template": "ricky"
+        })
+        self.assertEqual(league.id, "123")
+        self.assertEqual(league.name, "Test League")
+        self.assertEqual(len(league.players), 5)
+        self.assertEqual(len(league.schedule), 1)
+        self.assertEqual(league.schedule[0].number, 1)
+        self.assertEqual(len(league.schedule[0].matches), 1)
+        self.assertEqual(len(league.schedule[0].players_out), 1)
+        self.assertEqual([player.name for player in league.schedule[0].matches[0].players], ["Juliano", "Galina", "GC", "Fariba"])
+        self.assertEqual(league.schedule[0].players_out[0].name, "Aline")
+        self.assertEqual(league.scoring_system.value, "w_l")
+        self.assertEqual(league.owner.email, "test@test.com")

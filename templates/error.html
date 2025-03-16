@@ -11,12 +11,21 @@
             color: #000;
             background: #fff;
         }
+
+        .primary-button {
+            background: #ca0363;
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
     <h1>{{ title }}</h1>
     <p>{{ message }}</p>
-    <p>Please check the URL and try again.</p>
-    <a href="/">Back to home</a>
+    <a href="/"><button class="primary-button">Home</button></a>
 </body>
 </html>
