@@ -1,4 +1,7 @@
+.pytest_cache/
+.vscode/
 version.py
 __pycache__/
 *.pyc
 secret.py
+.DS_Store
