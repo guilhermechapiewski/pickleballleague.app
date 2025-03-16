@@ -22,7 +22,10 @@ class LeagueRepository:
             client = datastore.Client()
             key = client.key("League", league_id)
             league = client.get(key)
-            return League.from_object(league)
+            if league:
+                return League.from_object(league)
+            else:
+                return None
     
     @classmethod
     def save_league(cls, league: 'League'):
@@ -52,7 +55,11 @@ class UserRepository:
             client = datastore.Client()
             key = client.key("User", email)
             user = client.get(key)
-            return User.from_object(user)
+            if user:
+                return User.from_object(user)
+            else:
+                return None
+            
     
     @classmethod
     def save_user(cls, user: 'User'):
