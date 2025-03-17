@@ -335,6 +335,12 @@
             return false;
         }
 
+        var cancelEditLink = function() {
+            document.getElementsByClassName("link-edit-container")[0].style.display = "none";
+            document.getElementsByClassName("link-show-container")[0].style.display = "block";
+            return false;
+        }
+
         var saveLink = function() {
             if ((document.getElementById("new_league_id").value != document.getElementById("original_league_id").value) &&
                     (document.getElementById("new_league_id").value.length > 0))  
@@ -426,7 +432,7 @@
             <div class="link-container">
                 <b>Link:</b> 
                 <div class="link-show-container"><a href="http://{{ domain_name }}/league/{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}">https://{{ domain_name }}/league/{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}</a></div>
-                <div class="link-edit-container">http://{{ domain_name }}/league/<input type="text" id="new_league_id" name="new_league_id" class="link-input" value="{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}"><input type="hidden" id="original_league_id" name="original_league_id" value="{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}"><input type="hidden" id="update_league_id" name="update_league_id" value=""> <button class="small-button" onclick="return saveLink()">Save 💾</button></div>
+                <div class="link-edit-container">http://{{ domain_name }}/league/<input type="text" id="new_league_id" name="new_league_id" class="link-input" value="{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}"><input type="hidden" id="original_league_id" name="original_league_id" value="{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}"><input type="hidden" id="update_league_id" name="update_league_id" value=""> <button class="small-button" onclick="return saveLink()">Save 💾</button> <button class="small-button" onclick="return cancelEditLink()">Cancel ❌</button></div>
                 &nbsp;&nbsp;
                 <button id="copy-link" class="small-button" onclick="return copyLink('http://{{ domain_name }}/league/{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}');">Copy link 🔗</button>
                 {% if league.owner and league.owner.email == user.email %}
