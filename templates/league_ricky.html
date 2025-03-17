@@ -353,7 +353,9 @@
             <h1>League created on {{ league.date_created }}</h1>
         {% endif %}
         {% if league.owner %}
-            <p><b>Created by:</b> {{ league.owner.email }}</p>
+            <p><i><b>Private league</b> (created by: <u>{{ league.owner.email }}</u>)</i></p>
+        {% else %}
+            <p><i><b>Public league</b> (anyone with the link can view and edit)</i></p>
         {% endif %}
         <p>
             <div class="link-container">
@@ -362,7 +364,9 @@
                 <div class="link-edit-container">http://{{ domain_name }}/league/<input type="text" id="new_league_id" name="new_league_id" class="link-input" value="{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}"><input type="hidden" id="original_league_id" name="original_league_id" value="{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}"><input type="hidden" id="update_league_id" name="update_league_id" value=""> <button class="small-button" onclick="return saveLink()">Save 💾</button></div>
                 &nbsp;&nbsp;
                 <button id="copy-link" class="small-button" onclick="return copyLink('http://{{ domain_name }}/league/{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}');">Copy 🔗</button>
-                <button id="edit-link" class="small-button" onclick="return editLink();">Edit ✎ᝰ</button>
+                {% if league.owner and league.owner.email == user.email %}
+                    <button id="edit-link" class="small-button" onclick="return editLink();">Edit ✎ᝰ</button>
+                {% endif %}
             </div>
         </p>
         <table class="league-table">
@@ -424,11 +428,15 @@
                             {% if league.scoring_system.value == 'w_l' %}
                                 {% if player.name not in round.players_out|map(attribute='name')|list %}
                                     <td style="background-color: {{ ns1.color }};">    
-                                        <select name="player_score_round{{ round.number }}_player{{ loop.index }}" id="player_score_round{{ round.number }}_player{{ loop.index }}">
-                                            <option value="0"></option>
-                                            <option value="w" {{ ns2.w }}>W</option>
-                                            <option value="l" {{ ns3.l }}>L</option>
-                                        </select>
+                                        {% if league.owner and league.owner.email == user.email %}
+                                            <select name="player_score_round{{ round.number }}_player{{ loop.index }}" id="player_score_round{{ round.number }}_player{{ loop.index }}">
+                                                <option value="0"></option>
+                                                <option value="w" {{ ns2.w }}>W</option>
+                                                <option value="l" {{ ns3.l }}>L</option>
+                                            </select>
+                                        {% else %}
+                                            {{ ns4.score }}
+                                        {% endif %}
                                     </td>
                                 {% else %}
                                     <td>x</td>
@@ -436,7 +444,11 @@
                             {% elif league.scoring_system.value == 'score' %}
                                 {% if player.name not in round.players_out|map(attribute='name')|list %}
                                     <td style="background-color: {{ ns1.color }};">
-                                        <input type="number" name="player_score_round{{ round.number }}_player{{ loop.index }}" id="player_score_round{{ round.number }}_player{{ loop.index }}" min="0" max="100" step="1" value="{{ ns4.score }}">
+                                        {% if league.owner and league.owner.email == user.email %}
+                                            <input type="number" name="player_score_round{{ round.number }}_player{{ loop.index }}" id="player_score_round{{ round.number }}_player{{ loop.index }}" min="0" max="100" step="1" value="{{ ns4.score }}">
+                                        {% else %}
+                                            {{ ns4.score }}
+                                        {% endif %}
                                     </td>
                                 {% else %}
                                     <td>x</td>
@@ -452,7 +464,7 @@
         
         <div id="footer" class="footer">
             <a href="#" onclick="printPage()">Print</a>
-            {% if league.scoring_system.value != 'none' %}<a href="#" onclick="document.getElementById('league_form').submit()">Save</a>{% endif %}
+            {% if league.scoring_system.value != 'none' and ((league.owner and league.owner.email == user.email) or not league.owner) %}<a href="#" onclick="document.getElementById('league_form').submit()">Save</a>{% endif %}
             <a href="/">Home</a>
         </div>
     </div>
