@@ -1,31 +1,33 @@
 <div class="ranking-container">
     <h2>Standings</h2>
-    <table class="ranking-table">
-        <thead>
-            <tr>
-                <th>Rank</th>
-                <th>Player</th>
-                {% if league.scoring_system.value == 'score' %}
-                    <th>Score</th>
-                {% endif %}
-                <th>Wins</th>
-                <th>Losses</th>
-                <th>Win %</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for player in league.get_player_rankings() %}
+    <div style="width: 100%; overflow-x: auto;">
+        <table class="ranking-table">
+            <thead>
                 <tr>
-                    <td>{{ loop.index }}</td>
-                    <td>{{ player.name }}</td>
+                    <th>Rank</th>
+                    <th>Player</th>
                     {% if league.scoring_system.value == 'score' %}
-                        <td>{{ player.total_score }}</td>
+                        <th>Score</th>
                     {% endif %}
-                    <td>{{ player.wins }}</td>
-                    <td>{{ player.losses }}</td>
-                    <td>{{ "%.1f"|format(player.win_percentage) }}%</td>
+                    <th>Wins</th>
+                    <th>Losses</th>
+                    <th>Win %</th>
                 </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                {% for player in league.get_player_rankings() %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ player.name }}</td>
+                        {% if league.scoring_system.value == 'score' %}
+                            <td>{{ player.total_score }}</td>
+                        {% endif %}
+                        <td>{{ player.wins }}</td>
+                        <td>{{ player.losses }}</td>
+                        <td>{{ "%.1f"|format(player.win_percentage) }}%</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
