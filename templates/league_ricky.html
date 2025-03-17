@@ -16,6 +16,9 @@
             color: #2c3e50;
             text-align: left;
             font-size: 32px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         p {
@@ -50,13 +53,29 @@
             display: block;
         }
 
+        .name-show-container {
+            display: block;
+            align-items: center;
+        }
+
         .link-edit-container {
             font-size: 12px;
             display: none;
         }
 
+        .name-edit-container {
+            display: none;
+            align-items: center;
+        }
+
         .link-input {
             width: 250px;
+        }
+
+        .name-input {
+            width: 350px;
+            font-size: 32px;
+            font-weight: bold;
         }
         
         .league-table {
@@ -339,6 +358,34 @@
             return false;
         }
 
+        var editName = function() {
+            document.getElementsByClassName("name-show-container")[0].style.display = "none";
+            document.getElementsByClassName("name-edit-container")[0].style.display = "block";
+            document.getElementById("new_league_name").focus();
+            return false;
+        }
+
+        var cancelEditName = function() {
+            document.getElementsByClassName("name-edit-container")[0].style.display = "none";
+            document.getElementsByClassName("name-show-container")[0].style.display = "block";
+            return false;
+        }
+
+        var saveName = function() {
+            if ((document.getElementById("new_league_name").value != document.getElementById("original_league_name").value) &&
+                    (document.getElementById("new_league_name").value.length > 0))  
+                {
+                var new_league_name = document.getElementById("new_league_name").value;
+                document.getElementById("new_league_name").value = new_league_name;
+                document.getElementById("update_league_name").value = "1";
+                document.getElementById("league_form").submit();
+                return true;
+            }
+            document.getElementsByClassName("name-edit-container")[0].style.display = "none";
+            document.getElementsByClassName("name-show-container")[0].style.display = "block";
+            return false;
+        }
+
         {% include 'templates/_auth.js' %}
     </script>
 </head>
@@ -347,11 +394,29 @@
     <form id="league_form" name="league_form" action="/save_league" method="post">
     <input type="hidden" name="league_id" value="{{ league.id }}">
     <div class="container">
-        {% if league.name %}
-            <h1>{{ league.name }} (created on {{ league.date_created }})</h1>
-        {% else %}
-            <h1>League created on {{ league.date_created }}</h1>
-        {% endif %}
+        <h1>
+            {% if league.name %}
+                <div class="name-show-container">{{ league.name }} (created on {{ league.date_created }})
+                {% if (league.owner and league.owner.email == user.email) or not league.owner %}
+                    <button id="edit-name" class="small-button" onclick="return editName()">Edit name ✎ᝰ</button>
+                {% endif %}
+                </div>  
+            {% else %}
+                <div class="name-show-container">League created on {{ league.date_created }}
+                {% if (league.owner and league.owner.email == user.email) or not league.owner %}
+                    <button id="edit-name" class="small-button" onclick="return editName()">Edit name ✎ᝰ</button>
+                {% endif %}
+                </div>  
+            {% endif %}
+            <div class="name-edit-container">
+                <input type="text" id="new_league_name" name="new_league_name" class="name-input" value="{{ league.name }}">
+                <input type="hidden" id="original_league_name" name="original_league_name" value="{{ league.name }}">
+                <input type="hidden" id="update_league_name" name="update_league_name" value="">
+                <button class="small-button" onclick="return saveName()">Save 💾</button>
+                <button class="small-button" onclick="return cancelEditName()">Cancel ❌</button>
+            </div>
+            
+        </h1>
         {% if league.owner %}
             <p><i><b>Private league</b> (created by: <u>{{ league.owner.email }}</u>)</i></p>
         {% else %}
@@ -363,9 +428,9 @@
                 <div class="link-show-container"><a href="http://{{ domain_name }}/league/{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}">https://{{ domain_name }}/league/{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}</a></div>
                 <div class="link-edit-container">http://{{ domain_name }}/league/<input type="text" id="new_league_id" name="new_league_id" class="link-input" value="{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}"><input type="hidden" id="original_league_id" name="original_league_id" value="{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}"><input type="hidden" id="update_league_id" name="update_league_id" value=""> <button class="small-button" onclick="return saveLink()">Save 💾</button></div>
                 &nbsp;&nbsp;
-                <button id="copy-link" class="small-button" onclick="return copyLink('http://{{ domain_name }}/league/{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}');">Copy 🔗</button>
+                <button id="copy-link" class="small-button" onclick="return copyLink('http://{{ domain_name }}/league/{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}');">Copy link 🔗</button>
                 {% if league.owner and league.owner.email == user.email %}
-                    <button id="edit-link" class="small-button" onclick="return editLink();">Edit ✎ᝰ</button>
+                    <button id="edit-link" class="small-button" onclick="return editLink();">Edit link ✎ᝰ</button>
                 {% endif %}
             </div>
         </p>

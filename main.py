@@ -145,6 +145,12 @@ def save_league():
             ShortLinkRepository.save_short_link(short_link)
             league.set_short_link(new_league_id)
     
+    # now update the league name
+    update_league_name = flask.request.form["update_league_name"]
+    new_league_name = flask.request.form["new_league_name"]
+    if new_league_name and update_league_name and update_league_name == "1" and new_league_name != "":
+        league.name = new_league_name
+    
     # now update the league scores
     for round in league.schedule:
         player_index = 1
