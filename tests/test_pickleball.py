@@ -286,6 +286,10 @@ class TestLeague(unittest.TestCase):
         league.set_owner(user)
         self.assertEqual(league.owner, user)
 
+    def test_league_get_players_sorted(self):
+        league = League(player_names="Gc, Juliano, Fariba, Galina, Aline, Irina, Regina, Lana")
+        self.assertEqual([player.name for player in league.get_players_sorted()], ["Aline", "Fariba", "Galina", "Gc", "Irina", "Juliano", "Lana", "Regina"])
+
     def test_league_to_object(self):
         player_names="GC, Juliano, Fariba, Galina"
         league = League(name="Test League", player_names=player_names)

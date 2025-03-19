@@ -168,6 +168,9 @@ class League:
     
     def set_players(self, players: list[Player]):
         self.players = players
+    
+    def get_players_sorted(self):
+        return sorted(self.players, key=lambda x: x.name)
 
     def set_scoring_system(self, scoring_system: ScoringSystem):
         self.scoring_system = scoring_system

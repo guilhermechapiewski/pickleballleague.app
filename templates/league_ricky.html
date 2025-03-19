@@ -581,7 +581,7 @@
                         <th style="width: 80%; white-space: nowrap;" colspan="{{ league.players|length }}">Player Scores</th>
                     </tr>
                     <tr>
-                        {% for player in league.players %}
+                        {% for player in league.get_players_sorted() %}
                             <th style="width: {{ width }}%; white-space: nowrap;">{{ player }}</th>
                         {% endfor %}
                     </tr>
@@ -627,7 +627,7 @@
                                     {% endif %}
                                 </div>
                             </td>
-                            {% for player in league.players %}                        
+                            {% for player in league.get_players_sorted() %}                        
                                 {% set ns1 = namespace(color="") %}
                                 {% set ns2 = namespace(w="") %}
                                 {% set ns3 = namespace(l="") %}
