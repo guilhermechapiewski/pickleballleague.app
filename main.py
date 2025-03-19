@@ -28,7 +28,7 @@ app.secret_key = FLASK_SECRET_KEY
 
 template_engine = TemplateEngine()
 
-def get_auth_user():
+def get_auth_user() -> User:
     user = None
     # Check if user is already authenticated
     if flask.session.get("user_id") and flask.session.get("user_google_id") and flask.session.get("user_email"):
@@ -369,6 +369,63 @@ def profile():
         "leagues": leagues,
         "domain_name": flask.request.host
     })
+
+@app.route("/load-test-data")
+def load_test_data():
+    if not DEV_ENVIRONMENT:
+        return template_engine.render("error", {
+            "title": "Error",
+            "message": "This feature is only available in the development environment."
+        })
+    
+    user = get_auth_user()
+    if not user:
+        return template_engine.render("error", {
+            "title": "Error",
+            "message": "Please sign in to load test data."
+        })
+    else:
+        user = UserRepository.get_user(user.email)
+    
+    league = League(name="League with 4 players, 3 rounds", player_names="GC, Juliano, Fariba, Galina")
+    league.generate_schedule(rounds=3)
+    league.set_scoring_system(ScoringSystem.SCORE)
+    league.set_owner(user)
+    LeagueRepository.save_league(league)
+    user.add_league(league.id)
+    
+    league = League(name="League with 5 players, 5 rounds", player_names="GC, Juliano, Fariba, Galina, Aline")
+    league.generate_schedule(rounds=5)
+    league.set_scoring_system(ScoringSystem.SCORE)
+    league.set_owner(user)
+    LeagueRepository.save_league(league)
+    user.add_league(league.id)
+    
+    league = League(name="League with 6 players, 5 rounds", player_names="GC, Juliano, Fariba, Galina, Aline, Irina")
+    league.generate_schedule(rounds=5)
+    league.set_scoring_system(ScoringSystem.SCORE)
+    league.set_owner(user)
+    LeagueRepository.save_league(league)
+    user.add_league(league.id)
+
+    league = League(name="League with 9 players, 7 rounds", player_names="GC, Juliano, Fariba, Galina, Aline, Irina, Regina, Lana, Raquel")
+    league.generate_schedule(rounds=7)
+    league.set_scoring_system(ScoringSystem.SCORE)
+    league.set_owner(user)
+    LeagueRepository.save_league(league)
+    user.add_league(league.id)
+
+    league = League(name="W/L League with 11 players, 10 rounds", player_names="GC, Juliano, Fariba, Galina, Aline, Irina, Regina, Lana, Bruno, Igor, Yuri")
+    league.generate_schedule(rounds=7)
+    league.set_scoring_system(ScoringSystem.W_L)
+    league.set_owner(user)
+    LeagueRepository.save_league(league)
+    user.add_league(league.id)
+
+    # finally, save the user to record all league associations
+    UserRepository.save_user(user)
+    
+    return flask.redirect("/profile")
 
 if __name__ == "__main__":
     logger.info("Running AppEngine server locally")

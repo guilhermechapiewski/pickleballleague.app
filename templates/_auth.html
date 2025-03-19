@@ -14,6 +14,10 @@
         <div class="menu-item"><a href="/">New League</a></div>
         <div class="menu-item"><a href="#" onclick="signOut()">Sign out</a></div>
         <div class="menu-item" id="loggedin-user-email">@</div>
+        {% if dev_environment %}
+        <div class="menu-item" style="color: #000; font-weight: bold;">🌟🦸🏼‍♂️ DEV TOOLS 🌟</div>
+        <div class="menu-item"><a href="/load-test-data">Load test data</a></div>
+        {% endif %}
     </div>
     {% if not user %}
         {% if dev_environment %}

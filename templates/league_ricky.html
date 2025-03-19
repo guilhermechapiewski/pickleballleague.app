@@ -466,14 +466,6 @@
                     if (all_original_players.indexOf(original_player3) == -1) { all_original_players.push(original_player3); }
                     if (all_original_players.indexOf(original_player4) == -1) { all_original_players.push(original_player4); }
                 }
-                if (document.getElementsByName("players-out-round"+i)[0]) {
-                    var players_out = document.getElementsByName("players-out-round"+i)[0].value;
-                    var original_players_out = document.getElementsByName("original-players-out-round"+i)[0].value;
-                    if (players_out == "") {
-                        alert("Please fill in the players *out* for round " + i + ".");
-                        return false;
-                    }
-                }
             }
             if (all_new_players.sort().join(",") != all_original_players.sort().join(",")) {
                 var added_players = all_new_players.filter(player => all_original_players.indexOf(player) === -1);
