@@ -26,3 +26,4 @@ tests/
 nose2.cfg
 README.md
 requirements-dev.txt
+_dev_database/

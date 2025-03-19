@@ -7,6 +7,43 @@ from google.cloud import datastore
 
 DEV_ENVIRONMENT = os.environ.get("DEV_ENVIRONMENT") == "true"
 
+class DevLocalDB:
+    directory = "_dev_database/"
+    logger = logging.getLogger(__name__)
+
+    @classmethod
+    def save_object(cls, type: type, identifier: str, object: str):
+        filename = f"{type.__qualname__}_{identifier}.txt"
+        cls.logger.info(f"DEV MEMORY DB: Saving object {filename}")
+        os.makedirs(cls.directory, exist_ok=True)
+        with open(cls.directory + filename, "wb") as f:
+            f.write(str(object).encode('utf-8'))
+    
+    @classmethod
+    def get_object(cls, type: type, identifier: str):
+        filename = f"{type.__qualname__}_{identifier}.txt"
+        cls.logger.info(f"DEV MEMORY DB: Getting object {filename}")
+        try:
+            with open(cls.directory + filename, "rb") as f:
+                return eval(f.read().decode('utf-8'))
+        except FileNotFoundError:
+            return None
+    
+    @classmethod
+    def delete_object(cls, type: type, identifier: str):
+        filename = f"{type.__qualname__}_{identifier}.txt"
+        try:
+            os.remove(cls.directory + filename)
+        except FileNotFoundError:
+            cls.logger.info(f"DEV MEMORY DB: Object {filename} not found")
+    
+    @classmethod
+    def clear_db(cls):
+        if os.path.exists(cls.directory):
+            for filename in os.listdir(cls.directory):
+                os.remove(os.path.join(cls.directory, filename))
+            os.rmdir(cls.directory)
+
 class LeagueRepository:
     logger = logging.getLogger(__name__)
     stored_objects = {}
@@ -14,11 +51,9 @@ class LeagueRepository:
     @classmethod
     def get_league(cls, league_id: str) -> 'League':
         if DEV_ENVIRONMENT:
-            cls.logger.info(f"DEV MEMORY DB: Getting league {league_id}")
-            if league_id in cls.stored_objects.keys():
-                league = League.from_object(cls.stored_objects[league_id])
-                cls.logger.info(f"DEV MEMORY DB: Retrieved league: {league}")
-                return league
+            league = DevLocalDB.get_object(League, league_id)
+            if league:
+                return League.from_object(league)
             else:
                 return None
         else:
@@ -33,8 +68,7 @@ class LeagueRepository:
     @classmethod
     def save_league(cls, league: 'League'):
         if DEV_ENVIRONMENT:
-            cls.logger.info(f"DEV MEMORY DB: Saving league {league.id}")
-            cls.stored_objects[league.id] = league.to_object()
+            DevLocalDB.save_object(League, league.id, league.to_object())
         else:
             client = datastore.Client()
             complete_key = client.key("League", league.id)
@@ -45,8 +79,7 @@ class LeagueRepository:
     @classmethod
     def delete_league(cls, league_id: str):
         if DEV_ENVIRONMENT:
-            cls.logger.info(f"DEV MEMORY DB: Deleting league {league_id}")
-            del cls.stored_objects[league_id]
+            DevLocalDB.delete_object(League, league_id)
         else:
             client = datastore.Client()
             client.delete(client.key("League", league_id))
@@ -58,11 +91,9 @@ class UserRepository:
     @classmethod
     def get_user(cls, email: str) -> 'User':
         if DEV_ENVIRONMENT:
-            cls.logger.info(f"DEV MEMORY DB: Getting user {email}")
-            if email in cls.stored_objects.keys():
-                user = User.from_object(cls.stored_objects[email])
-                cls.logger.info(f"DEV MEMORY DB: Retrieved user: {user}")
-                return user
+            user = DevLocalDB.get_object(User, email)
+            if user:
+                return User.from_object(user)
             else:
                 return None
         else:
@@ -78,8 +109,7 @@ class UserRepository:
     @classmethod
     def save_user(cls, user: 'User'):
         if DEV_ENVIRONMENT:
-            cls.logger.info(f"DEV MEMORY DB: Saving user {user.email}")
-            cls.stored_objects[user.email] = user.to_object()
+            DevLocalDB.save_object(User, user.email, user.to_object())
         else:
             client = datastore.Client()
             complete_key = client.key("User", user.email)
@@ -94,11 +124,9 @@ class ShortLinkRepository:
     @classmethod
     def get_short_link(cls, link: str) -> 'ShortLink':
         if DEV_ENVIRONMENT:
-            cls.logger.info(f"DEV MEMORY DB: Getting short link {link}")
-            if link in cls.stored_objects.keys():
-                short_link = ShortLink.from_object(cls.stored_objects[link])
-                cls.logger.info(f"DEV MEMORY DB: Retrieved short link: {short_link}")
-                return short_link
+            short_link = DevLocalDB.get_object(ShortLink, link)
+            if short_link:
+                return ShortLink.from_object(short_link)
             else:
                 return None
         else:
@@ -113,8 +141,7 @@ class ShortLinkRepository:
     @classmethod
     def save_short_link(cls, short_link: 'ShortLink'):
         if DEV_ENVIRONMENT:
-            cls.logger.info(f"DEV MEMORY DB: Saving short link {short_link.link}")
-            cls.stored_objects[short_link.link] = short_link.to_object()
+            DevLocalDB.save_object(ShortLink, short_link.link, short_link.to_object())
         else:
             client = datastore.Client()
             complete_key = client.key("ShortLink", short_link.link)

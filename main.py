@@ -3,9 +3,10 @@ import logging
 import flask
 from app.template import TemplateEngine
 from app.pickleball import League, ScoringSystem, Player
-from app.db import LeagueRepository, UserRepository, ShortLinkRepository
+from app.db import DevLocalDB, LeagueRepository, UserRepository, ShortLinkRepository
 from app.user import User
 from app.links import ShortLink
+
 DEV_ENVIRONMENT = os.environ.get("DEV_ENVIRONMENT") == "true"
 
 try:
@@ -354,6 +355,7 @@ def profile():
             "title": "Error: Not logged in",
             "message": "Please sign in to view your profile."
         })
+    
     # get full user object from database
     user = UserRepository.get_user(user.email)
 
@@ -370,7 +372,7 @@ def profile():
         "domain_name": flask.request.host
     })
 
-@app.route("/load-test-data")
+@app.route("/dev-load-test-data")
 def load_test_data():
     if not DEV_ENVIRONMENT:
         return template_engine.render("error", {
@@ -426,6 +428,19 @@ def load_test_data():
     UserRepository.save_user(user)
     
     return flask.redirect("/profile")
+
+@app.route("/dev-clear-db")
+def clear_db():
+    if not DEV_ENVIRONMENT:
+        return template_engine.render("error", {
+            "title": "Error",
+            "message": "This feature is only available in the development environment."
+        })
+    
+    DevLocalDB.clear_db()
+    flask.session.clear()
+
+    return flask.redirect("/")
 
 if __name__ == "__main__":
     logger.info("Running AppEngine server locally")

@@ -3,6 +3,7 @@ run: clean
 
 test: clean
 	@export DEV_ENVIRONMENT="true" && pytest
+	@rm -rf _dev_database/
 
 deploy: clean test create_deployment_info
 	@echo "Deploying to Google App Engine..."
@@ -17,3 +18,4 @@ create_deployment_info: clean
 
 clean:
 	@rm -f version.py
+	@rm -rf _dev_database/
