@@ -83,7 +83,10 @@ def create_league():
 
     league = League(name=league_name, player_names=player_names)
     league.set_scoring_system(ScoringSystem(flask.request.form["scoring_system"]))
-    league.set_template(flask.request.form["template"])
+    
+    # TODO: remove this once we have more templates
+    #league.set_template(flask.request.form["template"])
+    league.set_template("ricky")
     
     rounds = int(flask.request.form["rounds"])
     if rounds == 0:
