@@ -34,6 +34,15 @@
             cursor: pointer;
         }
 
+        #edit-players {
+            border: 1px solid #ffffff;
+        }
+
+        #edit-save-players, #edit-cancel-players {
+            visibility: hidden;
+            border: 1px solid #ffffff;
+        }
+
         .small-button:hover {
             background-color: #1a2530;
         }
@@ -64,6 +73,10 @@
             align-items: center;
         }
 
+        .round-show-container {
+            display: block;
+        }
+
         .link-edit-container {
             font-size: 12px;
             display: none;
@@ -74,8 +87,20 @@
             align-items: center;
         }
 
+        .round-edit-container {
+            display: none;
+        }
+
         .link-input {
             width: 250px;
+        }
+
+        .team-input {
+            width: 50px;
+        }
+
+        .players-out-input {
+            width: 200px;
         }
 
         .name-input {
@@ -398,6 +423,104 @@
             return false;
         }
 
+        var editPlayers = function() {
+            for (var i = 0; i < document.getElementsByClassName("round-show-container").length; i++) {
+                document.getElementsByClassName("round-show-container")[i].style.display = "none";
+                document.getElementsByClassName("round-edit-container")[i].style.display = "block";
+            }
+            document.getElementById("edit-players").style.visibility = "hidden";
+            document.getElementById("edit-save-players").style.visibility = "visible";
+            document.getElementById("edit-cancel-players").style.visibility = "visible";
+            return false;
+        }
+
+        var savePlayers = function() {
+            // traverse all inputs to ensure they are 
+            var all_new_players = [];
+            var all_original_players = [];
+            for (var i = 1; i <= document.getElementsByClassName("round-show-container").length; i++) {
+                var number_of_matches = document.getElementsByName("round-number"+i+"-matches")[0].value;
+                for (var j = 1; j <= number_of_matches; j++) {
+                    var player1 = document.getElementsByName("player-name-round"+i+"-match"+j+"-player1")[0].value;
+                    var player2 = document.getElementsByName("player-name-round"+i+"-match"+j+"-player2")[0].value;
+                    var player3 = document.getElementsByName("player-name-round"+i+"-match"+j+"-player3")[0].value;
+                    var player4 = document.getElementsByName("player-name-round"+i+"-match"+j+"-player4")[0].value;
+                    var original_player1 = document.getElementsByName("original-player-name-round"+i+"-match"+j+"-player1")[0].value;
+                    var original_player2 = document.getElementsByName("original-player-name-round"+i+"-match"+j+"-player2")[0].value;
+                    var original_player3 = document.getElementsByName("original-player-name-round"+i+"-match"+j+"-player3")[0].value;
+                    var original_player4 = document.getElementsByName("original-player-name-round"+i+"-match"+j+"-player4")[0].value;
+                    if ((player1 == "") || (player2 == "") ||  (player3 == "") || (player4 == "")) {
+                        alert("Please fill in all player names for *round " + i + " match " + j + "*.");
+                        return false;
+                    }
+                    if ((player1.indexOf(",") != -1) || (player2.indexOf(",") != -1) || (player3.indexOf(",") != -1) || (player4.indexOf(",") != -1)) {
+                        alert("Player names cannot contain commas - check your entries for *round " + i + " match " + j + "*.");
+                        return false;
+                    }
+                    if (all_new_players.indexOf(player1) == -1) {  all_new_players.push(player1); }
+                    if (all_new_players.indexOf(player2) == -1) { all_new_players.push(player2); }
+                    if (all_new_players.indexOf(player3) == -1) { all_new_players.push(player3); }
+                    if (all_new_players.indexOf(player4) == -1) { all_new_players.push(player4); }
+                    if (all_original_players.indexOf(original_player1) == -1) { all_original_players.push(original_player1); }
+                    if (all_original_players.indexOf(original_player2) == -1) { all_original_players.push(original_player2); }
+                    if (all_original_players.indexOf(original_player3) == -1) { all_original_players.push(original_player3); }
+                    if (all_original_players.indexOf(original_player4) == -1) { all_original_players.push(original_player4); }
+                }
+                if (document.getElementsByName("players-out-round"+i)[0]) {
+                    var players_out = document.getElementsByName("players-out-round"+i)[0].value;
+                    var original_players_out = document.getElementsByName("original-players-out-round"+i)[0].value;
+                    if (players_out == "") {
+                        alert("Please fill in the players *out* for round " + i + ".");
+                        return false;
+                    }
+                }
+            }
+            if (all_new_players.sort().join(",") != all_original_players.sort().join(",")) {
+                var added_players = all_new_players.filter(player => all_original_players.indexOf(player) === -1);
+                var removed_players = all_original_players.filter(player => all_new_players.indexOf(player) === -1);
+                var message = "The changes look good but the number of players and/or the players have changed:\n";
+                if (added_players.length > 0) {
+                    message += "\n- Added players: " + added_players.join(", ");
+                }
+                if (removed_players.length > 0) {
+                    message += "\n- Removed players: " + removed_players.join(", ");
+                }
+                message += "\n\nDo you want to proceed?";
+                if (confirm(message) != true) {
+                    cancelEditPlayers();
+                    return false;
+                }
+            }
+            document.getElementById("update_player_names").value = "1";
+            document.getElementById("league_form").submit();
+            return true;
+        }
+
+        var cancelEditPlayers = function() {            
+            //reset all inputs to their original values
+            for (var i = 1; i <= document.getElementsByClassName("round-show-container").length; i++) {
+                var number_of_matches = document.getElementsByName("round-number"+i+"-matches")[0].value;
+                for (var j = 1; j <= number_of_matches; j++) {
+                    document.getElementsByName("player-name-round"+i+"-match"+j+"-player1")[0].value = document.getElementsByName("original-player-name-round"+i+"-match"+j+"-player1")[0].value;
+                    document.getElementsByName("player-name-round"+i+"-match"+j+"-player2")[0].value = document.getElementsByName("original-player-name-round"+i+"-match"+j+"-player2")[0].value;
+                    document.getElementsByName("player-name-round"+i+"-match"+j+"-player3")[0].value = document.getElementsByName("original-player-name-round"+i+"-match"+j+"-player3")[0].value;
+                    document.getElementsByName("player-name-round"+i+"-match"+j+"-player4")[0].value = document.getElementsByName("original-player-name-round"+i+"-match"+j+"-player4")[0].value;
+                    if (document.getElementsByName("players-out-round"+i)[0]) {
+                        document.getElementsByName("players-out-round"+i)[0].value = document.getElementsByName("original-players-out-round"+i)[0].value;
+                    }
+                }
+            }
+            // reset the display of the round show and edit containers
+            for (var i = 0; i < document.getElementsByClassName("round-show-container").length; i++) {
+                document.getElementsByClassName("round-show-container")[i].style.display = "block";
+                document.getElementsByClassName("round-edit-container")[i].style.display = "none";
+            }
+            document.getElementById("edit-save-players").style.visibility = "hidden";
+            document.getElementById("edit-cancel-players").style.visibility = "hidden";
+            document.getElementById("edit-players").style.visibility = "visible";
+            return false;
+        }
+
         {% include 'templates/_auth.js' %}
     </script>
 </head>
@@ -450,7 +573,11 @@
             <table class="league-table">
                 <thead>
                     <tr>
-                        <th style="width: 20%; white-space: nowrap;" rowspan="2">Rounds</th>
+                        <th style="width: 20%; white-space: nowrap;" rowspan="2">
+                            Rounds{% if (league.owner and league.owner.email == user.email) or not league.owner %}&nbsp;&nbsp;<button id="edit-players" class="small-button" onclick="return editPlayers();">Edit&nbsp;players&nbsp;✎</button><br>{% endif %}
+                            <button id="edit-save-players" class="small-button" onclick="return savePlayers()">Save&nbsp;💾</button>&nbsp;&nbsp;<button id="edit-cancel-players" class="small-button" onclick="return cancelEditPlayers()">Cancel&nbsp;❌</button>
+                            <input type="hidden" name="update_player_names" id="update_player_names" value="">
+                        </th>
                         <th style="width: 80%; white-space: nowrap;" colspan="{{ league.players|length }}">Player Scores</th>
                     </tr>
                     <tr>
@@ -463,19 +590,42 @@
                     {% for round in league.schedule %}
                         <tr>
                             <td class="round-cell">
-                                <div class="round-number">Round {{ round.number }}</div>
-                                {% for match in round.matches %}
-                                    <div class="match">
-                                        <span class="team">{{ match.players[0].name }}/{{ match.players[1].name }}</span>
-                                        <span class="vs">vs</span>
-                                        <span class="team">{{ match.players[2].name }}/{{ match.players[3].name }}</span>
-                                    </div>
-                                {% endfor %}
-                                {% if round.players_out %}
-                                    <div class="players-out">
-                                        <span class="players-out-label">Out:</span> {{ round.players_out|join(', ') }}
-                                    </div>
-                                {% endif %}
+                                <div class="round-show-container">
+                                    <div class="round-number">Round {{ round.number }}</div>
+                                    {% for match in round.matches %}
+                                        <div class="match">
+                                            <span class="team">{{ match.players[0].name }}/{{ match.players[1].name }}</span>
+                                            <span class="vs">vs</span>
+                                            <span class="team">{{ match.players[2].name }}/{{ match.players[3].name }}</span>
+                                        </div>
+                                    {% endfor %}
+                                    {% if round.players_out %}
+                                        <div class="players-out">
+                                            <span class="players-out-label">Out:</span> {{ round.players_out|join(', ') }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="round-edit-container">
+                                    <div class="round-number">Round {{ round.number }}</div>
+                                    <input type="hidden" name="round-number{{ round.number }}-matches" value="{{ round.matches|length }}">
+                                    {% for match in round.matches %}
+                                        <div class="match">
+                                            <span class="team"><input class="team-input" type="text" name="player-name-round{{ round.number }}-match{{ loop.index }}-player1" value="{{ match.players[0].name }}">/<input class="team-input" type="text" name="player-name-round{{ round.number }}-match{{ loop.index }}-player2" value="{{ match.players[1].name }}"></span>
+                                            <span class="vs">vs</span>
+                                            <span class="team"><input class="team-input" type="text" name="player-name-round{{ round.number }}-match{{ loop.index }}-player3" value="{{ match.players[2].name }}">/<input class="team-input" type="text" name="player-name-round{{ round.number }}-match{{ loop.index }}-player4" value="{{ match.players[3].name }}"></span>
+                                            <input type="hidden" name="original-player-name-round{{ round.number }}-match{{ loop.index }}-player1" value="{{ match.players[0].name }}">
+                                            <input type="hidden" name="original-player-name-round{{ round.number }}-match{{ loop.index }}-player2" value="{{ match.players[1].name }}">
+                                            <input type="hidden" name="original-player-name-round{{ round.number }}-match{{ loop.index }}-player3" value="{{ match.players[2].name }}">
+                                            <input type="hidden" name="original-player-name-round{{ round.number }}-match{{ loop.index }}-player4" value="{{ match.players[3].name }}">
+                                        </div>
+                                    {% endfor %}
+                                    {% if round.players_out %}
+                                        <div class="players-out">
+                                            <span class="players-out-label">Out:</span> <input class="players-out-input" type="text" name="players-out-round{{ round.number }}" value="{{ round.players_out|join(', ') }}">
+                                            <input type="hidden" name="original-players-out-round{{ round.number }}" value="{{ round.players_out|join(', ') }}">
+                                        </div>
+                                    {% endif %}
+                                </div>
                             </td>
                             {% for player in league.players %}                        
                                 {% set ns1 = namespace(color="") %}
@@ -506,7 +656,7 @@
                                 {% if league.scoring_system.value == 'w_l' %}
                                     {% if player.name not in round.players_out|map(attribute='name')|list %}
                                         <td style="background-color: {{ ns1.color }};">    
-                                            {% if league.owner and league.owner.email == user.email %}
+                                            {% if (league.owner and league.owner.email == user.email) or not league.owner %}
                                                 <select name="player_score_round{{ round.number }}_player{{ loop.index }}" id="player_score_round{{ round.number }}_player{{ loop.index }}">
                                                     <option value="0"></option>
                                                     <option value="w" {{ ns2.w }}>W</option>
@@ -522,7 +672,7 @@
                                 {% elif league.scoring_system.value == 'score' %}
                                     {% if player.name not in round.players_out|map(attribute='name')|list %}
                                         <td style="background-color: {{ ns1.color }};">
-                                            {% if league.owner and league.owner.email == user.email %}
+                                            {% if (league.owner and league.owner.email == user.email) or not league.owner %}
                                                 <input type="number" name="player_score_round{{ round.number }}_player{{ loop.index }}" id="player_score_round{{ round.number }}_player{{ loop.index }}" min="0" max="100" step="1" value="{{ ns4.score }}">
                                             {% else %}
                                                 {{ ns4.score }}

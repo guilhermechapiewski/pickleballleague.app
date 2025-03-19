@@ -2,7 +2,7 @@ import os
 import logging
 import flask
 from app.template import TemplateEngine
-from app.pickleball import League, ScoringSystem
+from app.pickleball import League, ScoringSystem, Player
 from app.db import LeagueRepository, UserRepository, ShortLinkRepository
 from app.user import User
 from app.links import ShortLink
@@ -129,7 +129,7 @@ def save_league():
     
     league = LeagueRepository.get_league(league_id)
 
-    # first check if the short link needs to be updated
+    # check if the short link needs to be updated
     update_league_id = flask.request.form["update_league_id"]
     new_league_id = flask.request.form["new_league_id"]
     if update_league_id and new_league_id and update_league_id == "1":
@@ -153,7 +153,108 @@ def save_league():
     new_league_name = flask.request.form["new_league_name"]
     if new_league_name and update_league_name and update_league_name == "1" and new_league_name != "":
         league.name = new_league_name
-    
+
+    # now update the league player names
+    update_player_names = flask.request.form["update_player_names"]
+    if update_player_names and update_player_names == "1":
+        all_players = []
+        for round in league.schedule:
+            match_index = 1
+            for match in round.matches:
+                player1_name = flask.request.form[f"player-name-round{round.number}-match{match_index}-player1"]
+                player2_name = flask.request.form[f"player-name-round{round.number}-match{match_index}-player2"]
+                player3_name = flask.request.form[f"player-name-round{round.number}-match{match_index}-player3"]
+                player4_name = flask.request.form[f"player-name-round{round.number}-match{match_index}-player4"]
+                
+                # Ensure player names are not empty to avoid potential errors
+                if player1_name.strip():
+                    player1 = Player(player1_name.strip())
+                    if player1 not in all_players:
+                        all_players.append(player1)
+                
+                if player2_name.strip():
+                    player2 = Player(player2_name.strip())
+                    if player2 not in all_players:
+                        all_players.append(player2)
+                
+                if player3_name.strip():
+                    player3 = Player(player3_name.strip())
+                    if player3 not in all_players:
+                        all_players.append(player3)
+                
+                if player4_name.strip():
+                    player4 = Player(player4_name.strip())
+                    if player4 not in all_players:
+                        all_players.append(player4)
+                
+                match_index += 1
+            
+            # Handle players out for this round
+            players_out_key = f"players-out-round{round.number}"
+            if players_out_key in flask.request.form and flask.request.form[players_out_key].strip():
+                for player_name in flask.request.form[players_out_key].split(","):
+                    if player_name.strip():  # Skip empty names
+                        player_out = Player(player_name.strip())
+                        if player_out not in all_players:
+                            all_players.append(player_out)
+        
+        # Set the updated player list
+        league.set_players(all_players)
+        
+        # Update match players and players out for each round
+        for round in league.schedule:
+            # Create a copy of all players to track who's out
+            remaining_players = all_players.copy()
+            match_index = 1
+            
+            for match in round.matches:
+                player1_name = flask.request.form[f"player-name-round{round.number}-match{match_index}-player1"]
+                player2_name = flask.request.form[f"player-name-round{round.number}-match{match_index}-player2"]
+                player3_name = flask.request.form[f"player-name-round{round.number}-match{match_index}-player3"]
+                player4_name = flask.request.form[f"player-name-round{round.number}-match{match_index}-player4"]
+                
+                # Create player objects and update match
+                if player1_name.strip():
+                    player1 = Player(player1_name.strip())
+                    match.players[0] = player1
+                    # Remove from remaining players if present
+                    for player in remaining_players:
+                        if player == player1:
+                            remaining_players.remove(player)
+                            break
+                
+                if player2_name.strip():
+                    player2 = Player(player2_name.strip())
+                    match.players[1] = player2
+                    # Remove from remaining players if present
+                    for player in remaining_players:
+                        if player == player2:
+                            remaining_players.remove(player)
+                            break
+                
+                if player3_name.strip():
+                    player3 = Player(player3_name.strip())
+                    match.players[2] = player3
+                    # Remove from remaining players if present
+                    for player in remaining_players:
+                        if player == player3:
+                            remaining_players.remove(player)
+                            break
+                
+                if player4_name.strip():
+                    player4 = Player(player4_name.strip())
+                    match.players[3] = player4
+                    # Remove from remaining players if present
+                    for player in remaining_players:
+                        if player == player4:
+                            remaining_players.remove(player)
+                            break
+                
+                match_index += 1
+            
+            # Set players out for this round
+            round.players_out = remaining_players
+
     # now update the league scores
     for round in league.schedule:
         player_index = 1
