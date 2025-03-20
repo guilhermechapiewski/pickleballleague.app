@@ -636,7 +636,7 @@
                 <thead>
                     <tr>
                         <th style="width: 20%; white-space: nowrap;" rowspan="2">
-                            Rounds{% if (league.owner and league.owner.email == user.email) or not league.owner %}&nbsp;&nbsp;<button id="edit-players" class="small-button" onclick="return editPlayers();">Edit&nbsp;players&nbsp;✎</button><br>{% endif %}
+                            Rounds{% if (league.owner and league.can_edit(user.email)) or not league.owner %}&nbsp;&nbsp;<button id="edit-players" class="small-button" onclick="return editPlayers();">Edit&nbsp;players&nbsp;✎</button><br>{% endif %}
                             <button id="edit-save-players" class="small-button" onclick="return savePlayers()">Save&nbsp;💾</button>&nbsp;&nbsp;<button id="edit-cancel-players" class="small-button" onclick="return cancelEditPlayers()">Cancel&nbsp;❌</button>
                             <input type="hidden" name="update_player_names" id="update_player_names" value="">
                         </th>
@@ -718,7 +718,7 @@
                                 {% if league.scoring_system.value == 'w_l' %}
                                     {% if player.name not in round.players_out|map(attribute='name')|list %}
                                         <td style="background-color: {{ ns1.color }};">    
-                                            {% if (league.owner and league.owner.email == user.email) or not league.owner %}
+                                            {% if (league.owner and league.can_edit(user.email)) or not league.owner %}
                                                 <select name="player_score_round{{ round.number }}_player{{ loop.index }}" id="player_score_round{{ round.number }}_player{{ loop.index }}">
                                                     <option value="0"></option>
                                                     <option value="w" {{ ns2.w }}>W</option>
@@ -734,7 +734,7 @@
                                 {% elif league.scoring_system.value == 'score' %}
                                     {% if player.name not in round.players_out|map(attribute='name')|list %}
                                         <td style="background-color: {{ ns1.color }};">
-                                            {% if (league.owner and league.owner.email == user.email) or not league.owner %}
+                                            {% if (league.owner and league.can_edit(user.email)) or not league.owner %}
                                                 <input type="number" name="player_score_round{{ round.number }}_player{{ loop.index }}" id="player_score_round{{ round.number }}_player{{ loop.index }}" min="0" max="100" step="1" value="{{ ns4.score }}">
                                             {% else %}
                                                 {{ ns4.score }}

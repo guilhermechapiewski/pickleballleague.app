@@ -285,7 +285,19 @@ class TestLeague(unittest.TestCase):
         user = User("123", "test@test.com")
         league.set_owner(user)
         self.assertEqual(league.owner, user)
-
+    
+    def test_league_contributors_can_also_edit(self):
+        league = League(player_names="GC, Juliano, Fariba, Galina")
+        user = User("123", "test@test.com")
+        self.assertTrue(league.can_edit(user.email), "User should be able to edit league since there is no owner")
+        league.set_owner(user)
+        self.assertTrue(league.can_edit(user.email), "User should be able to edit league since he is the owner")
+        
+        another_user = User("456", "another@test.com")
+        self.assertFalse(league.can_edit(another_user.email), "User should not be able to edit league since he is not the owner or a contributor")
+        league.add_contributor(another_user)
+        self.assertTrue(league.can_edit(another_user.email), "User should be able to edit league since he is a contributor")
+        
     def test_league_get_players_sorted(self):
         league = League(player_names="Gc, Juliano, Fariba, Galina, Aline, Irina, Regina, Lana")
         self.assertEqual([player.name for player in league.get_players_sorted()], ["Aline", "Fariba", "Galina", "Gc", "Irina", "Juliano", "Lana", "Regina"])
@@ -331,13 +343,15 @@ class TestLeague(unittest.TestCase):
         self.assertEqual(generated_league_object["scoring_system"], league_object["scoring_system"])
         self.assertEqual(generated_league_object["template"], league_object["template"])
     
-    def test_league_to_object_with_owner(self):
+    def test_league_to_object_with_owner_and_contributors(self):
         player_names="GC, Juliano, Fariba, Galina"
         league = League(name="Test League", player_names=player_names)
         league.generate_schedule(rounds=1)
         league.set_template("irina-fariba")
         user = User("123", "test@test.com")
         league.set_owner(user)
+        another_user = User("456", "another@test.com")
+        league.add_contributor(another_user)
         
         generated_league_object = league.to_object()
         league_object = {
@@ -347,6 +361,12 @@ class TestLeague(unittest.TestCase):
             "owner": {
                 "id": user.id
             },
+            "contributors": [
+                {
+                    "id": another_user.id,
+                    "email": another_user.email
+                }
+            ],
             "players": [ {"name": "GC"}, {"name": "Juliano"}, {"name": "Fariba"}, {"name": "Galina"}],
             "schedule": [
                 {
@@ -378,7 +398,9 @@ class TestLeague(unittest.TestCase):
         self.assertEqual(generated_league_object["template"], league_object["template"])
 
         self.assertEqual(generated_league_object["owner"]["id"], league_object["owner"]["id"])
-    
+        self.assertEqual(generated_league_object["contributors"][0]["id"], league_object["contributors"][0]["id"])
+        self.assertEqual(generated_league_object["contributors"][0]["email"], league_object["contributors"][0]["email"])
+        
     def test_league_from_object(self):
         league = League.from_object({
             "id": "123",

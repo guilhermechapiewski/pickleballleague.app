@@ -320,6 +320,11 @@ class League:
     def add_contributor(self, contributor: User):
         self.contributors.append(contributor)
     
+    def can_edit(self, email: str):
+        if self.owner is None:
+            return True
+        return self.owner.email == email or email in [contributor.email for contributor in self.contributors]
+    
     def to_object(self):
         return {
             "id": self.id,
@@ -340,10 +345,10 @@ class League:
         league = League(name=object["name"])
         league.set_id(object["id"])
         league.set_date_created(object["date_created"])
-        if "owner" in object and object["owner"] is not None and "email" in object["owner"]:
+        if object.get("owner") is not None and isinstance(object.get("owner"), dict) and "email" in object.get("owner"):
             user = User(object["owner"]["email"])
             league.set_owner(user)
-        for contributor in object["contributors"]:
+        for contributor in object.get("contributors", []):
             user = User(contributor["email"])
             league.add_contributor(user)
         league.set_players([Player.from_object(player) for player in object["players"]])

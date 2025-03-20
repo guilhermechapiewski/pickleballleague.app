@@ -78,18 +78,18 @@ def sign_out():
 def create_league():
     user = get_auth_user()
     
-    player_names = flask.request.form["player_names"]
-    league_name = flask.request.form["league_name"]
+    player_names = flask.request.form.get("player_names")
+    league_name = flask.request.form.get("league_name")
     logger.info(f"Creating league name=[{league_name}] for players=[{player_names}]")
 
     league = League(name=league_name, player_names=player_names)
-    league.set_scoring_system(ScoringSystem(flask.request.form["scoring_system"]))
+    league.set_scoring_system(ScoringSystem(flask.request.form.get("scoring_system")))
     
     # TODO: remove this once we have more templates
-    #league.set_template(flask.request.form["template"])
+    #league.set_template(flask.request.form.get("template"))
     league.set_template("ricky")
     
-    rounds = int(flask.request.form["rounds"])
+    rounds = int(flask.request.form.get("rounds"))
     if rounds == 0:
         if len(league.players) == 4:
             rounds = 3
@@ -121,7 +121,7 @@ def create_league():
 
 @app.route("/save_league", methods=["POST"])
 def save_league():
-    league_id = flask.request.form["league_id"]
+    league_id = flask.request.form.get("league_id")
     
     # first check if the short link exists
     short_link = ShortLinkRepository.get_short_link(league_id)
@@ -131,8 +131,8 @@ def save_league():
     league = LeagueRepository.get_league(league_id)
 
     # check if the short link needs to be updated
-    update_league_id = flask.request.form["update_league_id"]
-    new_league_id = flask.request.form["new_league_id"]
+    update_league_id = flask.request.form.get("update_league_id")
+    new_league_id = flask.request.form.get("new_league_id")
     if update_league_id and new_league_id and update_league_id == "1":
         # check if the new short link already exists
         short_link = ShortLinkRepository.get_short_link(new_league_id)
@@ -150,14 +150,14 @@ def save_league():
             league.set_short_link(new_league_id)
     
     # now update the league name
-    update_league_name = flask.request.form["update_league_name"]
-    new_league_name = flask.request.form["new_league_name"]
+    update_league_name = flask.request.form.get("update_league_name")
+    new_league_name = flask.request.form.get("new_league_name")
     if new_league_name and update_league_name and update_league_name == "1" and new_league_name != "":
         league.name = new_league_name
     
     # now update the league contributors
-    update_contributors = flask.request.form["update_contributors"]
-    new_contributor_email = flask.request.form["new_contributor_email"]
+    update_contributors = flask.request.form.get("update_contributors")
+    new_contributor_email = flask.request.form.get("new_contributor_email")
     if update_contributors and update_contributors == "1" and new_contributor_email and new_contributor_email != "":
         contributor = UserRepository.get_user(new_contributor_email)
         if contributor:
@@ -173,16 +173,16 @@ def save_league():
             })
     
     # now update the league player names
-    update_player_names = flask.request.form["update_player_names"]
+    update_player_names = flask.request.form.get("update_player_names")
     if update_player_names and update_player_names == "1":
         all_players = []
         for round in league.schedule:
             match_index = 1
             for match in round.matches:
-                player1_name = flask.request.form[f"player-name-round{round.number}-match{match_index}-player1"]
-                player2_name = flask.request.form[f"player-name-round{round.number}-match{match_index}-player2"]
-                player3_name = flask.request.form[f"player-name-round{round.number}-match{match_index}-player3"]
-                player4_name = flask.request.form[f"player-name-round{round.number}-match{match_index}-player4"]
+                player1_name = flask.request.form.get(f"player-name-round{round.number}-match{match_index}-player1")
+                player2_name = flask.request.form.get(f"player-name-round{round.number}-match{match_index}-player2")
+                player3_name = flask.request.form.get(f"player-name-round{round.number}-match{match_index}-player3")
+                player4_name = flask.request.form.get(f"player-name-round{round.number}-match{match_index}-player4")
                 
                 # Ensure player names are not empty to avoid potential errors
                 if player1_name.strip():
@@ -209,8 +209,8 @@ def save_league():
             
             # Handle players out for this round
             players_out_key = f"players-out-round{round.number}"
-            if players_out_key in flask.request.form and flask.request.form[players_out_key].strip():
-                for player_name in flask.request.form[players_out_key].split(","):
+            if players_out_key in flask.request.form and flask.request.form.get(players_out_key).strip():
+                for player_name in flask.request.form.get(players_out_key).split(","):
                     if player_name.strip():  # Skip empty names
                         player_out = Player(player_name.strip())
                         if player_out not in all_players:
@@ -226,10 +226,10 @@ def save_league():
             match_index = 1
             
             for match in round.matches:
-                player1_name = flask.request.form[f"player-name-round{round.number}-match{match_index}-player1"]
-                player2_name = flask.request.form[f"player-name-round{round.number}-match{match_index}-player2"]
-                player3_name = flask.request.form[f"player-name-round{round.number}-match{match_index}-player3"]
-                player4_name = flask.request.form[f"player-name-round{round.number}-match{match_index}-player4"]
+                player1_name = flask.request.form.get(f"player-name-round{round.number}-match{match_index}-player1")
+                player2_name = flask.request.form.get(f"player-name-round{round.number}-match{match_index}-player2")
+                player3_name = flask.request.form.get(f"player-name-round{round.number}-match{match_index}-player3")
+                player4_name = flask.request.form.get(f"player-name-round{round.number}-match{match_index}-player4")
                 
                 # Create player objects and update match
                 if player1_name.strip():
@@ -279,7 +279,7 @@ def save_league():
         for player in league.players:
             player_score = None
             try:
-                player_score = flask.request.form[f"player_score_round{round.number}_player{player_index}"]
+                player_score = flask.request.form.get(f"player_score_round{round.number}_player{player_index}")
             except KeyError:
                 pass
 
@@ -445,17 +445,17 @@ def load_test_data():
     LeagueRepository.save_league(league)
     user.add_league(league.id)
 
-    # finally, save the user to record all league associations
-    UserRepository.save_user(user)
-    
     other_league = League(name="League with 4 players, 3 rounds (other user owns it)", player_names="GC, Juliano, Fariba, Galina")
     other_league.generate_schedule(rounds=3)
     other_league.set_scoring_system(ScoringSystem.SCORE)
     other_league.set_owner(other_user)
+    other_league.add_contributor(user)
     LeagueRepository.save_league(other_league)
     other_user.add_league(other_league.id)
+    user.add_league(other_league.id)
 
-    # save the other user too
+    # finally, save users to record all league associations
+    UserRepository.save_user(user)
     UserRepository.save_user(other_user)
     
     return flask.redirect("/profile")
