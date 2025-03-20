@@ -77,6 +77,15 @@
             display: block;
         }
 
+        .contributor-container {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            width: 100%; 
+            overflow-x: auto;
+            font-size: 12px;
+        }
+
         .link-edit-container {
             font-size: 12px;
             display: none;
@@ -91,8 +100,18 @@
             display: none;
         }
 
+        .contributor-edit-container {
+            display: none;
+            white-space: nowrap;
+            align-items: center;
+        }
+
         .link-input {
             width: 250px;
+        }
+
+        .contributor-input {
+            width: 200px;
         }
 
         .team-input {
@@ -513,6 +532,43 @@
             return false;
         }
 
+        var addContributor = function() {
+            document.getElementsByClassName("contributor-edit-container")[0].style.display = "block";
+            document.getElementById("add-contributor").style.display = "none";
+            return false;
+        }
+
+        var saveContributor = function() {
+            var new_contributor_email = document.getElementById("new_contributor_email").value;
+            if (new_contributor_email == "") {
+                alert("Please enter an email address for the new contributor.");
+                return false;
+            }
+            var all_contributor_emails = document.getElementById("all_contributor_emails").value;
+            if (all_contributor_emails.indexOf(new_contributor_email) != -1) {
+                alert("\"" + new_contributor_email + "\" is already a contributor.");
+                return false;
+            }
+            if (!isValidEmail(new_contributor_email)) {
+                alert("Invalid email format.");
+                return false;
+            }
+            document.getElementById("update_contributors").value = "1";
+            document.getElementById("league_form").submit();
+            return true;
+        }
+
+        var cancelAddContributor = function() {
+            document.getElementsByClassName("contributor-edit-container")[0].style.display = "none";
+            document.getElementById("add-contributor").style.display = "block";
+            return false;
+        }
+
+        var isValidEmail = function(email) {
+            var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
         {% include 'templates/_auth.js' %}
     </script>
 </head>
@@ -545,7 +601,21 @@
             
         </h1>
         {% if league.owner %}
-            <p><i><b>Private league</b> (created by: <u>{{ league.owner.email }}</u>)</i></p>
+        <div class="contributor-container">
+            <div class="contributor-show-container">
+                <i><b>Private league</b> (created by: <u>{{ league.owner.email }}</u>{% if league.contributors | length > 0 %}; contributors: <u>{{ league.contributors|map(attribute='email')|join('</u>, <u>') }}</u>{% endif %})</i>
+            </div>
+            {% if league.owner.email == user.email %}
+            &nbsp;&nbsp;<button id="add-contributor" class="small-button" onclick="return addContributor()">Add&nbsp;contributor&nbsp;+</button>
+            <div class="contributor-edit-container">
+                <input type="text" id="new_contributor_email" name="new_contributor_email" class="contributor-input" value="">
+                <button class="small-button" onclick="return saveContributor()">Save&nbsp;💾</button>
+                <button class="small-button" onclick="return cancelAddContributor()">Cancel&nbsp;❌</button>
+            </div>
+            <input type="hidden" id="update_contributors" name="update_contributors" value="">
+            <input type="hidden" id="all_contributor_emails" value="{{ league.owner.email }}{% if league.contributors | length > 0 %},{{ league.contributors|map(attribute='email')|join(',') }}{% endif %}">
+            {% endif %}
+        </div>
         {% else %}
             <p><i><b>Public league</b> (anyone with the link can view and edit)</i></p>
         {% endif %}

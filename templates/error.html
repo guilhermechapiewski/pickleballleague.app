@@ -26,6 +26,6 @@
 <body>
     <h1>{{ title }}</h1>
     <p>{{ message }}</p>
-    <a href="/"><button class="primary-button">Home</button></a>
+    <a href="{% if action_url %}{{ action_url }}{% else %}/{% endif %}"><button class="primary-button">{% if action_name %}{{ action_name }}{% else %}Home{% endif %}</button></a>
 </body>
 </html>

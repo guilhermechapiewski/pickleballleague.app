@@ -5,3 +5,4 @@ __pycache__/
 *.pyc
 secret.py
 .DS_Store
+_dev_database/

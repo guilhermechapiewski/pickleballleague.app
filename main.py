@@ -141,7 +141,7 @@ def save_league():
             return template_engine.render("error", {
                 "title": "Error: Short link already exists",
                 "message": "The short link you are looking for already exists. Please check the URL and try again.",
-                "action_name": "Back",
+                "action_name": "Back to league",
                 "action_url": f"/league/{league_id}"
             })
         else:
@@ -154,7 +154,24 @@ def save_league():
     new_league_name = flask.request.form["new_league_name"]
     if new_league_name and update_league_name and update_league_name == "1" and new_league_name != "":
         league.name = new_league_name
-
+    
+    # now update the league contributors
+    update_contributors = flask.request.form["update_contributors"]
+    new_contributor_email = flask.request.form["new_contributor_email"]
+    if update_contributors and update_contributors == "1" and new_contributor_email and new_contributor_email != "":
+        contributor = UserRepository.get_user(new_contributor_email)
+        if contributor:
+            league.add_contributor(contributor)
+            contributor.add_league(league.id)
+            UserRepository.save_user(contributor)
+        else:
+            return template_engine.render("error", {
+                "title": "Error: User not found",
+                "message": f"The contributor you are trying to add (<i>{new_contributor_email}</i>) was not found in the user database.",
+                "action_name": "Back to league",
+                "action_url": f"/league/{league.id}"
+            })
+    
     # now update the league player names
     update_player_names = flask.request.form["update_player_names"]
     if update_player_names and update_player_names == "1":
@@ -417,15 +434,29 @@ def load_test_data():
     LeagueRepository.save_league(league)
     user.add_league(league.id)
 
+    # a very big league belonging with a contributor
+    other_user = User(email="other@example.com")
+
     league = League(name="W/L League with 11 players, 10 rounds", player_names="GC, Juliano, Fariba, Galina, Aline, Irina, Regina, Lana, Bruno, Igor, Yuri")
     league.generate_schedule(rounds=7)
     league.set_scoring_system(ScoringSystem.W_L)
     league.set_owner(user)
+    league.add_contributor(other_user)
     LeagueRepository.save_league(league)
     user.add_league(league.id)
 
     # finally, save the user to record all league associations
     UserRepository.save_user(user)
+    
+    other_league = League(name="League with 4 players, 3 rounds (other user owns it)", player_names="GC, Juliano, Fariba, Galina")
+    other_league.generate_schedule(rounds=3)
+    other_league.set_scoring_system(ScoringSystem.SCORE)
+    other_league.set_owner(other_user)
+    LeagueRepository.save_league(other_league)
+    other_user.add_league(other_league.id)
+
+    # save the other user too
+    UserRepository.save_user(other_user)
     
     return flask.redirect("/profile")
 

@@ -158,6 +158,7 @@ class League:
         self.scoring_system = ScoringSystem.NONE
         self.template = "ricky"
         self.owner = None
+        self.contributors = []
         self.short_link = None #string only
         
     def set_id(self, id: str):
@@ -316,17 +317,22 @@ class League:
     def set_owner(self, owner: User):
         self.owner = owner
     
+    def add_contributor(self, contributor: User):
+        self.contributors.append(contributor)
+    
     def to_object(self):
         return {
             "id": self.id,
             "name": self.name,
             "date_created": self.date_created,
             "owner": self.owner.to_object() if self.owner else None,
+            "contributors": [contributor.to_object() for contributor in self.contributors],
             "players": [player.to_object() for player in self.players],
             "schedule": [round.to_object() for round in self.schedule],
             "scoring_system": self.scoring_system.value,
             "template": self.template,
             "short_link": self.short_link if self.short_link else None
+            
         }
     
     @staticmethod
@@ -337,6 +343,9 @@ class League:
         if "owner" in object and object["owner"] is not None and "email" in object["owner"]:
             user = User(object["owner"]["email"])
             league.set_owner(user)
+        for contributor in object["contributors"]:
+            user = User(contributor["email"])
+            league.add_contributor(user)
         league.set_players([Player.from_object(player) for player in object["players"]])
         league.set_schedule([LeagueRound.from_object(round) for round in object["schedule"]])
         league.set_scoring_system(ScoringSystem(object["scoring_system"]))
