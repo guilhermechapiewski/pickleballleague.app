@@ -5,59 +5,194 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pickleball League App - Profile</title>
     <style>
+        :root {
+            --primary-color: #3b82f6;
+            --primary-hover: #2563eb;
+            --danger-color: #ffafaf;
+            --danger-hover: #dc2626;
+            --background-color: #f1f5f9;
+            --text-color: #0f172a;
+            --border-color: #e2e8f0;
+            --card-bg: #ffffff;
+        }
+
         body {
-            font-family: sans-serif;
-            margin: 50;
-            color: #000;
-            background: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            margin: 0;
+            padding: 2rem;
+            padding-top: 0rem;
+            color: var(--text-color);
+            background: var(--background-color);
+            min-height: 100vh;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 2rem;
+            color: var(--primary-color);
+            text-align: left;
+        }
+
+        h3 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            color: var(--text-color);
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+
+        h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: var(--primary-color);
+            border-radius: 2px;
         }
 
         .primary-button {
-            background: #ca0363;
-            color: #fff;
+            background: var(--primary-color);
+            color: white;
             border: none;
-            padding: 12px 24px;
-            font-size: 16px;
-            border-radius: 4px;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            border-radius: 0.75rem;
             cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2);
+            letter-spacing: 0.05em;
+        }
+
+        .primary-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px -1px rgba(79, 70, 229, 0.3);
+            background: var(--primary-hover);
         }
 
         .delete-button {
-            background: #fff4f4;
-            border: 1px solid #ffb6b6;
+            background: white;
+            border: 2px solid var(--danger-color);
+            color: var(--danger-color);
+            padding: 0.75rem;
+            border-radius: 0.5rem;
             cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .delete-button:hover {
+            background: var(--danger-color);
+            color: white;
+            transform: translateY(-2px);
         }
 
         .league-table {
-            border-collapse: collapse;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
-            background-color: white;
-            border-radius: 8px;
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background-color: var(--card-bg);
+            border-radius: 1rem;
             overflow: hidden;
-            border: 2px solid #3498db;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05),
+                       0 4px 6px -2px rgba(0, 0, 0, 0.03),
+                       0 0 0 1px rgba(0, 0, 0, 0.03);
+            margin: 1rem 0;
+            position: relative;
+        }
+        
+        .league-table::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 20px;
+            background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.02));
+            pointer-events: none;
         }
         
         .league-table th, .league-table td {
-            padding: 10px;
+            padding: 1.25rem;
             text-align: left;
-            border: 1px solid #ddd;
+            border-bottom: 1px solid var(--border-color);
         }
         
         .league-table th {
-            background-color: #2c3e50;
+            background: var(--primary-color);
             color: white;
-            font-weight: bold;
-            text-transform: uppercase;
-            font-size: 14px;
-            border: 1px solid #1a2530;
+            font-weight: 600;
+            font-size: 0.875rem;
         }
         
-        .league-table tr:nth-child(even) {
-            background-color: #f2f2f2;
+        .league-table tr:last-child td {
+            border-bottom: none;
         }
         
+        .league-table tr:hover td {
+            background-color: #f8fafc;
+            transform: scale(1.01);
+            transition: all 0.3s ease;
+        }
+
+        .league-table a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            display: inline-block;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .league-table a:hover {
+            color: var(--primary-hover);
+            text-decoration: none;
+        }
+
+        .league-table td {
+            transition: all 0.3s ease;
+        }
+
+        .league-table tr {
+            transition: all 0.3s ease;
+        }
+
         .league-table tr:hover {
-            background-color: #d4e6f1;
+            transform: translateY(-2px);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            background: var(--card-bg);
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin: 2rem 0;
+        }
+
+        .empty-state p {
+            font-size: 1.25rem;
+            color: #64748b;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .league-table th, .league-table td {
+                padding: 0.5rem;
+                font-size: 0.75rem;
+            }
+            
+            .league-table a {
+                max-width: 150px;
+                text-overflow: ellipsis;
+            }
         }
 
         {% include 'templates/_auth.css' %}

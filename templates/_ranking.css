@@ -1,0 +1,102 @@
+.ranking-container {
+    margin-top: 2rem;
+}
+
+.ranking-container h3 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    color: var(--text-color);
+    position: relative;
+    padding-bottom: 0.5rem;
+}
+
+.ranking-container h3::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 4px;
+    background: var(--primary-color);
+    border-radius: 2px;
+}
+
+.ranking-table {
+    width: 100%;
+    max-width: 800px;
+    margin: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+    background-color: var(--card-bg);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    position: relative;
+}
+
+.ranking-table::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 20px;
+    background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.02));
+    pointer-events: none;
+}
+
+.ranking-table th, .ranking-table td {
+    padding: 0.75rem;
+    text-align: center;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.ranking-table th {
+    background-color: var(--primary-color);
+    color: var(--card-bg);
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.ranking-table tr:nth-child(even) {
+    background-color: rgba(241, 245, 249, 0.3);
+}
+
+.ranking-table tr:hover {
+    background-color: rgba(241, 245, 249, 0.5);
+    transform: translateY(-1px);
+    transition: all 0.2s ease;
+}
+
+.ranking-table tr:first-child {
+    background-color: rgba(241, 245, 249, 0.5);
+    font-weight: 600;
+}
+
+@media print {
+    .ranking-table {
+        box-shadow: none;
+        border: 1px solid var(--border-color);
+    }
+    
+    .ranking-table th, .ranking-table td {
+        border: 1px solid var(--border-color);
+    }
+    
+    .ranking-table th {
+        background-color: rgba(59, 130, 246, 0.1) !important;
+        color: var(--text-color) !important;
+        border: 1px solid var(--border-color) !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    
+    .ranking-table tr:first-child {
+        background-color: rgba(241, 245, 249, 0.5) !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+} 

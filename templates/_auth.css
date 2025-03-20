@@ -1,117 +1,150 @@
+:root {
+    --primary-color: #3b82f6;
+    --primary-hover: #2563eb;
+    --danger-color: #ffafaf;
+    --danger-hover: #dc2626;
+    --background-color: #f1f5f9;
+    --text-color: #0f172a;
+    --border-color: #e2e8f0;
+    --card-bg: #ffffff;
+}
+
 button {
-    background: #fff;
-    color: #000;
+    background: var(--card-bg);
+    color: var(--text-color);
     border: none;
-    padding: 12px 24px;
-    font-size: 16px;
-    border-radius: 4px;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    border-radius: 0.375rem;
     cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .g_id_signin {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: 0.75rem;
+    right: 0.75rem;
     z-index: 100;
 }
 
 .loggedin-user-info {
     position: fixed;
-    top: 10px;
-    right: 10px;
+    top: 0.75rem;
+    right: 0.75rem;
     z-index: 101;
-    font-size: 12px;
-    color: #ffffff;
+    font-size: 0.75rem;
+    color: var(--card-bg);
     opacity: 1;
-    background-color: #ca0363;
-    padding: 10px 10px;
-    border-radius: 4px;
-    max-width: 250px;
+    background-color: var(--primary-color);
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.375rem;
+    max-width: 200px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     display: none;
     z-index: 9999;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .menu-container {
     position: relative;
 }
+
 .menu-button {
-    background: none;
+    background: var(--card-bg);
     border: none;
     cursor: pointer;
-    padding: 8px;
-    border-radius: 4px;
-    background-color: rgba(255, 255, 255, 0.9);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 0.375rem;
+    border-radius: 0.375rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     z-index: 10000;
+    transition: all 0.3s ease;
 }
+
+.menu-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 4px rgba(0, 0, 0, 0.1);
+}
+
 .hamburger {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 3px;
 }
+
 .hamburger span {
     display: block;
-    width: 20px;
+    width: 16px;
     height: 2px;
-    background-color: #333;
+    background-color: var(--text-color);
     transition: all 0.3s ease;
 }
+
 .menu-content {
     position: fixed;
-    top: 55px;
-    right: 10px;
-    background-color: #ca0363;
-    border-radius: 4px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    min-width: 120px;
+    top: 3rem;
+    right: 0.75rem;
+    background-color: var(--card-bg);
+    border-radius: 0.375rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 
+                0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    min-width: 140px;
     z-index: 10000;
-    padding: 4px 0;
+    padding: 0.375rem 0;
     transform-origin: top;
     transform: scaleY(0);
     opacity: 0;
     visibility: hidden;
-    transition: all 0.15s ease-out;
+    transition: all 0.2s ease-out;
+    border: 1px solid var(--border-color);
 }
+
 .menu-content.show {
     transform: scaleY(1);
     opacity: 1;
     visibility: visible;
 }
+
 .menu-item {
-    padding: 8px 12px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-    transform: translateY(-10px);
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+    transform: translateY(-8px);
     opacity: 0;
-    transition: all 0.15s ease-out;
+    transition: all 0.2s ease-out;
 }
+
 .menu-content.show .menu-item {
     transform: translateY(0);
     opacity: 1;
 }
+
 .menu-content.show .menu-item:nth-child(1) { transition-delay: 0.02s; }
 .menu-content.show .menu-item:nth-child(2) { transition-delay: 0.04s; }
 .menu-content.show .menu-item:nth-child(3) { transition-delay: 0.06s; }
+
 .menu-item:last-child {
     border-bottom: none;
 }
+
 .menu-item, .menu-item a {
-    color: white;
+    color: var(--text-color);
     text-decoration: none;
     display: block;
-    font-size: 12px;
+    font-size: 0.75rem;
+    transition: all 0.2s ease;
 }
 
 .menu-item a {
-    text-decoration: underline;
+    text-decoration: none;
 }
 
 .menu-item a:hover {
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--primary-color);
 }
 
 .menu-item span {
-    font-weight: bold;
+    font-weight: 600;
+    color: var(--primary-color);
 }

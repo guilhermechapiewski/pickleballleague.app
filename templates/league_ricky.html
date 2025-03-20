@@ -5,67 +5,168 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pickleball League App{% if league.name %} - {{ league.name }}{% endif %}</title>
     <style>
+        :root {
+            --primary-color: #3b82f6;
+            --primary-hover: #2563eb;
+            --danger-color: #ffafaf;
+            --danger-hover: #dc2626;
+            --background-color: #f1f5f9;
+            --text-color: #0f172a;
+            --border-color: #e2e8f0;
+            --card-bg: #ffffff;
+            --success-color: #90EE90;
+            --error-color: #FFCCCB;
+        }
+
         body {
-            font-family: sans-serif;
-            color: #333;
-            padding: 10px;
-            background-color: #f9f9f9;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            color: var(--text-color);
+            padding: 1rem;
+            padding-top: 0rem;
+            background-color: var(--background-color);
+            min-height: 100vh;
         }
         
         h1 {
-            color: #2c3e50;
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 2rem;
+            color: var(--primary-color);
             text-align: left;
-            font-size: 32px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 0.75rem;
+        }
+
+        h3 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-color);
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+
+        h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: var(--primary-color);
+            border-radius: 2px;
         }
 
         p {
-            font-size: 12px;
+            font-size: 0.875rem;
+            color: var(--text-color);
+            opacity: 0.8;
+            margin-bottom: 0.5rem;
+        }
+
+        a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-weight: 500;
         }
 
         .small-button {
-            font-size: 12px;
-            background-color: #2c3e50;
-            color: white;
+            font-size: 0.75rem;
+            background-color: #1e293b;
+            color: #ffffff;
             border: none;
-            padding: 5px 10px;
+            padding: 0.375rem 0.5rem;
+            border-radius: 0.25rem;
             cursor: pointer;
-        }
-
-        #edit-players {
-            border: 1px solid #ffffff;
-        }
-
-        #edit-save-players, #edit-cancel-players {
-            visibility: hidden;
-            border: 1px solid #ffffff;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            transform: translateY(0);
+            position: relative;
+            overflow: visible;
+            font-weight: 600;
+            letter-spacing: 0.02em;
         }
 
         .small-button:hover {
-            background-color: #1a2530;
-        }
-
-        .small-button:active {
-            background-color: #00881e;
+            box-shadow: 0 2px 3px rgba(0, 0, 0, 0.15);
+            background-color: #0f172a;
         }
 
         .link-container {
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 0.375rem;
             width: 100%; 
             overflow-x: auto;
+            font-size: 0.875rem;
+            font-style: italic;
+            padding: 0.75rem 1rem;
+            position: relative;
+            background-color: var(--card-bg);
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            margin-bottom: 1rem;
+        }
+
+        .link-container::before {
+            content: "";
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 6px;
+            height: 6px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
         }
 
         .link-show-container {
-            font-size: 12px;
+            font-size: 0.875rem;
             display: block;
             max-width: 500px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            margin-left: 1.5rem;
+        }
+
+        .link-container b {
+            margin-left: 1.5rem;
+        }
+
+        .contributor-container {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            width: 100%; 
+            overflow-x: auto;
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-bottom: 1rem;
+            padding: 0.75rem 1rem;
+            position: relative;
+            background-color: var(--card-bg);
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .contributor-container::before {
+            content: "";
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 6px;
+            height: 6px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+
+        .contributor-show-container {
+            margin-left: 1.5rem;
         }
 
         .name-show-container {
@@ -77,17 +178,12 @@
             display: block;
         }
 
-        .contributor-container {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            width: 100%; 
-            overflow-x: auto;
-            font-size: 12px;
+        #edit-save-players, #edit-cancel-players {
+            visibility: hidden;
         }
 
         .link-edit-container {
-            font-size: 12px;
+            font-size: 0.875rem;
             display: none;
         }
 
@@ -108,139 +204,165 @@
 
         .link-input {
             width: 250px;
+            padding: 0.375rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
         }
 
         .contributor-input {
             width: 200px;
+            padding: 0.375rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
         }
 
         .team-input {
             width: 50px;
+            padding: 0.25rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
         }
 
         .players-out-input {
             width: 200px;
+            padding: 0.25rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
         }
 
         .name-input {
-            width: 350px;
-            font-size: 32px;
-            font-weight: bold;
+            width: 400px;
+            font-size: 2rem;
+            font-weight: 700;
+            padding: 0.375rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.25rem;
         }
         
         .league-table {
             width: 100%;
-            border-collapse: collapse;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
-            background-color: white;
-            border-radius: 8px;
+            border-collapse: separate;
+            border-spacing: 0;
+            background-color: var(--card-bg);
+            border-radius: 0.5rem;
             overflow: hidden;
-            border: 2px solid #3498db;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            margin: 0.5rem 0;
+            position: relative;
         }
         
         .league-table th, .league-table td {
-            padding: 5px 5px;
+            padding: 0.5rem;
             text-align: center;
-            border: 1px solid #ddd;
+            border-bottom: 1px solid var(--border-color);
         }
         
         .league-table th {
-            background-color: #2c3e50;
-            color: white;
-            font-weight: bold;
+            background-color: var(--primary-color);
+            color: var(--card-bg);
+            font-weight: 600;
+            font-size: 0.75rem;
             text-transform: uppercase;
-            font-size: 14px;
-            border: 1px solid #1a2530;
+            letter-spacing: 0.05em;
         }
         
         .league-table tr:nth-child(even) {
-            background-color: #f2f2f2;
+            background-color: rgba(241, 245, 249, 0.3);
         }
         
         .league-table tr:hover {
-            background-color: #d4e6f1;
+            background-color: rgba(241, 245, 249, 0.5);
         }
         
         .round-cell {
             text-align: left;
-            background-color: #d6eaf8;
-            border-right: 2px solid #3498db !important;
-            padding: 5px 5px;
+            background-color: rgba(30, 64, 175, 0.08);
+            border-right: 1px solid var(--border-color) !important;
+            padding: 0.5rem;
             line-height: 1.4;
             white-space: nowrap;
         }
         
         .round-number {
-            font-weight: bold;
-            color: #2c3e50;
-            margin-bottom: 5px;
-            font-size: 15px;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 0.25rem;
+            font-size: 0.75rem;
         }
         
         .match {
-            margin-bottom: 4px;
+            margin-bottom: 0.125rem;
         }
         
         .team {
             display: inline-block;
-            background-color: #f8f9fa;
-            padding: 1px 6px;
-            border-radius: 3px;
-            margin: 1px;
-            border: 1px solid #bdc3c7;
-            font-size: 13px;
+            background-color: var(--card-bg);
+            padding: 0.125rem 0.375rem;
+            border-radius: 0.125rem;
+            margin: 0.125rem;
+            border: 1px solid var(--border-color);
+            font-size: 0.75rem;
         }
         
         .vs {
-            font-weight: bold;
-            color: #34495e;
-            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-color);
+            opacity: 0.7;
+            font-size: 0.75rem;
         }
         
         .players-out {
-            margin-top: 5px;
-            font-size: 11px;
-            color: #34495e;
-            font-weight: 500;
+            margin-top: 0.25rem;
+            font-size: 0.75rem;
+            color: var(--text-color);
+            opacity: 0.7;
         }
         
         .players-out-label {
-            font-weight: bold;
+            font-weight: 600;
         }
         
         .footer {
-            margin-top: 20px;
+            margin-top: 1rem;
             text-align: center;
         }
         
         .footer a {
             display: inline-block;
-            margin: 0 10px;
-            padding: 8px 16px;
-            background-color: #2c3e50;
-            color: white;
+            margin: 0 0.375rem;
+            padding: 0.5rem 1rem;
+            background-color: #1e293b;
+            color: #ffffff;
             text-decoration: none;
-            border-radius: 4px;
-            transition: background-color 0.3s;
+            border-radius: 0.25rem;
+            transition: all 0.2s ease;
+            font-size: 0.75rem;
+            font-weight: 700;
         }
         
         .footer a:hover {
-            background-color: #1a2530;
+            background-color: #0f172a;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 3px rgba(0, 0, 0, 0.15);
         }
         
         @media print {
             body {
-                background-color: white;
+                background-color: var(--card-bg);
                 padding: 0;
             }
             
             .league-table {
                 box-shadow: none;
-                border: 1px solid #000;
+                border: 1px solid var(--border-color);
             }
             
             .league-table th, .league-table td {
-                border: 1px solid #000;
+                border: 1px solid var(--border-color);
             }
             
             .footer {
@@ -248,27 +370,27 @@
             }
             
             .league-table th {
-                background-color: #d6eaf8 !important;
-                color: #000 !important;
-                border: 1px solid #000 !important;
+                background-color: rgba(30, 64, 175, 0.1) !important;
+                color: var(--text-color) !important;
+                border: 1px solid var(--border-color) !important;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
             
             .round-cell {
-                background-color: #f2f2f2 !important;
-                border-right: 2px solid #000 !important;
+                background-color: rgba(30, 64, 175, 0.08) !important;
+                border-right: 1px solid var(--border-color) !important;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
             
             .team {
-                border: 1px solid #000;
+                border: 1px solid var(--border-color);
             }
         }
     
         {% if league.scoring_system.value != 'none' %}
-            {% include 'templates/_ranking_styles.css' %}
+            {% include 'templates/_ranking.css' %}
         {% endif %}
 
         {% include 'templates/_auth.css' %}
@@ -579,7 +701,7 @@
     <div class="container">
         <h1>
             {% if league.name %}
-                <div class="name-show-container">{{ league.name }} (created on {{ league.date_created }})
+                <div class="name-show-container">{{ league.name }}
                 {% if (league.owner and league.owner.email == user.email) or not league.owner %}
                     <button id="edit-name" class="small-button" onclick="return editName()">Edit&nbsp;name&nbsp;✎</button>
                 {% endif %}
@@ -600,6 +722,7 @@
             </div>
             
         </h1>
+        <h3>League details</h3>
         {% if league.owner %}
         <div class="contributor-container">
             <div class="contributor-show-container">
@@ -617,20 +740,20 @@
             {% endif %}
         </div>
         {% else %}
+        <div class="contributor-container">
             <p><i><b>Public league</b> (anyone with the link can view and edit)</i></p>
+        </div>
         {% endif %}
-        <p>
-            <div class="link-container">
-                <b>Link:</b> 
-                <div class="link-show-container"><a href="http://{{ domain_name }}/league/{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}">https://{{ domain_name }}/league/{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}</a></div>
-                <div class="link-edit-container">http://{{ domain_name }}/league/<input type="text" id="new_league_id" name="new_league_id" class="link-input" value="{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}"><input type="hidden" id="original_league_id" name="original_league_id" value="{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}"><input type="hidden" id="update_league_id" name="update_league_id" value=""> <button class="small-button" onclick="return saveLink()">Save 💾</button> <button class="small-button" onclick="return cancelEditLink()">Cancel ❌</button></div>
-                &nbsp;&nbsp;
-                <button id="copy-link" class="small-button" onclick="return copyLink('http://{{ domain_name }}/league/{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}');">Copy&nbsp;🔗</button>
-                {% if league.owner and league.owner.email == user.email %}
-                    <button id="edit-link" class="small-button" onclick="return editLink();">Edit&nbsp;link&nbsp;✎</button>
-                {% endif %}
-            </div>
-        </p>
+        <div class="link-container">
+            <b>Link:</b>
+            <div class="link-show-container"><a href="http://{{ domain_name }}/league/{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}">https://{{ domain_name }}/league/{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}</a></div>
+            <div class="link-edit-container">http://{{ domain_name }}/league/<input type="text" id="new_league_id" name="new_league_id" class="link-input" value="{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}"><input type="hidden" id="original_league_id" name="original_league_id" value="{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}"><input type="hidden" id="update_league_id" name="update_league_id" value=""> <button class="small-button" onclick="return saveLink()">Save 💾</button> <button class="small-button" onclick="return cancelEditLink()">Cancel ❌</button></div>
+            &nbsp;&nbsp;
+            <button id="copy-link" class="small-button" onclick="return copyLink('http://{{ domain_name }}/league/{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}');">Copy&nbsp;🔗</button>
+            {% if league.owner and league.owner.email == user.email %}
+                <button id="edit-link" class="small-button" onclick="return editLink();">Edit&nbsp;link&nbsp;✎</button>
+            {% endif %}
+        </div>
         <div style="width: 100%; overflow-x: auto;">
             <table class="league-table">
                 <thead>
