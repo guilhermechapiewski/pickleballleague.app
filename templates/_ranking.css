@@ -2,26 +2,6 @@
     margin-top: 2rem;
 }
 
-.ranking-container h3 {
-    font-size: 1.75rem;
-    font-weight: 700;
-    margin-bottom: 2rem;
-    color: var(--text-color);
-    position: relative;
-    padding-bottom: 0.5rem;
-}
-
-.ranking-container h3::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 60px;
-    height: 4px;
-    background: var(--primary-color);
-    border-radius: 2px;
-}
-
 .ranking-table {
     width: 100%;
     max-width: 800px;
