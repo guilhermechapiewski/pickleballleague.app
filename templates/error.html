@@ -5,31 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pickleball League App - Error - {{ title }}</title>
     <style>
-        :root {
-            --primary-color: #3b82f6;
-            --primary-hover: #2563eb;
-            --danger-color: #ffafaf;
-            --danger-hover: #dc2626;
-            --background-color: #f1f5f9;
-            --text-color: #0f172a;
-            --border-color: #e2e8f0;
-            --card-bg: #ffffff;
-        }
+        {% include 'templates/_internal_pages.css' %}
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            padding: 0.25rem;
-            padding-top: 1rem;
-            color: var(--text-color);
-            background-color: #e5e5f7;
-            background-image: repeating-linear-gradient(45deg, #d7d7d7 0, #d7d7d7 1px, #e5e5f7 0, #e5e5f7 50%);
-            background-size: 10px 10px;
-            background-position: 0 0, 0 20px, 20px -20px, -20px 0px;
-            min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            opacity: 0.9;
         }
 
         .error-container {
@@ -44,40 +25,12 @@
             text-align: center;
         }
 
-        h1 {
-            font-size: 2rem;
-            font-weight: 800;
-            margin-bottom: 1rem;
-            color: var(--primary-color);
-        }
-
         p {
             font-size: 1rem;
             color: var(--text-color);
             opacity: 0.8;
             margin-bottom: 2rem;
             line-height: 1.5;
-        }
-
-        .primary-button {
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            font-size: 1rem;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            font-weight: 600;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .primary-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            background: var(--primary-hover);
         }
     </style>
 </head>
