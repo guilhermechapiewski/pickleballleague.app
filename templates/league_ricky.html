@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>Pickleball League App{% if league.name %} - {{ league.name }}{% endif %}</title>
     <style>
         {% include 'templates/_main.css' %}
@@ -39,14 +39,7 @@
         .contributor-show-container, .link-show-container {
             margin-left: 1.5rem;
             white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            font-size: 0.75rem;
-        }
-
-        .link-container b {
-            margin-left: 1.5rem;
-            font-size: 0.75rem;
+            text-align: left;
         }
 
         .name-show-container {
@@ -64,6 +57,7 @@
 
         .link-edit-container {
             display: none;
+            white-space: nowrap;
         }
 
         .name-edit-container {
@@ -150,11 +144,11 @@
         }
         
         .league-table tr:nth-child(even) {
-            background-color: rgba(241, 245, 249, 0.3);
+            background-color: rgba(241, 245, 249, 0.75);
         }
         
         .league-table tr:hover {
-            background-color: rgba(241, 245, 249, 0.5);
+            background-color: rgba(241, 245, 249, 1);
         }
         
         .round-cell {
@@ -219,6 +213,10 @@
                 background-color: var(--card-bg);
                 padding: 0;
             }
+
+            .contributor-container, .link-container {
+                width: 98%;
+            }
             
             .league-table {
                 box-shadow: none;
@@ -250,6 +248,13 @@
             
             .team {
                 border: 1px solid var(--border-color);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .contributor-container, .link-container {
+                font-size: 10px;
+                width: 96%;
             }
         }
     
@@ -605,15 +610,24 @@
         </div>
         {% else %}
         <div class="contributor-container">
-            <p><i><b>Public league</b> (anyone with the link can view and edit)</i></p>
+            <div class="contributor-show-container">
+                <p><i><b>Public league</b> (anyone with the link can view and edit)</i></p>
+            </div>
         </div>
         {% endif %}
         <div class="link-container">
-            <b>Link:</b>
-            <div class="link-show-container"><a href="http://{{ domain_name }}/league/{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}">https://{{ domain_name }}/league/{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}</a></div>
-            <div class="link-edit-container">http://{{ domain_name }}/league/<input type="text" id="new_league_id" name="new_league_id" class="link-input" value="{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}"><input type="hidden" id="original_league_id" name="original_league_id" value="{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}"><input type="hidden" id="update_league_id" name="update_league_id" value=""> <button class="small-button" onclick="return saveLink()">Save 💾</button> <button class="small-button" onclick="return cancelEditLink()">Cancel ❌</button></div>
+            <div class="link-show-container">
+                <b>Link:</b> <a href="http://{{ domain_name }}/league/{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}">https://{{ domain_name }}/league/{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}</a>
+            </div>
+            <div class="link-edit-container">
+                <b>Link:</b> http://{{ domain_name }}/league/<input type="text" id="new_league_id" name="new_league_id" class="link-input" value="{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}">
+                <input type="hidden" id="original_league_id" name="original_league_id" value="{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}">
+                <input type="hidden" id="update_league_id" name="update_league_id" value="">
+                <button class="small-button" onclick="return saveLink()">Save 💾</button>
+                <button class="small-button" onclick="return cancelEditLink()">Cancel ❌</button>
+            </div>
             &nbsp;&nbsp;
-            <button id="copy-link" class="small-button" onclick="return copyLink('http://{{ domain_name }}/league/{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}');">Copy link</button>
+            <button id="copy-link" class="small-button" onclick="return copyLink('http://{{ domain_name }}/league/{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}');">Copy&nbsp;link</button>
             {% if league.owner and league.owner.email == user.email %}
                 <button id="edit-link" class="small-button" onclick="return editLink();">Edit&nbsp;link&nbsp;✎</button>
             {% endif %}

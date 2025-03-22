@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>Pickleball League App - Profile</title>
     <style>
         {% include 'templates/_main.css' %}
@@ -24,7 +24,6 @@
         .delete-button:hover {
             background: var(--danger-color);
             color: white;
-            transform: translateY(-2px);
         }
 
         .league-table {
@@ -52,7 +51,7 @@
         }
         
         .league-table th, .league-table td {
-            padding: 1.25rem;
+            padding: 1rem;
             text-align: left;
             border-bottom: 1px solid var(--border-color);
         }
@@ -61,11 +60,14 @@
             background: var(--primary-color);
             color: white;
             font-weight: 600;
-            font-size: 0.875rem;
+            padding: 0.5rem;
+            font-size: 0.75rem;
+            text-transform: uppercase;
         }
         
         .league-table tr:last-child td {
             border-bottom: none;
+            white-space: nowrap;
         }
         
         .league-table tr:hover td {
@@ -90,42 +92,15 @@
         }
 
         .league-table td {
-            transition: all 0.3s ease;
+            font-size: 0.875rem;
         }
 
-        .league-table tr {
-            transition: all 0.3s ease;
+        .league-table tr:nth-child(even) {
+            background-color: rgba(241, 245, 249, 0.75);
         }
 
         .league-table tr:hover {
-            transform: translateY(-2px);
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 3rem;
-            background: var(--card-bg);
-            border-radius: 1rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            margin: 2rem 0;
-        }
-
-        .empty-state p {
-            font-size: 1.25rem;
-            color: #64748b;
-            margin-bottom: 1.5rem;
-        }
-
-        @media (max-width: 768px) {
-            .league-table th, .league-table td {
-                padding: 0.5rem;
-                font-size: 0.75rem;
-            }
-            
-            .league-table a {
-                max-width: 150px;
-                text-overflow: ellipsis;
-            }
+            background-color: rgba(241, 245, 249, 1);
         }
 
         {% include 'templates/_auth.css' %}
@@ -150,12 +125,12 @@
         <table class="league-table">
             <thead>
                 <tr>
-                    <th style="text-align: left; padding: 8px; border-bottom: 1px solid #ddd;">League Name</th>
-                    <th style="text-align: left; padding: 8px; border-bottom: 1px solid #ddd;">Link</th>
-                    <th style="text-align: left; padding: 8px; border-bottom: 1px solid #ddd;">Scoring System</th>
-                    <th style="text-align: left; padding: 8px; border-bottom: 1px solid #ddd;">Players</th>
-                    <th style="text-align: left; padding: 8px; border-bottom: 1px solid #ddd;">Created On</th>
-                    <th style="text-align: left; padding: 8px; border-bottom: 1px solid #ddd;">Actions</th>
+                    <th>League Name</th>
+                    <th>Link</th>
+                    <th>Scoring System</th>
+                    <th>Players</th>
+                    <th>Created On</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -163,7 +138,7 @@
                 <tr>
                     <td style="padding: 8px; border-bottom: 1px solid #ddd;">{% if league.name %}{{ league.name }}{% else %}Unnamed league{% endif %}</td>
                     <td style="padding: 8px; border-bottom: 1px solid #ddd;">
-                        <a href="http://{{ domain_name }}/league/{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}">http://{{ domain_name }}/league/{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}</a>
+                        <a href="http://{{ domain_name }}/league/{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}">http://{{ domain_name }}/league/<br>{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}</a>
                     </td>
                     <td style="padding: 8px; border-bottom: 1px solid #ddd;">{% if league.scoring_system.value == "score" %}Full scores{% elif league.scoring_system.value == "w_l" %}W/L only{% else %}{{ league.scoring_system.value }}{% endif %}</td>
                     <td style="padding: 8px; border-bottom: 1px solid #ddd;">{% for player in league.players %}{{ player.name }}{% if not loop.last %}, {% endif %}{% endfor %}</td>
