@@ -2,8 +2,8 @@ import os
 import logging
 import flask
 from app.template import TemplateEngine
-from app.pickleball import League, ScoringSystem, Player
-from app.db import DevLocalDB, LeagueRepository, UserRepository, ShortLinkRepository
+from app.pickleball import League, ScoringSystem, Player, Series
+from app.db import DevLocalDB, LeagueRepository, UserRepository, ShortLinkRepository, SeriesRepository
 from app.user import User
 from app.links import ShortLink
 
@@ -121,6 +121,7 @@ def create_league():
 
 @app.route("/save_league", methods=["POST"])
 def save_league():
+    user = get_auth_user()
     league_id = flask.request.form.get("league_id")
     
     # first check if the short link exists
@@ -139,6 +140,8 @@ def save_league():
         if short_link:
             logger.error(f"Short link already exists: {new_league_id}")
             return template_engine.render("error", {
+                "dev_environment": DEV_ENVIRONMENT,
+                "user": user,
                 "title": "Error: Short link already exists",
                 "message": "The short link you are looking for already exists. Please check the URL and try again.",
                 "action_name": "Back to league",
@@ -166,6 +169,8 @@ def save_league():
             UserRepository.save_user(contributor)
         else:
             return template_engine.render("error", {
+                "dev_environment": DEV_ENVIRONMENT,
+                "user": user,
                 "title": "Error: User not found",
                 "message": f"The contributor you are trying to add (<i>{new_contributor_email}</i>) was not found in the user database.",
                 "action_name": "Back to league",
@@ -337,8 +342,32 @@ def league(league_id):
     except Exception as e:
         logger.error(f"Error: {e}")
         return template_engine.render("error", {
+            "dev_environment": DEV_ENVIRONMENT,
+            "user": user,
             "title": "Error: League not found",
             "message": "The league you are looking for does not exist. Please check the URL and try again."
+        })
+
+@app.route("/series/<series_id>")
+def series(series_id):
+    user = get_auth_user()
+    try:
+        # retrieve series
+        series = SeriesRepository.get_series(series_id)
+        return template_engine.render(f"series", {
+            "series": series,
+            "user": user,
+            "dev_environment": DEV_ENVIRONMENT,
+            "domain_name": flask.request.host
+        })
+    except Exception as e:
+        logger.error(f"Error: {e}")
+        logger.exception(e)
+        return template_engine.render("error", {
+            "dev_environment": DEV_ENVIRONMENT,
+            "user": user,
+            "title": "Error: Series not found",
+            "message": "The series you are looking for does not exist. Please check the URL and try again."
         })
 
 @app.route("/league/<league_id>/delete")
@@ -354,11 +383,15 @@ def delete_league(league_id):
             return flask.redirect("/profile")
         else:
             return template_engine.render("error", {
+                "dev_environment": DEV_ENVIRONMENT,
+                "user": user,
                 "title": "Error: League not found",
                 "message": "You are not the owner of this league."
             })
     else:
         return template_engine.render("error", {
+            "dev_environment": DEV_ENVIRONMENT,
+            "user": user,
             "title": "Error: League not found",
             "message": "The league you are trying to delete does not exist."
         })
@@ -369,6 +402,8 @@ def profile():
 
     if not user:
         return template_engine.render("error", {
+            "dev_environment": DEV_ENVIRONMENT,
+            "user": user,
             "title": "Error: Not logged in",
             "message": "Please sign in to view your profile."
         })
@@ -380,12 +415,18 @@ def profile():
     for league_id in user.league_ids:
         league = LeagueRepository.get_league(league_id)
         leagues.append(league)
+    
+    series = []
+    for series_id in user.series_ids:
+        a_series = SeriesRepository.get_series(series_id)
+        series.append(a_series)
 
     logger.info(f"User: {user.to_object()}")
     return template_engine.render("profile", {
         "dev_environment": DEV_ENVIRONMENT, 
         "user": user, 
         "leagues": leagues,
+        "series": series,
         "domain_name": flask.request.host
     })
 
@@ -393,6 +434,8 @@ def profile():
 def load_test_data():
     if not DEV_ENVIRONMENT:
         return template_engine.render("error", {
+            "dev_environment": DEV_ENVIRONMENT,
+            "user": user,
             "title": "Error",
             "message": "This feature is only available in the development environment."
         })
@@ -400,6 +443,8 @@ def load_test_data():
     user = get_auth_user()
     if not user:
         return template_engine.render("error", {
+            "dev_environment": DEV_ENVIRONMENT,
+            "user": user,
             "title": "Error",
             "message": "Please sign in to load test data."
         })
@@ -420,20 +465,27 @@ def load_test_data():
     LeagueRepository.save_league(league)
     user.add_league(league.id)
     
-    league = League(name="League with 6 players, 5 rounds", player_names="GC, Juliano, Fariba, Galina, Aline, Irina")
-    league.generate_schedule(rounds=5)
-    league.set_scoring_system(ScoringSystem.SCORE)
-    league.set_owner(user)
-    LeagueRepository.save_league(league)
-    user.add_league(league.id)
+    league_in_series1 = League(name="League with 6 players, 5 rounds", player_names="GC, Juliano, Fariba, Galina, Aline, Irina")
+    league_in_series1.generate_schedule(rounds=5)
+    league_in_series1.set_scoring_system(ScoringSystem.SCORE)
+    league_in_series1.set_owner(user)
+    LeagueRepository.save_league(league_in_series1)
+    user.add_league(league_in_series1.id)
 
-    league = League(name="League with 9 players, 7 rounds", player_names="GC, Juliano, Fariba, Galina, Aline, Irina, Regina, Lana, Raquel")
-    league.generate_schedule(rounds=7)
-    league.set_scoring_system(ScoringSystem.SCORE)
-    league.set_owner(user)
-    LeagueRepository.save_league(league)
-    user.add_league(league.id)
+    league_in_series2 = League(name="League with 9 players, 7 rounds", player_names="GC, Juliano, Fariba, Galina, Aline, Irina, Regina, Lana, Raquel")
+    league_in_series2.generate_schedule(rounds=7)
+    league_in_series2.set_scoring_system(ScoringSystem.SCORE)
+    league_in_series2.set_owner(user)
+    LeagueRepository.save_league(league_in_series2)
+    user.add_league(league_in_series2.id)
 
+    series = Series(name="Series with 2 leagues")
+    series.add_league(league_in_series1)
+    series.add_league(league_in_series2)
+    series.set_owner(user)
+    SeriesRepository.save_series(series)
+    user.add_series(series.id)
+    
     # a very big league belonging with a contributor
     other_user = User(email="other@example.com")
 
@@ -463,7 +515,10 @@ def load_test_data():
 @app.route("/dev-clear-db")
 def clear_db():
     if not DEV_ENVIRONMENT:
+        user = get_auth_user()
         return template_engine.render("error", {
+            "dev_environment": DEV_ENVIRONMENT,
+            "user": user,
             "title": "Error",
             "message": "This feature is only available in the development environment."
         })

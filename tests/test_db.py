@@ -1,8 +1,28 @@
 import unittest
-from app.db import LeagueRepository, UserRepository, ShortLinkRepository
-from app.pickleball import League
+from app.db import LeagueRepository, UserRepository, ShortLinkRepository, DevLocalDB, SeriesRepository
+from app.pickleball import League, Series
 from app.user import User
 from app.links import ShortLink
+
+class TestDevLocalDB(unittest.TestCase):
+    def test_save_and_get_object(self):
+        DevLocalDB.save_object(League, "123-abc-456", League(name="Test League", player_names="John, Jane, Jim, Jill").to_object())
+        retrieved_league = League.from_object(DevLocalDB.get_object(League, "123-abc-456"))
+        self.assertEqual(retrieved_league.name, "Test League")
+
+    def test_delete_object(self):
+        DevLocalDB.save_object(League, "123-abc-456", League(name="Test League", player_names="John, Jane, Jim, Jill").to_object())
+        DevLocalDB.delete_object(League, "123-abc-456")
+        retrieved_league = DevLocalDB.get_object(League, "123-abc-456")
+        self.assertIsNone(retrieved_league)
+
+    def test_clear_db(self):
+        DevLocalDB.save_object(League, "123-abc-456", League(name="Test League", player_names="John, Jane, Jim, Jill").to_object())
+        retrieved_league = DevLocalDB.get_object(League, "123-abc-456")
+        self.assertIsNotNone(retrieved_league)
+        DevLocalDB.clear_db()
+        retrieved_league = DevLocalDB.get_object(League, "123-abc-456")
+        self.assertIsNone(retrieved_league)
 
 class TestLeagueRepository(unittest.TestCase):
     def test_save_and_get_league(self):
@@ -42,6 +62,44 @@ class TestLeagueRepository(unittest.TestCase):
 
         retrieved_deleted_league = LeagueRepository.get_league(league.id)
         self.assertIsNone(retrieved_deleted_league)
+
+class TestSeriesRepository(unittest.TestCase):
+    def test_save_and_get_series(self):
+        series_name = "Test Series"
+        series = Series(name=series_name)
+        series_id = series.id
+
+        SeriesRepository.save_series(series)
+        
+        retrieved_series = SeriesRepository.get_series(series_id)
+
+        self.assertEqual(retrieved_series.name, series_name)
+        self.assertEqual(retrieved_series.league_ids, [])
+        self.assertEqual(retrieved_series.scoring_system.value, "score")
+    
+    def test_get_series_that_does_not_exist(self):
+        series = SeriesRepository.get_series("non-existent-id")
+        self.assertIsNone(series)
+    
+    def test_delete_series(self):
+        series = Series(name="Test Series")
+        user = User(google_id="123", email="test@test.com")
+        user.add_series(series.id)
+        series.owner = user
+        SeriesRepository.save_series(series)
+        UserRepository.save_user(user)
+
+        retrieved_series = SeriesRepository.get_series(series.id)
+        retrieved_user = UserRepository.get_user(user.email)
+
+        self.assertEqual(retrieved_series.name, series.name)
+        self.assertEqual(retrieved_series.owner.email, user.email)
+        self.assertEqual(retrieved_user.series_ids, [series.id])
+
+        SeriesRepository.delete_series(series.id)
+
+        retrieved_deleted_series = SeriesRepository.get_series(series.id)
+        self.assertIsNone(retrieved_deleted_series)
     
 class TestUserRepository(unittest.TestCase):
     def test_save_and_get_user(self):
@@ -74,6 +132,23 @@ class TestUserRepository(unittest.TestCase):
         self.assertEqual(retrieved_user.google_id, "123")
         self.assertEqual(retrieved_user.email, "test@test.com")
         self.assertEqual(retrieved_user.league_ids, ["123-abc-456", "456-def-789"])
+
+    def test_save_and_get_user_with_series(self):
+        user = User(google_id="123", email="test@test.com")
+        user_id = user.id
+        user.add_series("123-abc-456")
+        user.add_series("456-def-789")
+
+        UserRepository.save_user(user)
+        
+        retrieved_user = UserRepository.get_user("test@test.com")
+
+        print(retrieved_user.to_object())
+
+        self.assertEqual(retrieved_user.id, user_id)
+        self.assertEqual(retrieved_user.google_id, "123")
+        self.assertEqual(retrieved_user.email, "test@test.com")
+        self.assertEqual(retrieved_user.series_ids, ["123-abc-456", "456-def-789"])
 
     def test_get_user_that_does_not_exist(self):
         user = UserRepository.get_user("non-existent-id")

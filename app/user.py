@@ -6,7 +6,8 @@ class User:
         self.google_id = google_id
         self.email = email
         self.league_ids = []
-
+        self.series_ids = []
+    
     def add_league(self, league_id: str):
         self.league_ids.append(league_id)
 
@@ -15,13 +16,23 @@ class User:
     
     def remove_league(self, league_id: str):
         self.league_ids.remove(league_id)
+
+    def add_series(self, series_id: str):
+        self.series_ids.append(series_id)
+
+    def get_series(self):
+        return self.series_ids
+    
+    def remove_series(self, series_id: str):
+        self.series_ids.remove(series_id)
     
     def to_object(self):
         return {
             "id": self.id,
             "google_id": self.google_id,
             "email": self.email,
-            "league_ids": self.league_ids
+            "league_ids": self.league_ids,
+            "series_ids": self.series_ids
         }
 
     @staticmethod
@@ -33,4 +44,7 @@ class User:
         if "league_ids" in object and object["league_ids"] is not None:
             for league_id in object["league_ids"]:
                 user.add_league(league_id)
+        if "series_ids" in object and object["series_ids"] is not None:
+            for series_id in object["series_ids"]:
+                user.add_series(series_id)
         return user

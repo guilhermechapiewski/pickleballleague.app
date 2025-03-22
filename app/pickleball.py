@@ -184,6 +184,9 @@ class League:
     
     def add_round(self, round: LeagueRound):
         self.schedule.append(round)
+    
+    def number_of_matches(self):
+        return sum([round.number_of_matches() for round in self.schedule])
 
     def calculate_max_possible_unique_pairs(self):
         n = len(self.players)
@@ -358,3 +361,112 @@ class League:
         if "short_link" in object and object["short_link"] is not None:
             league.set_short_link(object["short_link"])
         return league
+    
+class Series:
+    def __init__(self, name: str=""):
+        self.id = str(uuid.uuid4())
+        self.name = name
+        self.league_ids = []
+        self.scoring_system = ScoringSystem.SCORE
+        self.owner = None
+        self.contributors = []
+    
+    def set_id(self, id: str):
+        self.id = id
+
+    def add_league(self, league: League):
+        if type(league) != League:
+            raise ValueError("League parameter must be a League object")
+        if league.id is None or len(league.id) == "":
+            raise ValueError("League ID cannot be empty")
+        if league.id in self.league_ids:
+            raise ValueError("League ID already exists in series")
+        if league.scoring_system != self.scoring_system:
+            raise ValueError("Leagues in a series must have the same scoring system")
+        self.league_ids.append(league.id)
+    
+    def set_scoring_system(self, scoring_system: ScoringSystem):
+        if scoring_system not in [ScoringSystem.SCORE, ScoringSystem.W_L]:
+            raise ValueError("Series can only have score or win/loss scoring system")
+        self.scoring_system = scoring_system
+    
+    def set_owner(self, owner: User):
+        self.owner = owner
+    
+    def add_contributor(self, contributor: User):
+        self.contributors.append(contributor)
+    
+    def can_edit(self, email: str):
+        if self.owner is None:
+            return True
+        return self.owner.email == email or email in [contributor.email for contributor in self.contributors]
+
+    def get_all_players(self):
+        from app.db import LeagueRepository
+        players = []
+        for league_id in self.league_ids:
+            league = LeagueRepository.get_league(league_id)
+            if league and league.players and len(league.players) > 0:
+                for player in league.players:
+                    if player not in players:
+                        players.append(player)
+        return players
+    
+    def get_leagues(self):
+        from app.db import LeagueRepository
+        leagues = []
+        for league_id in self.league_ids:
+            league = LeagueRepository.get_league(league_id)
+            if league:
+                leagues.append(league)
+        return leagues
+
+    def get_player_rankings(self):
+        rankings = []
+        
+        for league in self.get_leagues():
+            league_rankings = league.get_player_rankings()
+            for ranking in league_rankings:
+                if ranking["name"] not in [r["name"] for r in rankings]:
+                    rankings.append(ranking)
+                else:
+                    idx = next((i for i, r in enumerate(rankings) if r["name"] == ranking["name"]), None)
+                    if idx is not None:
+                        rankings[idx]["total_score"] += ranking["total_score"]
+                        rankings[idx]["wins"] += ranking["wins"] 
+                        rankings[idx]["losses"] += ranking["losses"]
+
+        # Calculate total matches and win percentage for each player
+        for player in rankings:
+            total_matches = player["wins"] + player["losses"]
+            player["total_matches"] = total_matches
+            player["win_percentage"] = (player["wins"] / total_matches * 100) if total_matches > 0 else 0
+        
+        # Sort rankings by wins (descending) and then by total score (descending)
+        rankings.sort(key=lambda x: (x["wins"], x["total_score"]), reverse=True)
+
+        return rankings
+    
+    def to_object(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "league_ids": self.league_ids,
+            "scoring_system": self.scoring_system.value,
+            "owner": self.owner.to_object() if self.owner else None,
+            "contributors": [contributor.to_object() for contributor in self.contributors]
+        }
+    
+    @staticmethod
+    def from_object(object: dict):
+        series = Series(object["name"])
+        series.set_id(object["id"])
+        series.set_scoring_system(ScoringSystem(object["scoring_system"]))
+        series.league_ids = object["league_ids"]
+        if object.get("owner") is not None and isinstance(object.get("owner"), dict) and "email" in object.get("owner"):
+            user = User(object["owner"]["email"])
+            series.set_owner(user)
+        for contributor in object.get("contributors", []):
+            user = User(contributor["email"])
+            series.add_contributor(user)
+        return series

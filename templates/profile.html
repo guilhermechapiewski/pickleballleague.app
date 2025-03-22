@@ -113,15 +113,23 @@
             }
             return false;
         }
-        
+
+        function deleteSeries(seriesId, seriesName) {
+            alert('Work in progress. Not implemented yet.');
+            return false;
+            //if (confirm('Are you sure you want to delete this series? This cannot be undone.\n\nSeries Name: ' + seriesName)) {
+            //    window.location.href = '/series/' + seriesId + '/delete';
+            //}
+            //return false;
+        }
         {% include 'templates/_auth.js' %}
     </script>
 </head>
 <body>
     {% include 'templates/_auth.html' %}
     <h1>Dashboard</h1>
-    {% if user.league_ids %}
     <h3>Your leagues</h3>
+    {% if user.league_ids %}
     <div style="width: 100%; overflow-x: auto;">
         <table class="league-table">
             <thead>
@@ -153,7 +161,39 @@
         </table>
     </div>
     {% else %}
-    <p>You have not created any leagues yet.</p>
+    <p>You don't have any leagues yet.</p>
+    {% endif %}
+    <br>
+    {% if user.series_ids %}
+    <h3>Your series</h3>
+    <div style="width: 100%; overflow-x: auto;">
+        <table class="league-table">
+            <thead>
+                <tr>
+                    <th>Series Name</th>
+                    <th>Link</th>
+                    <th>Scoring System</th>
+                    <th>Players</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for series in series %}
+                <tr>
+                    <td>{% if series.name %}{{ series.name }}{% else %}Unnamed series{% endif %}</td>
+                    <td>
+                        <a href="http://{{ domain_name }}/series/{{ series.id }}">http://{{ domain_name }}/series/<br>{{ series.id }}</a>
+                    </td>
+                    <td>{% if series.scoring_system.value == "score" %}Full scores{% elif series.scoring_system.value == "w_l" %}W/L only{% else %}{{ series.scoring_system.value }}{% endif %}</td>
+                    <td>{% for player in series.get_all_players() %}{{ player.name }}{% if not loop.last %}, {% endif %}{% endfor %}</td>
+                    <td style="min-width: 10px; text-align: center;">
+                        <a href="/series/{{ series.id }}/delete"><button class="delete-button" onclick="return deleteSeries('{{ series.id }}', '{% if series.name %}{{ series.name }}{% else %}Unnamed series{% endif %}')">🗑</button></a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
     {% endif %}
     <br>
     <a href="/"><button class="primary-button">Home</button></a>

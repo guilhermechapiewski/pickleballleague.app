@@ -32,9 +32,16 @@
             margin-bottom: 2rem;
             line-height: 1.5;
         }
+
+        {% include 'templates/_auth.css' %}
     </style>
+    <script language="javascript" type="text/javascript">
+        {% include 'templates/_auth.js' %}
+    </script>
 </head>
 <body>
+    {% include 'templates/_auth.html' %}
+    <br>
     <div class="error-container">
         <h1>{{ title }}</h1>
         <p>{{ message }}</p>

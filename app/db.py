@@ -1,6 +1,6 @@
 import os
 import logging
-from app.pickleball import League
+from app.pickleball import League, Series
 from app.user import User
 from app.links import ShortLink
 from google.cloud import datastore
@@ -83,7 +83,47 @@ class LeagueRepository:
         else:
             client = datastore.Client()
             client.delete(client.key("League", league_id))
-            
+
+class SeriesRepository:
+    logger = logging.getLogger(__name__)
+    stored_objects = {}
+
+    @classmethod
+    def get_series(cls, series_id: str) -> 'Series':
+        if DEV_ENVIRONMENT:
+            series = DevLocalDB.get_object(Series, series_id)
+            if series:
+                return Series.from_object(series)
+            else:
+                return None
+        else:
+            client = datastore.Client()
+            key = client.key("Series", series_id)
+            series = client.get(key)
+            if series:
+                return Series.from_object(series)
+            else:
+                return None
+    
+    @classmethod
+    def save_series(cls, series: 'Series'):
+        if DEV_ENVIRONMENT:
+            DevLocalDB.save_object(Series, series.id, series.to_object())
+        else:
+            client = datastore.Client()
+            complete_key = client.key("Series", series.id)
+            persistent_series = datastore.Entity(key=complete_key)
+            persistent_series.update(series.to_object())
+            client.put(persistent_series)
+    
+    @classmethod
+    def delete_series(cls, series_id: str):
+        if DEV_ENVIRONMENT:
+            DevLocalDB.delete_object(Series, series_id)
+        else:
+            client = datastore.Client()
+            client.delete(client.key("Series", series_id))
+
 class UserRepository:
     logger = logging.getLogger(__name__)
     stored_objects = {}

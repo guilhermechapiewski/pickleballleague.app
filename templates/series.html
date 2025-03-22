@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Pickleball League App{% if series.name %} - {{ series.name }}{% endif %}</title>
+    <style>
+        {% include 'templates/_main.css' %}
+
+        h1 {
+            width: 87%; /* to avoid getting behind the menu */
+        }
+        
+        .contributor-container, .link-container {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            width: 99%; 
+            overflow-x: auto;
+            font-size: 0.75rem;
+            font-style: italic;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            position: relative;
+            background-color: var(--card-bg);
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .contributor-container::before, .link-container::before {
+            content: "";
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 6px;
+            height: 6px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+
+        .contributor-show-container, .link-show-container {
+            margin-left: 1.5rem;
+            white-space: nowrap;
+            text-align: left;
+        }
+
+        .name-show-container {
+            display: block;
+            align-items: center;
+        }
+
+        .round-show-container {
+            display: block;
+        }
+
+        #edit-save-players, #edit-cancel-players {
+            visibility: hidden;
+        }
+
+        .link-edit-container {
+            margin-left: 1.5rem;
+            display: none;
+            white-space: nowrap;
+        }
+
+        .name-edit-container {
+            display: none;
+            align-items: center;
+        }
+
+        .round-edit-container {
+            display: none;
+        }
+
+        .contributor-edit-container {
+            display: none;
+            white-space: nowrap;
+            align-items: center;
+        }
+
+        .link-input {
+            width: 150px;
+            padding: 0.375rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+        }
+
+        .contributor-input {
+            width: 150px;
+            padding: 0.375rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+        }
+
+        .team-input {
+            width: 50px;
+            padding: 0.25rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+        }
+
+        .players-out-input {
+            width: 200px;
+            padding: 0.25rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+        }
+
+        .name-input {
+            width: 400px;
+            font-size: 2rem;
+            font-weight: 700;
+            padding: 0.375rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.25rem;
+        }
+        
+        .league-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background-color: var(--card-bg);
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05),
+                       0 4px 6px -2px rgba(0, 0, 0, 0.03),
+                       0 0 0 1px rgba(0, 0, 0, 0.03);
+            position: relative;
+        }
+        
+        .league-table::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 20px;
+            background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.02));
+            pointer-events: none;
+        }
+        
+        .league-table th, .league-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .league-table th {
+            background: var(--primary-color);
+            color: white;
+            font-weight: 600;
+            padding: 0.5rem;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+        }
+        
+        .league-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .league-table tr:hover td {
+            background-color: #f8fafc;
+            transform: scale(1.01);
+            transition: all 0.3s ease;
+        }
+
+        .league-table a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            display: inline-block;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .league-table a:hover {
+            color: var(--primary-hover);
+            text-decoration: none;
+        }
+
+        .league-table td {
+            font-size: 0.875rem;
+            min-width: 125px;
+            padding: 0.5rem;
+        }
+
+        .league-table tr:nth-child(even) {
+            background-color: rgba(241, 245, 249, 0.75);
+        }
+
+        .league-table tr:hover {
+            background-color: rgba(241, 245, 249, 1);
+        }
+
+        .delete-button {
+            background: white;
+            border: 2px solid var(--danger-color);
+            color: var(--danger-color);
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .delete-button:hover {
+            background: var(--danger-color);
+            color: white;
+        }
+        
+        .footer {
+            margin-top: 1rem;
+            text-align: center;
+            display: flex;
+            justify-content:center;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .contributor-container, .link-container {
+                font-size: 10px;
+                width: 96%;
+            }
+        }
+    
+        {% include 'templates/_ranking.css' %}
+        
+        {% include 'templates/_auth.css' %}
+    </style>
+    <script>
+        var editName = function() {
+            alert('Work in progress. Not implemented yet.');
+            return false;
+            //document.getElementsByClassName("name-show-container")[0].style.display = "none";
+            //document.getElementsByClassName("name-edit-container")[0].style.display = "block";
+            //document.getElementById("new_league_name").focus();
+            //return false;
+        }
+        
+        var copyLink = function(link) {
+            navigator.clipboard.writeText(link);
+            return false;
+        }
+
+        var removeLeague = function(seriesId, leagueId, leagueName, leagueDateCreated) {
+            alert('Work in progress. Not implemented yet.');
+            return false;
+            //if (confirm('Remove the following league from this series?\n\nLeague Name: ' + leagueName + '\nCreated On: ' + leagueDateCreated)) {
+            //    window.location.href = '/series/' + seriesId + '/league/' + leagueId + '/remove';
+            //}
+            //return false;
+        }
+
+        var addLeague = function() {
+            alert('Work in progress. Not implemented yet.');
+            return false;
+            //window.location.href = '/series/' + seriesId + '/league/add';
+        }
+
+        {% include 'templates/_auth.js' %}
+    </script>
+</head>
+<body>
+    {% include 'templates/_auth.html' %}
+    <form id="series_form" name="series_form" action="/save_series" method="post">
+    <input type="hidden" name="series_id" value="{{ series.id }}">
+    <div class="container">
+        <h1>
+            {% if series.name %}
+                <div class="name-show-container">{{ series.name }}
+                {% if (series.owner and series.owner.email == user.email) or not series.owner %}
+                    <button id="edit-name" class="small-button" onclick="return editName()">Edit&nbsp;name&nbsp;✎</button>
+                {% endif %}
+                </div>  
+            {% else %}
+                <div class="name-show-container">Series created on {{ series.date_created }}
+                {% if (series.owner and series.owner.email == user.email) or not series.owner %}
+                    <button id="edit-name" class="small-button" onclick="return editName()">Edit&nbsp;name&nbsp;✎</button>
+                {% endif %}
+                </div>  
+            {% endif %}
+            <div class="name-edit-container">
+                <input type="text" id="new_series_name" name="new_series_name" class="name-input" value="{{ series.name }}">
+                <input type="hidden" id="original_series_name" name="original_series_name" value="{{ series.name }}">
+                <input type="hidden" id="update_series_name" name="update_series_name" value="">
+                <button class="small-button" onclick="return saveName()">Save&nbsp;💾</button>
+                <button class="small-button" onclick="return cancelEditName()">Cancel&nbsp;❌</button>
+            </div>
+            
+        </h1>
+        <h3>Series details</h3>
+        {% if series.owner %}
+        <div class="contributor-container">
+            <div class="contributor-show-container">
+                <i><b>Private series</b> (created by: <u>{{ series.owner.email }}</u>{% if series.contributors | length > 0 %}; contributors: <u>{{ series.contributors|map(attribute='email')|join('</u>, <u>') }}</u>{% endif %})</i>
+            </div>
+        </div>
+        {% else %}
+        <div class="contributor-container">
+            <div class="contributor-show-container">
+                <p><i><b>Public series</b> (anyone with the link can view and edit)</i></p>
+            </div>
+        </div>
+        {% endif %}
+        <div class="link-container">
+            <div class="link-show-container">
+                <b>Link:</b> <a href="http://{{ domain_name }}/series/{{ series.id }}">https://{{ domain_name }}/series/{{ series.id }}</a>
+            </div>
+            <div class="link-edit-container">
+                <b>Link:</b> http://{{ domain_name }}/series/<input type="text" id="new_series_id" name="new_series_id" class="link-input" value="{{ series.id }}">
+            </div>
+            &nbsp;&nbsp;
+            <button id="copy-link" class="small-button" onclick="return copyLink('http://{{ domain_name }}/series/{{ series.id }}');">Copy&nbsp;link</button>
+        </div>
+
+        <h3>Rounds - all leagues in this series</h3>
+        {% if series.league_ids %}
+        <div style="width: 100%; overflow-x: auto;">
+            <table class="league-table">
+                <thead>
+                    <tr>
+                        <th>League Name</th>
+                        <th>Players</th>
+                        <th>Total Rounds</th>
+                        <th>Total Matches</th>
+                        <th>Link</th>
+                        <th>
+                            <button class="small-button" onclick="return addLeague()">Add&nbsp;league&nbsp;+</button>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for league in series.get_leagues() %}
+                    <tr>
+                        <td><b>{% if league.name %}{{ league.name }}{% else %}Unnamed league{% endif %}</b></td>
+                        <td>{% for player in league.players | sort(attribute='name') %}{{ player.name }}{% if not loop.last %}, {% endif %}{% endfor %}</td>
+                        <td>{{ league.schedule | length }}</td>
+                        <td>{{ league.number_of_matches() }}</td>
+                        <td>
+                            <a href="http://{{ domain_name }}/league/{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}">http://{{ domain_name }}/league/<br>{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}</a>
+                        </td>
+                        <td style="min-width: 10px; text-align: center;">
+                            <a href="/series/{{ series.id }}/league/{{ league.id }}/remove"><button class="delete-button" onclick="return removeLeague('{{ series.id }}', '{{ league.id }}', '{% if league.name %}{{ league.name }}{% else %}Unnamed league{% endif %}', '{{ league.date_created }}')">❌</button></a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p>No leagues in this series yet.</p>
+        {% endif %}
+        
+        <div class="ranking-container">
+            <h3>Standings</h3>
+            <div style="width: 100%; overflow-x: auto;">
+                <table class="ranking-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Player</th>
+                            {% if series.scoring_system.value == 'score' %}
+                                <th>Total Score</th>
+                            {% endif %}
+                            <th>Total Matches</th>
+                            <th>Wins</th>
+                            <th>Losses</th>
+                            <th>Win %</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for player in series.get_player_rankings() %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td>{{ player.name }}</td>
+                                {% if series.scoring_system.value == 'score' %}
+                                    <td>{{ player.total_score }}</td>
+                                {% endif %}
+                                <td>{{ player.total_matches }}</td>
+                                <td>{{ player.wins }}</td>
+                                <td>{{ player.losses }}</td>
+                                <td>{{ "%.1f"|format(player.win_percentage) }}%</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="footer" class="footer">
+            <a class="primary-button" href="#" onclick="document.getElementById('series_form').submit()">Save</a>
+            <a class="primary-button" href="/">Home</a>
+        </div>
+    </div>
+    </form>
+</body>
+</html>
