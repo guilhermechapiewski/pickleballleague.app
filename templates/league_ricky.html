@@ -429,11 +429,11 @@
         }
 
         var editPlayers = function() {
+            document.getElementById("edit-players").style.visibility = "hidden";
             for (var i = 0; i < document.getElementsByClassName("round-show-container").length; i++) {
                 document.getElementsByClassName("round-show-container")[i].style.display = "none";
                 document.getElementsByClassName("round-edit-container")[i].style.display = "block";
             }
-            document.getElementById("edit-players").style.visibility = "hidden";
             document.getElementById("edit-save-players").style.visibility = "visible";
             document.getElementById("edit-cancel-players").style.visibility = "visible";
             return false;
@@ -494,6 +494,8 @@
         }
 
         var cancelEditPlayers = function() {            
+            document.getElementById("edit-save-players").style.visibility = "hidden";
+            document.getElementById("edit-cancel-players").style.visibility = "hidden";
             //reset all inputs to their original values
             for (var i = 1; i <= document.getElementsByClassName("round-show-container").length; i++) {
                 var number_of_matches = document.getElementsByName("round-number"+i+"-matches")[0].value;
@@ -512,8 +514,6 @@
                 document.getElementsByClassName("round-show-container")[i].style.display = "block";
                 document.getElementsByClassName("round-edit-container")[i].style.display = "none";
             }
-            document.getElementById("edit-save-players").style.visibility = "hidden";
-            document.getElementById("edit-cancel-players").style.visibility = "hidden";
             document.getElementById("edit-players").style.visibility = "visible";
             return false;
         }
@@ -613,7 +613,7 @@
             <div class="link-show-container"><a href="http://{{ domain_name }}/league/{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}">https://{{ domain_name }}/league/{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}</a></div>
             <div class="link-edit-container">http://{{ domain_name }}/league/<input type="text" id="new_league_id" name="new_league_id" class="link-input" value="{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}"><input type="hidden" id="original_league_id" name="original_league_id" value="{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}"><input type="hidden" id="update_league_id" name="update_league_id" value=""> <button class="small-button" onclick="return saveLink()">Save 💾</button> <button class="small-button" onclick="return cancelEditLink()">Cancel ❌</button></div>
             &nbsp;&nbsp;
-            <button id="copy-link" class="small-button" onclick="return copyLink('http://{{ domain_name }}/league/{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}');">Copy&nbsp;🔗</button>
+            <button id="copy-link" class="small-button" onclick="return copyLink('http://{{ domain_name }}/league/{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}');">Copy link</button>
             {% if league.owner and league.owner.email == user.email %}
                 <button id="edit-link" class="small-button" onclick="return editLink();">Edit&nbsp;link&nbsp;✎</button>
             {% endif %}
