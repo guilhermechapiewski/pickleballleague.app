@@ -67,7 +67,6 @@
         
         .league-table tr:last-child td {
             border-bottom: none;
-            white-space: nowrap;
         }
         
         .league-table tr:hover td {
@@ -93,6 +92,7 @@
 
         .league-table td {
             font-size: 0.875rem;
+            min-width: 120px;
         }
 
         .league-table tr:nth-child(even) {
@@ -136,14 +136,14 @@
             <tbody>
                 {% for league in leagues %}
                 <tr>
-                    <td style="padding: 8px; border-bottom: 1px solid #ddd;">{% if league.name %}{{ league.name }}{% else %}Unnamed league{% endif %}</td>
-                    <td style="padding: 8px; border-bottom: 1px solid #ddd;">
+                    <td>{% if league.name %}{{ league.name }}{% else %}Unnamed league{% endif %}</td>
+                    <td>
                         <a href="http://{{ domain_name }}/league/{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}">http://{{ domain_name }}/league/<br>{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}</a>
                     </td>
-                    <td style="padding: 8px; border-bottom: 1px solid #ddd;">{% if league.scoring_system.value == "score" %}Full scores{% elif league.scoring_system.value == "w_l" %}W/L only{% else %}{{ league.scoring_system.value }}{% endif %}</td>
-                    <td style="padding: 8px; border-bottom: 1px solid #ddd;">{% for player in league.players %}{{ player.name }}{% if not loop.last %}, {% endif %}{% endfor %}</td>
-                    <td style="padding: 8px; border-bottom: 1px solid #ddd;">{{ league.date_created }}</td>
-                    <td style="padding: 8px; border-bottom: 1px solid #ddd;">
+                    <td>{% if league.scoring_system.value == "score" %}Full scores{% elif league.scoring_system.value == "w_l" %}W/L only{% else %}{{ league.scoring_system.value }}{% endif %}</td>
+                    <td>{% for player in league.players %}{{ player.name }}{% if not loop.last %}, {% endif %}{% endfor %}</td>
+                    <td>{{ league.date_created }}</td>
+                    <td style="min-width: 10px;">
                         <a href="/league/{{ league.id }}/delete"><button class="delete-button" onclick="return deleteLeague('{{ league.id }}', '{% if league.name %}{{ league.name }}{% else %}Unnamed league{% endif %}', '{{ league.date_created }}')">🗑</button></a>
                     </td>
                 </tr>
