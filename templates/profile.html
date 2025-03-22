@@ -92,7 +92,8 @@
 
         .league-table td {
             font-size: 0.875rem;
-            min-width: 120px;
+            min-width: 125px;
+            padding: 0.5rem;
         }
 
         .league-table tr:nth-child(even) {
@@ -143,7 +144,7 @@
                     <td>{% if league.scoring_system.value == "score" %}Full scores{% elif league.scoring_system.value == "w_l" %}W/L only{% else %}{{ league.scoring_system.value }}{% endif %}</td>
                     <td>{% for player in league.players %}{{ player.name }}{% if not loop.last %}, {% endif %}{% endfor %}</td>
                     <td>{{ league.date_created }}</td>
-                    <td style="min-width: 10px;">
+                    <td style="min-width: 10px; text-align: center;">
                         <a href="/league/{{ league.id }}/delete"><button class="delete-button" onclick="return deleteLeague('{{ league.id }}', '{% if league.name %}{{ league.name }}{% else %}Unnamed league{% endif %}', '{{ league.date_created }}')">🗑</button></a>
                     </td>
                 </tr>
