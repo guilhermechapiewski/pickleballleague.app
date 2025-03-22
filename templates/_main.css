@@ -33,6 +33,7 @@ h1 {
     text-align: left;
     display: flex;
     align-items: center;
+    text-shadow: 1px 1px 1px #0f172a60;
 }
 
 h3 {
