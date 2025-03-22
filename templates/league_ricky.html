@@ -7,23 +7,23 @@
     <style>
         {% include 'templates/_main.css' %}
 
-        .link-container {
+        .contributor-container, .link-container {
             display: flex;
             align-items: center;
-            gap: 0.375rem;
-            width: 100%; 
+            gap: 0.25rem;
+            width: 99%; 
             overflow-x: auto;
-            font-size: 0.875rem;
+            font-size: 0.75rem;
             font-style: italic;
-            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
             position: relative;
             background-color: var(--card-bg);
             border-radius: 0.5rem;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            margin-bottom: 1rem;
         }
 
-        .link-container::before {
+        .contributor-container::before, .link-container::before {
             content: "";
             position: absolute;
             left: 1rem;
@@ -36,51 +36,17 @@
             box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
         }
 
-        .link-show-container {
-            font-size: 0.875rem;
-            display: block;
-            max-width: 500px;
+        .contributor-show-container, .link-show-container {
+            margin-left: 1.5rem;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            margin-left: 1.5rem;
+            font-size: 0.75rem;
         }
 
         .link-container b {
             margin-left: 1.5rem;
-        }
-
-        .contributor-container {
-            display: flex;
-            align-items: center;
-            gap: 0.375rem;
-            width: 100%; 
-            overflow-x: auto;
-            font-size: 0.875rem;
-            font-style: italic;
-            margin-bottom: 1rem;
-            padding: 0.75rem 1rem;
-            position: relative;
-            background-color: var(--card-bg);
-            border-radius: 0.5rem;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-
-        .contributor-container::before {
-            content: "";
-            position: absolute;
-            left: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 6px;
-            height: 6px;
-            background-color: var(--primary-color);
-            border-radius: 50%;
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-        }
-
-        .contributor-show-container {
-            margin-left: 1.5rem;
+            font-size: 0.75rem;
         }
 
         .name-show-container {
@@ -97,7 +63,6 @@
         }
 
         .link-edit-container {
-            font-size: 0.875rem;
             display: none;
         }
 
@@ -121,7 +86,7 @@
             padding: 0.375rem;
             border: 1px solid var(--border-color);
             border-radius: 0.25rem;
-            font-size: 0.875rem;
+            font-size: 0.75rem;
         }
 
         .contributor-input {
@@ -129,7 +94,7 @@
             padding: 0.375rem;
             border: 1px solid var(--border-color);
             border-radius: 0.25rem;
-            font-size: 0.875rem;
+            font-size: 0.75rem;
         }
 
         .team-input {
