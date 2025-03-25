@@ -8,7 +8,7 @@
         {% include 'templates/_main.css' %}
 
         h1 {
-            width: 87%; /* to avoid getting behind the menu */
+            width: 85%; /* to avoid getting behind the menu */
         }
         
         .contributor-container, .link-container {
@@ -237,18 +237,49 @@
         {% include 'templates/_ranking.css' %}
         
         {% include 'templates/_auth.css' %}
+
+        .expand-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: transform 0.3s ease;
+            color: var(--primary-color);
+        }
+        
+        .expand-button.expanded {
+            transform: rotate(180deg);
+        }
+        
+        .league-details {
+            display: none;
+            background: var(--card-bg);
+            padding: 1rem;
+        }
+        
+        .league-details.show {
+            display: table-row;
+        }
+        
+        .league-details td {
+            padding: 1rem;
+            background: rgba(241, 245, 249, 0.5);
+        }
+        
+        .scores-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0.5rem 0;
+        }
+        
+        .scores-table th, .scores-table td {
+            padding: 0.5rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
     </style>
     <script>
         {% if (series.owner and series.owner.email == user.email) or not series.owner %}
-        var editName = function() {
-            alert('Work in progress. Not implemented yet.');
-            return false;
-            //document.getElementsByClassName("name-show-container")[0].style.display = "none";
-            //document.getElementsByClassName("name-edit-container")[0].style.display = "block";
-            //document.getElementById("new_league_name").focus();
-            //return false;
-        }
-
         var removeLeague = function(seriesId, leagueId, leagueName, leagueDateCreated) {
             if (confirm('Remove the following league from this series?\n\nLeague Name: ' + leagueName + '\nCreated On: ' + leagueDateCreated)) {
                 window.location.href = '/series/' + seriesId + '/league/' + leagueId + '/remove';
@@ -266,11 +297,47 @@
             document.getElementById('add_league_form').submit();
             return true;
         }
+
+        var editName = function() {
+            document.getElementsByClassName("name-show-container")[0].style.display = "none";
+            document.getElementsByClassName("name-edit-container")[0].style.display = "block";
+            document.getElementById("new_series_name").focus();
+            return false;
+        }
+
+        var cancelEditName = function() {
+            document.getElementsByClassName("name-edit-container")[0].style.display = "none";
+            document.getElementsByClassName("name-show-container")[0].style.display = "block";
+            return false;
+        }
+
+        var saveName = function() {
+            if ((document.getElementById("new_series_name").value != document.getElementById("original_series_name").value) &&
+                    (document.getElementById("new_series_name").value.length > 0))  
+                {
+                var new_series_name = document.getElementById("new_series_name").value;
+                document.getElementById("new_series_name").value = new_series_name;
+                document.getElementById("update_series_name").value = "1";
+                document.getElementById("series_form").submit();
+                return true;
+            }
+            document.getElementsByClassName("name-edit-container")[0].style.display = "none";
+            document.getElementsByClassName("name-show-container")[0].style.display = "block";
+            return false;
+        }
         {% endif %}
         
         var copyLink = function(link) {
             navigator.clipboard.writeText(link);
             return false;
+        }
+
+        function toggleLeagueDetails(leagueId) {
+            const button = document.getElementById(`expand-${leagueId}`);
+            const detailsRow = document.getElementById(`details-${leagueId}`);
+            
+            button.classList.toggle('expanded');
+            detailsRow.classList.toggle('show');
         }
 
         {% include 'templates/_auth.js' %}
@@ -279,29 +346,31 @@
 <body>
     {% include 'templates/_auth.html' %}
     <div class="container">
-        <h1>
-            {% if series.name %}
-                <div class="name-show-container">{{ series.name }}
-                {% if (series.owner and series.owner.email == user.email) or not series.owner %}
-                    <button id="edit-name" class="small-button" onclick="return editName()">Edit&nbsp;name&nbsp;✎</button>
+        <form id="series_form" name="series_form" action="/save_series" method="post">
+            <input type="hidden" name="series_id" value="{{ series.id }}">
+            <h1>
+                {% if series.name %}
+                    <div class="name-show-container">{{ series.name }}
+                    {% if (series.owner and series.owner.email == user.email) or not series.owner %}
+                        <button id="edit-name" class="small-button" onclick="return editName()">Edit&nbsp;name&nbsp;✎</button>
+                    {% endif %}
+                    </div>  
+                {% else %}
+                    <div class="name-show-container">Series created on {{ series.date_created }}
+                    {% if (series.owner and series.owner.email == user.email) or not series.owner %}
+                        <button id="edit-name" class="small-button" onclick="return editName()">Edit&nbsp;name&nbsp;✎</button>
+                    {% endif %}
+                    </div>  
                 {% endif %}
-                </div>  
-            {% else %}
-                <div class="name-show-container">Series created on {{ series.date_created }}
-                {% if (series.owner and series.owner.email == user.email) or not series.owner %}
-                    <button id="edit-name" class="small-button" onclick="return editName()">Edit&nbsp;name&nbsp;✎</button>
-                {% endif %}
-                </div>  
-            {% endif %}
-            <div class="name-edit-container">
-                <input type="text" id="new_series_name" name="new_series_name" class="name-input" value="{{ series.name }}">
-                <input type="hidden" id="original_series_name" name="original_series_name" value="{{ series.name }}">
-                <input type="hidden" id="update_series_name" name="update_series_name" value="">
-                <button class="small-button" onclick="return saveName()">Save&nbsp;💾</button>
-                <button class="small-button" onclick="return cancelEditName()">Cancel&nbsp;❌</button>
-            </div>
-            
-        </h1>
+                <div class="name-edit-container">
+                    <input type="text" id="new_series_name" name="new_series_name" class="name-input" value="{{ series.name }}">
+                    <input type="hidden" id="original_series_name" name="original_series_name" value="{{ series.name }}">
+                    <input type="hidden" id="update_series_name" name="update_series_name" value="">
+                    <button class="small-button" onclick="return saveName()">Save&nbsp;💾</button>
+                    <button class="small-button" onclick="return cancelEditName()">Cancel&nbsp;❌</button>
+                </div>
+            </h1>
+        </form>
         <h3>Series details</h3>
         {% if series.owner %}
         <div class="contributor-container">
@@ -351,7 +420,15 @@
                 <tbody>
                     {% for league in series.get_leagues() %}
                     <tr>
-                        <td><b>{% if league.name %}{{ league.name }}{% else %}Unnamed league{% endif %}</b></td>
+                        <td>
+                            <button id="expand-{{ league.id }}" 
+                                    class="expand-button" 
+                                    onclick="toggleLeagueDetails('{{ league.id }}')"
+                                    title="Show/hide details">
+                                ▼
+                            </button>
+                            <b>{% if league.name %}{{ league.name }}{% else %}Unnamed league{% endif %}</b>
+                        </td>
                         <td>{% for player in league.players | sort(attribute='name') %}{{ player.name }}{% if not loop.last %}, {% endif %}{% endfor %}</td>
                         <td>{{ league.schedule | length }}</td>
                         <td>{{ league.number_of_matches() }}</td>
@@ -362,6 +439,38 @@
                             {% if (series.owner and series.owner.email == user.email) or not series.owner %}
                                 <a href="/series/{{ series.id }}/league/{{ league.id }}/remove"><button class="delete-button" onclick="return removeLeague('{{ series.id }}', '{{ league.id }}', '{% if league.name %}{{ league.name }}{% else %}Unnamed league{% endif %}', '{{ league.date_created }}')">❌</button></a>
                             {% endif %}
+                        </td>
+                    </tr>
+                    <tr id="details-{{ league.id }}" class="league-details">
+                        <td colspan="6">
+                            <table class="scores-table">
+                                <thead>
+                                    <tr>
+                                        <th>Player</th>
+                                        <th>Matches</th>
+                                        <th>Wins</th>
+                                        <th>Losses</th>
+                                        <th>Win %</th>
+                                        {% if league.scoring_system.value == 'score' %}
+                                            <th>Score</th>
+                                        {% endif %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for player in league.get_player_rankings() %}
+                                    <tr>
+                                        <td>{{ player.name }}</td>
+                                        <td>{{ player.total_matches }}</td>
+                                        <td>{{ player.wins }}</td>
+                                        <td>{{ player.losses }}</td>
+                                        <td>{{ "%.1f"|format(player.win_percentage) }}%</td>
+                                        {% if league.scoring_system.value == 'score' %}
+                                            <td>{{ player.total_score }}</td>
+                                        {% endif %}
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
                         </td>
                     </tr>
                     {% endfor %}

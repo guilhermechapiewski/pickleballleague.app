@@ -488,6 +488,22 @@ def add_league_to_series(series_id):
             "message": "You are not the owner of this series."
         })
 
+@app.route("/save_series", methods=["POST"])
+def save_series():
+    user = get_auth_user()
+    series_id = flask.request.form.get("series_id")
+    
+    series = SeriesRepository.get_series(series_id)
+
+    # update the series name
+    update_series_name = flask.request.form.get("update_series_name")
+    new_series_name = flask.request.form.get("new_series_name")
+    if new_series_name and update_series_name and update_series_name == "1" and new_series_name != "":
+        series.name = new_series_name
+    
+    SeriesRepository.save_series(series)
+    return flask.redirect(f"/series/{series.id}")
+
 @app.route("/profile")
 def profile():
     user = get_auth_user()
