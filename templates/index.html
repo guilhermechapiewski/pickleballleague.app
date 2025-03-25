@@ -40,8 +40,13 @@
             padding: 40px 20px;
         }
 
-        h1 {
+        .hero h1 {
             color: #FFF;
+        }
+
+        .title {
+            padding-top: 0.5rem;
+            padding-left: 0.7rem;
         }
 
         .description {
@@ -382,10 +387,14 @@
 
 <body>
     {% include 'templates/_auth.html' %}
+    {% if new_league == '1' %}
+    <h1 class="title">Create a new league</h1>
+    {% else %}
     <div class="hero">
         <h1>Create your own Pickleball league in seconds! 🏓</h1>
     </div>
     <div class="description"><strong>Elevate your pickleball tournaments! 🏓 </strong>Easily create custom leagues to <strong>track scores</strong>, <strong>monitor wins and losses</strong>, and create <strong>organized match schedules</strong> for your group. <strong>Share instant access</strong> with other players, allowing <strong>everyone to view and update results in real-time.</strong> No more confusion or paper shuffling — enjoy geeking out on stats without the hassle! 🥳🎉</div>
+    {% endif %}
     <div class="container">
         <form method="POST" action="/create-league" onsubmit="return validateForm()">
             <table style="width: 100%; padding: 0 0 20px;" cellspacing="0" cellpadding="5">

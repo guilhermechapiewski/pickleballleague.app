@@ -385,6 +385,10 @@ class Series:
             raise ValueError("Leagues in a series must have the same scoring system")
         self.league_ids.append(league.id)
     
+    def remove_league(self, league_id: str):
+        if league_id in self.league_ids:
+            self.league_ids.remove(league_id)
+
     def set_scoring_system(self, scoring_system: ScoringSystem):
         if scoring_system not in [ScoringSystem.SCORE, ScoringSystem.W_L]:
             raise ValueError("Series can only have score or win/loss scoring system")

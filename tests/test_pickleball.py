@@ -567,6 +567,14 @@ class TestSeries(unittest.TestCase):
             series.add_league(league2)
         
         self.assertEqual(len(series.league_ids), 1)
+    
+    def test_series_remove_league(self):
+        league1 = League(name="Test League 1", player_names="GC, Juliano, Fariba, Galina")
+        league1.set_scoring_system(ScoringSystem.SCORE)
+        league2 = League(name="Test League 2", player_names="GC2, Juliano2, Fariba2, Galina2")
+        league2.set_scoring_system(ScoringSystem.SCORE)
+        series = Series(name="Test Series")
+        series.add_league(league1)
 
     def test_series_set_owner(self):
         series = Series(name="Test Series")

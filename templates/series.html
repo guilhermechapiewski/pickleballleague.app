@@ -239,6 +239,7 @@
         {% include 'templates/_auth.css' %}
     </style>
     <script>
+        {% if (series.owner and series.owner.email == user.email) or not series.owner %}
         var editName = function() {
             alert('Work in progress. Not implemented yet.');
             return false;
@@ -247,25 +248,29 @@
             //document.getElementById("new_league_name").focus();
             //return false;
         }
+
+        var removeLeague = function(seriesId, leagueId, leagueName, leagueDateCreated) {
+            if (confirm('Remove the following league from this series?\n\nLeague Name: ' + leagueName + '\nCreated On: ' + leagueDateCreated)) {
+                window.location.href = '/series/' + seriesId + '/league/' + leagueId + '/remove';
+            }
+            return false;
+        }
+
+        var addLeague = function() {
+            var leagueId = prompt('League id:');
+            if (leagueId.trim() == "") {
+                alert('Please enter a valid league id.');
+                return false;
+            }
+            document.getElementById('league_id').value = leagueId;
+            document.getElementById('add_league_form').submit();
+            return true;
+        }
+        {% endif %}
         
         var copyLink = function(link) {
             navigator.clipboard.writeText(link);
             return false;
-        }
-
-        var removeLeague = function(seriesId, leagueId, leagueName, leagueDateCreated) {
-            alert('Work in progress. Not implemented yet.');
-            return false;
-            //if (confirm('Remove the following league from this series?\n\nLeague Name: ' + leagueName + '\nCreated On: ' + leagueDateCreated)) {
-            //    window.location.href = '/series/' + seriesId + '/league/' + leagueId + '/remove';
-            //}
-            //return false;
-        }
-
-        var addLeague = function() {
-            alert('Work in progress. Not implemented yet.');
-            return false;
-            //window.location.href = '/series/' + seriesId + '/league/add';
         }
 
         {% include 'templates/_auth.js' %}
@@ -273,8 +278,6 @@
 </head>
 <body>
     {% include 'templates/_auth.html' %}
-    <form id="series_form" name="series_form" action="/save_series" method="post">
-    <input type="hidden" name="series_id" value="{{ series.id }}">
     <div class="container">
         <h1>
             {% if series.name %}
@@ -336,7 +339,12 @@
                         <th>Total Matches</th>
                         <th>Link</th>
                         <th>
-                            <button class="small-button" onclick="return addLeague()">Add&nbsp;league&nbsp;+</button>
+                            {% if (series.owner and series.owner.email == user.email) or not series.owner %}
+                                <form id="add_league_form" name="add_league_form" action="/series/{{ series.id }}/league/add" method="post">
+                                    <input type="hidden" id="league_id" name="league_id" value="">
+                                    <button type="button" class="small-button" onclick="return addLeague()">Add&nbsp;league&nbsp;+</button>
+                                </form>
+                            {% endif %}
                         </th>
                     </tr>
                 </thead>
@@ -351,7 +359,9 @@
                             <a href="http://{{ domain_name }}/league/{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}">http://{{ domain_name }}/league/<br>{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}</a>
                         </td>
                         <td style="min-width: 10px; text-align: center;">
-                            <a href="/series/{{ series.id }}/league/{{ league.id }}/remove"><button class="delete-button" onclick="return removeLeague('{{ series.id }}', '{{ league.id }}', '{% if league.name %}{{ league.name }}{% else %}Unnamed league{% endif %}', '{{ league.date_created }}')">❌</button></a>
+                            {% if (series.owner and series.owner.email == user.email) or not series.owner %}
+                                <a href="/series/{{ series.id }}/league/{{ league.id }}/remove"><button class="delete-button" onclick="return removeLeague('{{ series.id }}', '{{ league.id }}', '{% if league.name %}{{ league.name }}{% else %}Unnamed league{% endif %}', '{{ league.date_created }}')">❌</button></a>
+                            {% endif %}
                         </td>
                     </tr>
                     {% endfor %}
@@ -397,12 +407,6 @@
                 </table>
             </div>
         </div>
-
-        <div id="footer" class="footer">
-            <a class="primary-button" href="#" onclick="document.getElementById('series_form').submit()">Save</a>
-            <a class="primary-button" href="/">Home</a>
-        </div>
     </div>
-    </form>
 </body>
 </html>

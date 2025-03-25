@@ -42,7 +42,8 @@ def get_auth_user() -> User:
 @app.route("/")
 def root():
     user = get_auth_user()
-    return template_engine.render("index", {"version": version, "dev_environment": DEV_ENVIRONMENT, "user": user})
+    new_league = flask.request.args.get("new_league")
+    return template_engine.render("index", {"version": version, "dev_environment": DEV_ENVIRONMENT, "user": user, "new_league": new_league})
 
 @app.route("/sign-in", methods=["POST"])
 def sign_in():
@@ -348,6 +349,53 @@ def league(league_id):
             "message": "The league you are looking for does not exist. Please check the URL and try again."
         })
 
+@app.route("/league/<league_id>/delete")
+def delete_league(league_id):
+    user = get_auth_user()
+    league = LeagueRepository.get_league(league_id)
+
+    if league:
+        if league.owner.email == user.email:
+            LeagueRepository.delete_league(league_id)
+            user = UserRepository.get_user(user.email)
+            user.remove_league(league_id)
+            UserRepository.save_user(user)
+            return flask.redirect("/profile")
+        else:
+            return template_engine.render("error", {
+                "dev_environment": DEV_ENVIRONMENT,
+                "user": user,
+                "title": "Error: Permission denied",
+                "message": "You are not the owner of this league."
+            })
+    else:
+        return template_engine.render("error", {
+            "dev_environment": DEV_ENVIRONMENT,
+            "user": user,
+            "title": "Error: League not found",
+            "message": "The league you are trying to delete does not exist."
+        })
+
+@app.route("/create-series", methods=["POST"])
+def create_series():
+    user = get_auth_user()
+    series_name = flask.request.form.get("series_name")
+    series_selected_leagues = flask.request.form.get("series_selected_leagues")
+    logger.info(f"Creating series name=[{series_name}] for leagues=[{series_selected_leagues}]")
+    
+    series = Series(name=series_name)
+    series.set_owner(user)
+    for league_id in series_selected_leagues.split(","):
+        league = LeagueRepository.get_league(league_id)
+        series.add_league(league)
+    SeriesRepository.save_series(series)
+
+    user = UserRepository.get_user(user.email)
+    user.add_series(series.id)
+    UserRepository.save_user(user)
+
+    return flask.redirect("/profile")
+
 @app.route("/series/<series_id>")
 def series(series_id):
     user = get_auth_user()
@@ -370,30 +418,74 @@ def series(series_id):
             "message": "The series you are looking for does not exist. Please check the URL and try again."
         })
 
-@app.route("/league/<league_id>/delete")
-def delete_league(league_id):
+@app.route("/series/<series_id>/delete")
+def delete_series(series_id):
     user = get_auth_user()
-    league = LeagueRepository.get_league(league_id)
-    if league:
-        if league.owner.email == user.email:
-            LeagueRepository.delete_league(league_id)
+    series = SeriesRepository.get_series(series_id)
+    logger.info(f"Deleting series: {series.to_object()}")
+
+    if series:
+        if series.owner and series.owner.email == user.email:
+            SeriesRepository.delete_series(series_id)
             user = UserRepository.get_user(user.email)
-            user.remove_league(league_id)
+            user.remove_series(series_id)
             UserRepository.save_user(user)
             return flask.redirect("/profile")
         else:
             return template_engine.render("error", {
                 "dev_environment": DEV_ENVIRONMENT,
                 "user": user,
-                "title": "Error: League not found",
-                "message": "You are not the owner of this league."
+                "title": "Error: Permission denied",
+                "message": "You are not the owner of this series."
             })
     else:
         return template_engine.render("error", {
             "dev_environment": DEV_ENVIRONMENT,
             "user": user,
+            "title": "Error: Series not found",
+            "message": "The series you are trying to delete does not exist."
+        })
+
+@app.route("/series/<series_id>/league/<league_id>/remove")
+def remove_league_from_series(series_id, league_id):
+    user = get_auth_user()
+    user = UserRepository.get_user(user.email)
+    series = SeriesRepository.get_series(series_id)
+    league = LeagueRepository.get_league(league_id)
+    
+    series.remove_league(league_id)
+    SeriesRepository.save_series(series)
+
+    user.remove_league(league_id)
+    UserRepository.save_user(user)
+
+    return flask.redirect(f"/series/{series_id}")
+
+@app.route("/series/<series_id>/league/add", methods=["POST"])
+def add_league_to_series(series_id):
+    user = get_auth_user()
+    series = SeriesRepository.get_series(series_id)
+    league_id = flask.request.form.get("league_id")
+    league = LeagueRepository.get_league(league_id)
+    
+    if not league:
+        return template_engine.render("error", {
+            "dev_environment": DEV_ENVIRONMENT,
+            "user": user,
             "title": "Error: League not found",
-            "message": "The league you are trying to delete does not exist."
+            "message": "The league you are trying to add does not exist."
+        })
+    
+    if series.owner and series.owner.email == user.email:
+        series.add_league(league)
+        SeriesRepository.save_series(series)
+        return flask.redirect(f"/series/{series_id}")
+    else:
+        return template_engine.render("error", {
+            "dev_environment": DEV_ENVIRONMENT,
+            "user": user,
+            "title": "Error: Permission denied",
+            "message": "You are not the owner of this series."
         })
 
 @app.route("/profile")
