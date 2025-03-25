@@ -396,13 +396,13 @@
             <button id="copy-link" class="small-button" onclick="return copyLink('http://{{ domain_name }}/series/{{ series.id }}');">Copy&nbsp;link</button>
         </div>
 
-        <h3>Rounds - all leagues in this series</h3>
+        <h3>All rounds in this series</h3>
         {% if series.league_ids %}
         <div style="width: 100%; overflow-x: auto;">
             <table class="league-table">
                 <thead>
                     <tr>
-                        <th>League Name</th>
+                        <th>Name</th>
                         <th>Players</th>
                         <th>Total Rounds</th>
                         <th>Total Matches</th>
@@ -483,7 +483,7 @@
         {% endif %}
         
         <div class="ranking-container">
-            <h3>Standings</h3>
+            <h3>Overall standings</h3>
             <div style="width: 100%; overflow-x: auto;">
                 <table class="ranking-table">
                     <thead>
