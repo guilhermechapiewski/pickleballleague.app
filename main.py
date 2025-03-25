@@ -68,7 +68,7 @@ def sign_in():
             flask.session['user_email'] = user.email
             flask.session['user_google_id'] = user.google_id
     
-    return flask.redirect("/")
+    return flask.redirect(flask.request.referrer or "/")
 
 @app.route("/sign-out")
 def sign_out():
