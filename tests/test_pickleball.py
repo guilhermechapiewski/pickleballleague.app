@@ -1,6 +1,7 @@
 import unittest
 from app.pickleball import League, Player, Match, LeagueRound, ScoringSystem, Series
 from app.user import User
+from app.db import LeagueRepository
 
 class TestPlayer(unittest.TestCase):
     def test_player(self):
@@ -21,6 +22,21 @@ class TestPlayer(unittest.TestCase):
     def test_player_from_object(self):
         player = Player.from_object({"name": "John"})
         self.assertEqual(player.name, "John")
+    
+    def test_player_name_can_only_contain_letters_numbers_and_spaces(self):
+        Player("John Doe")
+        Player("John Doe 2")
+        Player("GC")
+        with self.assertRaises(ValueError):
+            Player("John, Doe")
+        with self.assertRaises(ValueError):
+            Player("John-Doe")
+        with self.assertRaises(ValueError):
+            Player("S.B")
+        with self.assertRaises(ValueError):
+            Player("S.B.")
+        with self.assertRaises(ValueError):
+            Player("S.B. 2")
 
 class TestMatch(unittest.TestCase):
     def test_match(self):
@@ -84,6 +100,16 @@ class TestMatch(unittest.TestCase):
         match.set_score([11, 2])
         self.assertEqual(match.get_winner_team(), 1)
         self.assertEqual([player.name for player in match.get_winner_team_players()], ["John", "Jane"])
+    
+    def test_match_winner_is_reverted_if_score_is_reverted_below_11(self):
+        match = Match([Player("John"), Player("Jane"), Player("Jim"), Player("Jill")], ScoringSystem.SCORE)
+        match.set_score([11, 2])
+        self.assertEqual(match.get_winner_team(), 1)
+        self.assertEqual([player.name for player in match.get_winner_team_players()], ["John", "Jane"])
+        
+        match.set_score([10, 2])
+        self.assertEqual(match.get_winner_team(), 0)
+        self.assertEqual(match.get_winner_team_players(), [])
 
 class TestLeagueRound(unittest.TestCase):
     def test_league_round_to_object(self):
@@ -230,6 +256,38 @@ class TestLeague(unittest.TestCase):
         for round in schedule:
             self.assertEqual(round.number, round_number)
             round_number += 1
+
+    def test_generate_schedule_with_18_players_and_edit_player_names_with_special_characters(self):
+        league = League(player_names="GC, Juliano, Fariba, Galina, Igor, Yuri, Scott, Mark, John, Tammy I, Tammy J, Stephanie, Lilly, Sveta, Mohammed, Lana, Aline, Irina")
+        schedule = league.generate_schedule(rounds=7)
+        self.assertEqual(len(schedule), 7)
+
+        for round in schedule:
+            self.assertEqual(round.number_of_matches(), 4)
+            self.assertEqual(len(round.players_out), 2)
+        
+        LeagueRepository.save_league(league)
+
+        retrieved_league = LeagueRepository.get_league(league.id)
+        self.assertEqual(len(retrieved_league.schedule), 7)
+        self.assertEqual(len(retrieved_league.schedule[0].matches), 4)
+        self.assertEqual(len(retrieved_league.schedule[0].players_out), 2)
+
+        #make a change of players in round 1 to have S.B playing and GC not playing
+        round = retrieved_league.schedule[0]
+        round.matches[0].players[0] = Player("Sveta")
+        if Player("Sveta") in round.players_out:
+            round.players_out.remove(Player("Sveta"))
+        round.players_out.append(Player("GC"))
+
+        LeagueRepository.save_league(retrieved_league)
+
+        retrieved_league = LeagueRepository.get_league(league.id)
+        self.assertEqual(len(retrieved_league.schedule), 7)
+        self.assertEqual(len(retrieved_league.schedule[0].matches), 4)
+        self.assertEqual(len(retrieved_league.schedule[0].players_out), len(round.players_out))
+        self.assertEqual(retrieved_league.schedule[0].matches[0].players[0].name, "Sveta")
+        self.assertTrue(Player("GC") in retrieved_league.schedule[0].players_out)
 
     def test_schedule_rounds_start_with_one(self):
         league = League(player_names="GC, Juliano, Fariba, Galina, Igor, Yuri, Scott, Mark, John")

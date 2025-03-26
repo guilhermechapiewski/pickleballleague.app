@@ -15,6 +15,9 @@ class Player:
     def __init__(self, name: str):
         if name is None or len(name) == 0:
             raise ValueError("Player name cannot be empty")
+        # Only allow letters, numbers and spaces in player names
+        if not all(c.isalnum() or c.isspace() for c in name):
+            raise ValueError("Player name can only contain letters, numbers and spaces")
         self.name = name
 
     def __str__(self):
@@ -84,6 +87,8 @@ class Match:
                 self.set_winner_team(2)
             else:
                 self.set_winner_team(0)
+        else:
+            self.set_winner_team(0)
 
     def get_score(self):
         return self.score

@@ -204,18 +204,27 @@
                 alert('You need at least 6 players for '+rounds+' rounds.');
                 return false;
             }
-            // Check if player names are unique
+            // Check if player names are valid and unique
             var uniqueNames = new Set();
             for (var i = 0; i < players.length; i++) {
                 var trimmedName = players[i].trim();
                 if (trimmedName === '') continue;
                 
+                var validPlayerNameRegex = /^[a-zA-Z0-9\s]*$/;
+                if (!validPlayerNameRegex.test(trimmedName)) {
+                    alert("Invalid player name: \"" + trimmedName + "\". Player names can only contain letters, numbers and spaces.");
+                    return false;
+                }
+
                 if (uniqueNames.has(trimmedName)) {
                     alert('Player names must be unique. "' + trimmedName + '" appears more than once.');
                     return false;
                 }
                 uniqueNames.add(trimmedName);
             }
+
+            
+            
 
             // Save players to localStorage
             savePlayers(players);

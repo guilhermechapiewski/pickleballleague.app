@@ -494,7 +494,7 @@
         }
 
         var savePlayers = function() {
-            // traverse all inputs to ensure they are 
+            // traverse all inputs to ensure they are valid player names
             var all_new_players = [];
             var all_original_players = [];
             for (var i = 1; i <= document.getElementsByClassName("round-show-container").length; i++) {
@@ -512,8 +512,9 @@
                         alert("Please fill in all player names for *round " + i + " match " + j + "*.");
                         return false;
                     }
-                    if ((player1.indexOf(",") != -1) || (player2.indexOf(",") != -1) || (player3.indexOf(",") != -1) || (player4.indexOf(",") != -1)) {
-                        alert("Player names cannot contain commas - check your entries for *round " + i + " match " + j + "*.");
+                    var validPlayerNameRegex = /^[a-zA-Z0-9\s]*$/;
+                    if (!validPlayerNameRegex.test(player1) || !validPlayerNameRegex.test(player2) || !validPlayerNameRegex.test(player3) || !validPlayerNameRegex.test(player4)) {
+                        alert("Player names can only contain letters, numbers and spaces. Check your entries for *round " + i + " match " + j + "*.");
                         return false;
                     }
                     if (all_new_players.indexOf(player1) == -1) {  all_new_players.push(player1); }
