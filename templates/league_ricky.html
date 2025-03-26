@@ -269,6 +269,49 @@
         {% endif %}
 
         {% include 'templates/_auth.css' %}
+
+        /* Add these new styles */
+        .fullscreen-mode {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: var(--card-bg);
+            z-index: 1000;
+            overflow: auto;
+            padding: 1rem;
+        }
+
+        .fullscreen-mode .league-table {
+            font-size: 1.2em;
+        }
+
+        .fullscreen-mode .round-cell {
+            font-size: 1.1em;
+        }
+
+        .fullscreen-mode .team {
+            font-size: 1em;
+        }
+
+        .exit-fullscreen {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 1001;
+            padding: 0.5rem 1rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .exit-fullscreen:hover {
+            opacity: 0.9;
+        }
     </style>
     <script>
         function printPage() {
@@ -566,6 +609,56 @@
             return emailRegex.test(email);
         }
 
+        function togglePresentationMode() {
+            const container = document.querySelector('.container');
+            const tableContainer = document.querySelector('.league-table').parentElement;
+            
+            if (!document.fullscreenElement) {
+                // Enter presentation mode
+                tableContainer.classList.add('fullscreen-mode');
+                
+                // Create and add exit button
+                const exitButton = document.createElement('button');
+                exitButton.className = 'exit-fullscreen';
+                exitButton.className = 'small-button';
+                exitButton.innerHTML = 'Exit Presentation Mode';
+                exitButton.onclick = togglePresentationMode;
+                tableContainer.appendChild(exitButton);
+                
+                // Hide other elements
+                document.querySelector('h1').style.display = 'none';
+                document.querySelector('h3').style.display = 'none';
+                document.getElementsByClassName('loggedin-user-info')[0].style.display = 'none';
+                document.getElementById('edit-players').style.display = 'none';
+                document.querySelectorAll('.contributor-container, .link-container, .footer').forEach(el => {
+                    el.style.display = 'none';
+                });
+                
+                // Request fullscreen
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen();
+                }
+            } else {
+                // Exit presentation mode
+                document.exitFullscreen();
+                tableContainer.classList.remove('fullscreen-mode');
+                
+                // Remove exit button
+                const exitButton = document.querySelector('.exit-fullscreen');
+                if (exitButton) exitButton.remove();
+                
+                // Show other elements
+                document.querySelector('h1').style.display = 'block';
+                document.querySelector('h3').style.display = 'block';
+                document.getElementsByClassName('loggedin-user-info')[0].style.display = 'block';
+                document.getElementById('edit-players').style.display = 'block';
+                document.querySelectorAll('.contributor-container, .link-container').forEach(el => {
+                    el.style.display = 'flex';
+                });
+                document.querySelector('.footer').style.display = 'flex';
+            }
+        }
+
         {% include 'templates/_auth.js' %}
     </script>
 </head>
@@ -760,6 +853,7 @@
         </div>
         <div id="footer" class="footer">
             <a href="#" class="primary-button" onclick="printPage()">Print</a>
+            <a href="#" class="primary-button" onclick="togglePresentationMode()">Court (Presentation) Mode</a>
             {% if league.scoring_system.value != 'none' and ((league.owner and league.owner.email == user.email) or not league.owner) %}<a class="primary-button" href="#" onclick="document.getElementById('league_form').submit()">Save</a>{% endif %}
             <a class="primary-button" href="/">Home</a>
         </div>
