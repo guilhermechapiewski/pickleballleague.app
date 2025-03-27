@@ -331,6 +331,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             initTeammateMap();
             addScoreEventListeners();
+            updateLastUpdatedTime();
         });
         
         var initTeammateMap = function() {
@@ -391,6 +392,32 @@
                     {% endif %}
                 {% endfor %}
             {% endfor %}
+        }
+
+        var updateLastUpdatedTime = function() {
+            var lastUpdatedTime = document.getElementById("last-updated-time");
+            var secondsSinceLastUpdate = {{ league.get_seconds_since_version_update() }};
+            if (Math.floor(secondsSinceLastUpdate / 3600) > 0) {
+                lastUpdatedTime.innerHTML = Math.floor(secondsSinceLastUpdate / 3600) + "+ hours ago";
+            } else {
+                var timer = setInterval(function() {
+                    secondsSinceLastUpdate++;
+                    if (secondsSinceLastUpdate < 15) {
+                        lastUpdatedTime.innerHTML = "just now";
+                    } else {
+                        var hours = Math.floor(secondsSinceLastUpdate / 3600);
+                        var minutes = Math.floor((secondsSinceLastUpdate % 3600) / 60);
+                        var seconds = secondsSinceLastUpdate % 60;
+                        if (hours > 0) {
+                            lastUpdatedTime.innerHTML = hours + "+ hours ago";
+                        } else if (minutes > 0) {
+                            lastUpdatedTime.innerHTML = minutes + ":" + (seconds < 10 ? "0" : "") + seconds + " minute" + (minutes > 1 ? "s" : "") + " ago";
+                        } else {
+                            lastUpdatedTime.innerHTML = seconds + " seconds ago";
+                        }
+                    }
+                }, 1000);
+            }
         }
         
         var syncTeammateScore = function(roundNumber, playerName, value) {
@@ -610,7 +637,7 @@
             return emailRegex.test(email);
         }
 
-        function togglePresentationMode() {
+        var togglePresentationMode = function() {
             const container = document.querySelector('.container');
             const tableContainer = document.querySelector('.league-table').parentElement;
             
@@ -667,6 +694,7 @@
     {% include 'templates/_auth.html' %}
     <form id="league_form" name="league_form" action="/save_league" method="post">
     <input type="hidden" name="league_id" value="{{ league.id }}">
+    <input type="hidden" name="version_control" value="{{ league.get_version() }}">
     <div class="container">
         <h1>
             {% if league.name %}
@@ -691,6 +719,11 @@
             </div>
         </h1>
         <h3>League details</h3>
+        <div class="contributor-container">
+            <div class="contributor-show-container">
+                <i><b>Last updated:</b>&nbsp;<span id="last-updated-time">...</span></i>
+            </div>
+        </div>
         {% if league.owner %}
         <div class="contributor-container">
             <div class="contributor-show-container">

@@ -67,6 +67,7 @@ class LeagueRepository:
     
     @classmethod
     def save_league(cls, league: 'League'):
+        league.refresh_version()
         if DEV_ENVIRONMENT:
             DevLocalDB.save_object(League, league.id, league.to_object())
         else:

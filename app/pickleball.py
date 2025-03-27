@@ -158,6 +158,7 @@ class League:
         self.id = str(uuid.uuid4())
         self.name = name
         self.date_created = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        self.versioning_timestamp = datetime.now().timestamp()
         self.players = [Player(player.strip()) for player in player_names.split(",")] if player_names else []
         self.schedule = []
         self.scoring_system = ScoringSystem.NONE
@@ -168,6 +169,15 @@ class League:
         
     def set_id(self, id: str):
         self.id = id
+
+    def refresh_version(self):
+        self.versioning_timestamp = datetime.now().timestamp()
+    
+    def get_version(self):
+        return self.versioning_timestamp
+    
+    def get_seconds_since_version_update(self):
+        return int(datetime.now().timestamp() - self.versioning_timestamp)
 
     def set_schedule(self, schedule: list[LeagueRound]):
         self.schedule = schedule
@@ -338,6 +348,7 @@ class League:
             "id": self.id,
             "name": self.name,
             "date_created": self.date_created,
+            "versioning_timestamp": self.versioning_timestamp,
             "owner": self.owner.to_object() if self.owner else None,
             "contributors": [contributor.to_object() for contributor in self.contributors],
             "players": [player.to_object() for player in self.players],
@@ -353,6 +364,7 @@ class League:
         league = League(name=object["name"])
         league.set_id(object["id"])
         league.set_date_created(object["date_created"])
+        league.versioning_timestamp = float(object["versioning_timestamp"])
         if object.get("owner") is not None and isinstance(object.get("owner"), dict) and "email" in object.get("owner"):
             user = User(object["owner"]["email"])
             league.set_owner(user)
