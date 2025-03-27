@@ -472,9 +472,10 @@ class Series:
             player["total_matches"] = total_matches
             player["win_percentage"] = (player["wins"] / total_matches * 100) if total_matches > 0 else 0
             player["points_difference"] = player["points_won"] - player["points_against"]
+            player["normalized_points_difference"] = player["points_difference"] / total_matches if total_matches > 0 else 0
 
-        # Sort rankings by win percentage (descending), points difference (descending), wins (descending) and then by points won (descending)
-        rankings.sort(key=lambda x: (x["win_percentage"], x["points_difference"], x["wins"], x["points_won"]), reverse=True)
+        # Sort rankings by win percentage (descending), normalized points difference (descending)
+        rankings.sort(key=lambda x: (x["win_percentage"], x["normalized_points_difference"]), reverse=True)
 
         return rankings
     

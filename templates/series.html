@@ -584,11 +584,12 @@
                             <th>Player</th>
                             <th><i style="color: var(--success-color);">(1)</i> Win %</th>
                             {% if series.scoring_system.value == 'score' %}
-                                <th><i style="color: var(--success-color);">(2)</i> Net<br>Points</th>    
-                                <th><i style="color: var(--success-color);">(4)</i> Points<br>Won</th>
+                                <th><i style="color: var(--success-color);">(2)</i> Normalized<br>Score</th>
+                                <th>Net<br>Points</th>    
+                                <th>Points<br>Won</th>
                                 <th>Points<br>Against</th>
                             {% endif %}
-                            <th><i style="color: var(--success-color);">(3)</i> Match<br>Wins</th>
+                            <th>Match<br>Wins</th>
                             <th>Match<br>Losses</th>
                             <th>Total<br>Matches</th>
                         </tr>
@@ -600,6 +601,7 @@
                                 <td>{{ player.name }}</td>
                                 <td>{{ "%.1f"|format(player.win_percentage) }}%</td>
                                 {% if series.scoring_system.value == 'score' %}
+                                    <td>{{ "%.1f"|format(player.normalized_points_difference) }}</td>
                                     <td>{{ player.points_difference }}</td>
                                     <td>{{ player.points_won }}</td>
                                     <td>{{ player.points_against }}</td>
