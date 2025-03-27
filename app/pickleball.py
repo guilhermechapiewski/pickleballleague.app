@@ -297,7 +297,9 @@ class League:
         for player in self.players:
             rankings.append({
                 "name": player.name,
-                "total_score": 0,
+                "points_won": 0,
+                "points_against": 0,
+                "points_difference": 0,
                 "wins": 0,
                 "losses": 0,
                 "win_percentage": 1
@@ -314,9 +316,11 @@ class League:
                             # Add score
                             if self.scoring_system == ScoringSystem.SCORE:
                                 if i < 2:  # Team 1
-                                    rankings[player_idx]["total_score"] += match.score[0] if match.score and len(match.score) > 0 else 0
+                                    rankings[player_idx]["points_won"] += match.score[0] if match.score and len(match.score) > 0 else 0
+                                    rankings[player_idx]["points_against"] += match.score[1] if match.score and len(match.score) > 1 else 0
                                 else:  # Team 2
-                                    rankings[player_idx]["total_score"] += match.score[1] if match.score and len(match.score) > 1 else 0
+                                    rankings[player_idx]["points_won"] += match.score[1] if match.score and len(match.score) > 1 else 0
+                                    rankings[player_idx]["points_against"] += match.score[0] if match.score and len(match.score) > 0 else 0
                             
                             # Add win/loss
                             if (i < 2 and winner_team == 1) or (i >= 2 and winner_team == 2):
@@ -324,13 +328,14 @@ class League:
                             else:
                                 rankings[player_idx]["losses"] += 1
         
-        # Calculate win percentage for each player
+        # Calculate win percentage and points difference for each player
         for player in rankings:
             total_matches = player["wins"] + player["losses"]
             player["win_percentage"] = (player["wins"] / total_matches * 100) if total_matches > 0 else 0
+            player["points_difference"] = player["points_won"] - player["points_against"]
         
-        # Sort rankings by wins (descending) and then by total score (descending)
-        rankings.sort(key=lambda x: (x["wins"], x["total_score"]), reverse=True)
+        # Sort rankings by wins (descending) and then by points difference (descending) and then by points won (descending)
+        rankings.sort(key=lambda x: (x["wins"], x["points_difference"], x["points_won"]), reverse=True)
 
         return rankings
     
@@ -455,7 +460,8 @@ class Series:
                 else:
                     idx = next((i for i, r in enumerate(rankings) if r["name"] == ranking["name"]), None)
                     if idx is not None:
-                        rankings[idx]["total_score"] += ranking["total_score"]
+                        rankings[idx]["points_won"] += ranking["points_won"]
+                        rankings[idx]["points_against"] += ranking["points_against"]
                         rankings[idx]["wins"] += ranking["wins"] 
                         rankings[idx]["losses"] += ranking["losses"]
 
@@ -464,9 +470,10 @@ class Series:
             total_matches = player["wins"] + player["losses"]
             player["total_matches"] = total_matches
             player["win_percentage"] = (player["wins"] / total_matches * 100) if total_matches > 0 else 0
-        
-        # Sort rankings by wins (descending) and then by total score (descending)
-        rankings.sort(key=lambda x: (x["wins"], x["total_score"]), reverse=True)
+            player["points_difference"] = player["points_won"] - player["points_against"]
+
+        # Sort rankings by wins (descending) and then by points difference (descending) and then by points won (descending)
+        rankings.sort(key=lambda x: (x["wins"], x["points_difference"], x["points_won"]), reverse=True)
 
         return rankings
     

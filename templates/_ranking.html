@@ -6,12 +6,14 @@
                 <tr>
                     <th>Rank</th>
                     <th>Player</th>
-                    {% if league.scoring_system.value == 'score' %}
-                        <th>Total Score</th>
-                    {% endif %}
-                    <th>Wins</th>
-                    <th>Losses</th>
                     <th>Win %</th>
+                    {% if league.scoring_system.value == 'score' %}
+                        <th>Total<br>Score</th>    
+                        <th>Points<br>Won</th>
+                        <th>Points<br>Against</th>
+                    {% endif %}
+                    <th>Match<br>Wins</th>
+                    <th>Match<br>Losses</th>
                 </tr>
             </thead>
             <tbody>
@@ -19,12 +21,14 @@
                     <tr>
                         <td>{{ loop.index }}</td>
                         <td>{{ player.name }}</td>
+                        <td>{{ "%.1f"|format(player.win_percentage) }}%</td>
                         {% if league.scoring_system.value == 'score' %}
-                            <td>{{ player.total_score }}</td>
+                            <td>{{ player.points_difference }}</td>    
+                            <td>{{ player.points_won }}</td>
+                            <td>{{ player.points_against }}</td>
                         {% endif %}
                         <td>{{ player.wins }}</td>
                         <td>{{ player.losses }}</td>
-                        <td>{{ "%.1f"|format(player.win_percentage) }}%</td>
                     </tr>
                 {% endfor %}
             </tbody>
