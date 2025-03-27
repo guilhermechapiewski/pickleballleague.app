@@ -132,12 +132,12 @@ def save_league():
     
     league = LeagueRepository.get_league(league_id)
 
-    if league.get_version() != float(flask.request.form.get("version_control")):
+    if league.get_version() != 0.0 and league.get_version() != float(flask.request.form.get("version_control")):
         return template_engine.render("error", {
             "dev_environment": DEV_ENVIRONMENT,
             "user": user,
             "title": "Error: Concurrent editing",
-            "message": f"This league was updated by another user. Please refresh the page and try again.<br><br>Code: {str(league.get_version())}/{flask.request.form.get('version_control')}",
+            "message": f"This league was updated by another user. Please refresh the page and try again.<br><br>Error code: {str(league.get_version())},{flask.request.form.get('version_control')}",
             "action_name": "Back to league",
             "action_url": f"/league/{league_id}"
         })
