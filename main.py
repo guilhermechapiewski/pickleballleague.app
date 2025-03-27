@@ -137,7 +137,7 @@ def save_league():
             "dev_environment": DEV_ENVIRONMENT,
             "user": user,
             "title": "Error: Concurrent editing",
-            "message": "This league was updated by another user. Please refresh the page and try again.",
+            "message": f"This league was updated by another user. Please refresh the page and try again.<br><br>Code: {str(league.get_version())}/{flask.request.form.get('version_control')}",
             "action_name": "Back to league",
             "action_url": f"/league/{league_id}"
         })
