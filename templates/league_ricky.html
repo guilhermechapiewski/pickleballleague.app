@@ -637,54 +637,39 @@
             return emailRegex.test(email);
         }
 
-        var togglePresentationMode = function() {
-            const container = document.querySelector('.container');
-            const tableContainer = document.querySelector('.league-table').parentElement;
-            
-            if (!document.fullscreenElement) {
-                // Enter presentation mode
-                tableContainer.classList.add('fullscreen-mode');
-                
-                // Create and add exit button
-                const exitButton = document.createElement('button');
-                exitButton.className = 'exit-fullscreen';
-                exitButton.className = 'small-button';
-                exitButton.innerHTML = 'Exit Presentation Mode';
-                exitButton.onclick = togglePresentationMode;
-                tableContainer.appendChild(exitButton);
-                
-                // Hide other elements
-                document.querySelector('h1').style.display = 'none';
-                document.querySelector('h3').style.display = 'none';
-                document.getElementsByClassName('loggedin-user-info')[0].style.display = 'none';
-                document.getElementById('edit-players').style.display = 'none';
-                document.querySelectorAll('.contributor-container, .link-container, .footer').forEach(el => {
-                    el.style.display = 'none';
-                });
-                
-                // Request fullscreen
-                if (document.documentElement.requestFullscreen) {
-                    document.documentElement.requestFullscreen();
-                }
-            } else {
-                // Exit presentation mode
-                document.exitFullscreen();
-                tableContainer.classList.remove('fullscreen-mode');
-                
-                // Remove exit button
-                const exitButton = document.querySelector('.exit-fullscreen');
-                if (exitButton) exitButton.remove();
-                
-                // Show other elements
-                document.querySelector('h1').style.display = 'block';
-                document.querySelector('h3').style.display = 'block';
-                document.getElementsByClassName('loggedin-user-info')[0].style.display = 'block';
-                document.getElementById('edit-players').style.display = 'block';
-                document.querySelectorAll('.contributor-container, .link-container').forEach(el => {
-                    el.style.display = 'flex';
-                });
-                document.querySelector('.footer').style.display = 'flex';
+        var textSize = 0.75;
+        var textSizeIncrement = 0.25;
+        
+        var updateTextSize = function(className) {
+            for (var i = 0; i < document.getElementsByClassName(className).length; i++) {
+                document.getElementsByClassName(className)[i].style.fontSize = textSize + "rem";
             }
+        }
+
+        var updateAllTextSizes = function() {
+            updateTextSize("team");
+            updateTextSize("vs");
+            updateTextSize("player-scores-header");
+            updateTextSize("players-out");
+            updateTextSize("team-input");
+            updateTextSize("players-out-input");
+            updateTextSize("player-score-select");
+            updateTextSize("player-score-input");
+            updateTextSize("player-score-label");
+        }
+        
+        var increaseTextSize = function() {
+            textSize = textSize + textSizeIncrement;
+            updateAllTextSizes();
+            return false;
+        }
+
+        var decreaseTextSize = function() {
+            if (textSize > 0.75) {
+                textSize = textSize - textSizeIncrement;
+            }
+            updateAllTextSizes();
+            return false;
         }
 
         {% include 'templates/_auth.js' %}
@@ -770,14 +755,17 @@
                     <tr>
                         <th style="width: 20%; white-space: nowrap;" rowspan="2">
                             Rounds{% if (league.owner and league.can_edit(user.email)) or not league.owner %}&nbsp;&nbsp;<button id="edit-players" class="small-button" onclick="return editPlayers();">Edit&nbsp;players&nbsp;✎</button><br>{% endif %}
-                            <button id="edit-save-players" class="small-button" onclick="return savePlayers()">Save&nbsp;💾</button>&nbsp;&nbsp;<button id="edit-cancel-players" class="small-button" onclick="return cancelEditPlayers()">Cancel&nbsp;❌</button>
+                            <button id="text-size-increase" class="small-button" onclick="return increaseTextSize()">🔍&nbsp;+</button>&nbsp;
+                            <button id="text-size-decrease" class="small-button" onclick="return decreaseTextSize()">🔍&nbsp;-</button>&nbsp;
+                            <button id="edit-save-players" class="small-button" onclick="return savePlayers()">Save&nbsp;💾</button>&nbsp;&nbsp;<button id="edit-cancel-players" class="small-button" onclick="return cancelEditPlayers()">Cancel&nbsp;❌</button>&nbsp;
                             <input type="hidden" name="update_player_names" id="update_player_names" value="">
+                            
                         </th>
                         <th style="width: 80%; white-space: nowrap;" colspan="{{ league.players|length }}">Player Scores</th>
                     </tr>
                     <tr>
                         {% for player in league.players %}
-                            <th style="width: {{ width }}%; white-space: nowrap;">{{ player }}</th>
+                            <th class="player-scores-header" style="width: {{ width }}%; white-space: nowrap;">{{ player }}</th>
                         {% endfor %}
                     </tr>
                 </thead>
@@ -852,29 +840,29 @@
                                     {% if player.name not in round.players_out|map(attribute='name')|list %}
                                         <td style="background-color: {{ ns1.color }};">    
                                             {% if (league.owner and league.can_edit(user.email)) or not league.owner %}
-                                                <select name="player_score_round{{ round.number }}_player{{ loop.index }}" id="player_score_round{{ round.number }}_player{{ loop.index }}">
+                                                <select class="player-score-select" name="player_score_round{{ round.number }}_player{{ loop.index }}" id="player_score_round{{ round.number }}_player{{ loop.index }}">
                                                     <option value="0"></option>
                                                     <option value="w" {{ ns2.w }}>W</option>
                                                     <option value="l" {{ ns3.l }}>L</option>
                                                 </select>
                                             {% else %}
-                                                {{ ns4.score }}
+                                                <span class="player-score-label">{{ ns4.score }}</span>
                                             {% endif %}
                                         </td>
                                     {% else %}
-                                        <td>x</td>
+                                        <td><span class="player-score-label">x</span></td>
                                     {% endif %}
                                 {% elif league.scoring_system.value == 'score' %}
                                     {% if player.name not in round.players_out|map(attribute='name')|list %}
                                         <td style="background-color: {{ ns1.color }};">
                                             {% if (league.owner and league.can_edit(user.email)) or not league.owner %}
-                                                <input type="number" name="player_score_round{{ round.number }}_player{{ loop.index }}" id="player_score_round{{ round.number }}_player{{ loop.index }}" min="0" max="100" step="1" value="{{ ns4.score }}">
+                                                <input type="number" class="player-score-input" name="player_score_round{{ round.number }}_player{{ loop.index }}" id="player_score_round{{ round.number }}_player{{ loop.index }}" min="0" max="100" step="1" value="{{ ns4.score }}">
                                             {% else %}
-                                                {{ ns4.score }}
+                                                <span class="player-score-label">{{ ns4.score }}</span>
                                             {% endif %}
                                         </td>
                                     {% else %}
-                                        <td>x</td>
+                                        <td><span class="player-score-label">x</span></td>
                                     {% endif %}
                                 {% else %}
                                     <td></td>
@@ -887,7 +875,6 @@
         </div>
         <div id="footer" class="footer">
             <a href="#" class="primary-button" onclick="printPage()">Print</a>
-            <a href="#" class="primary-button" onclick="togglePresentationMode()">Court (Presentation) Mode</a>
             {% if league.scoring_system.value != 'none' and ((league.owner and league.owner.email == user.email) or not league.owner) %}<a class="primary-button" href="#" onclick="document.getElementById('league_form').submit()">Save</a>{% endif %}
             <a class="primary-button" href="/">Home</a>
         </div>
