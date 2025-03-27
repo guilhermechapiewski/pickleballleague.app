@@ -364,7 +364,7 @@ class League:
         league = League(name=object["name"])
         league.set_id(object["id"])
         league.set_date_created(object["date_created"])
-        league.versioning_timestamp = float(object["versioning_timestamp"])
+        league.versioning_timestamp = float(object.get("versioning_timestamp", 0.0))
         if object.get("owner") is not None and isinstance(object.get("owner"), dict) and "email" in object.get("owner"):
             user = User(object["owner"]["email"])
             league.set_owner(user)
