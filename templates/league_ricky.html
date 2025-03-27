@@ -397,7 +397,7 @@
         var updateLastUpdatedTime = function() {
             var lastUpdatedTime = document.getElementById("last-updated-time");
             var secondsSinceLastUpdate = {{ league.get_seconds_since_version_update() }};
-            if (Math.floor(secondsSinceLastUpdate / 86400) > 0) {
+            if (Math.floor(secondsSinceLastUpdate / 172800) > 0) {
                 lastUpdatedTime.innerHTML = Math.floor(secondsSinceLastUpdate / 172800) + " days ago";
             } else if (Math.floor(secondsSinceLastUpdate / 3600) > 0) {
                 lastUpdatedTime.innerHTML = Math.floor(secondsSinceLastUpdate / 3600) + "+ hours ago";
