@@ -177,6 +177,8 @@ class League:
         return self.versioning_timestamp
     
     def get_seconds_since_version_update(self):
+        if self.versioning_timestamp == 0.0:
+            self.versioning_timestamp = datetime.now().timestamp() - (24 * 60 * 60)
         return int(datetime.now().timestamp() - self.versioning_timestamp)
 
     def set_schedule(self, schedule: list[LeagueRound]):

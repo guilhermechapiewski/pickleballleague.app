@@ -397,7 +397,9 @@
         var updateLastUpdatedTime = function() {
             var lastUpdatedTime = document.getElementById("last-updated-time");
             var secondsSinceLastUpdate = {{ league.get_seconds_since_version_update() }};
-            if (Math.floor(secondsSinceLastUpdate / 3600) > 0) {
+            if (Math.floor(secondsSinceLastUpdate / 86400) > 0) {
+                lastUpdatedTime.innerHTML = Math.floor(secondsSinceLastUpdate / 86400) + " days ago";
+            } else if (Math.floor(secondsSinceLastUpdate / 3600) > 0) {
                 lastUpdatedTime.innerHTML = Math.floor(secondsSinceLastUpdate / 3600) + "+ hours ago";
             } else {
                 var timer = setInterval(function() {
@@ -405,12 +407,9 @@
                     if (secondsSinceLastUpdate < 15) {
                         lastUpdatedTime.innerHTML = "just now";
                     } else {
-                        var hours = Math.floor(secondsSinceLastUpdate / 3600);
                         var minutes = Math.floor((secondsSinceLastUpdate % 3600) / 60);
                         var seconds = secondsSinceLastUpdate % 60;
-                        if (hours > 0) {
-                            lastUpdatedTime.innerHTML = hours + "+ hours ago";
-                        } else if (minutes > 0) {
+                        if (minutes > 0) {
                             lastUpdatedTime.innerHTML = minutes + ":" + (seconds < 10 ? "0" : "") + seconds + " minute" + (minutes > 1 ? "s" : "") + " ago";
                         } else {
                             lastUpdatedTime.innerHTML = seconds + " seconds ago";
