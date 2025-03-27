@@ -334,8 +334,8 @@ class League:
             player["win_percentage"] = (player["wins"] / total_matches * 100) if total_matches > 0 else 0
             player["points_difference"] = player["points_won"] - player["points_against"]
         
-        # Sort rankings by wins (descending) and then by points difference (descending) and then by points won (descending)
-        rankings.sort(key=lambda x: (x["wins"], x["points_difference"], x["points_won"]), reverse=True)
+        # Sort rankings by win percentage (descending), points difference (descending), wins (descending) and then by points won (descending)
+        rankings.sort(key=lambda x: (x["win_percentage"], x["points_difference"], x["wins"], x["points_won"]), reverse=True)
 
         return rankings
     
@@ -472,8 +472,8 @@ class Series:
             player["win_percentage"] = (player["wins"] / total_matches * 100) if total_matches > 0 else 0
             player["points_difference"] = player["points_won"] - player["points_against"]
 
-        # Sort rankings by wins (descending) and then by points difference (descending) and then by points won (descending)
-        rankings.sort(key=lambda x: (x["wins"], x["points_difference"], x["points_won"]), reverse=True)
+        # Sort rankings by win percentage (descending), points difference (descending), wins (descending) and then by points won (descending)
+        rankings.sort(key=lambda x: (x["win_percentage"], x["points_difference"], x["wins"], x["points_won"]), reverse=True)
 
         return rankings
     
