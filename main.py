@@ -3,9 +3,9 @@ import logging
 import flask
 from app.template import TemplateEngine
 from app.pickleball import League, ScoringSystem, Player, Series
-from app.db import DevLocalDB, LeagueRepository, UserRepository, ShortLinkRepository, SeriesRepository
+from app.db import DevLocalDB, LeagueRepository, UserRepository, SeriesRepository, ShortLinkRepository, SeriesShortLinkRepository
 from app.user import User
-from app.links import ShortLink
+from app.links import ShortLink, SeriesShortLink
 
 DEV_ENVIRONMENT = os.environ.get("DEV_ENVIRONMENT") == "true"
 
@@ -154,7 +154,7 @@ def save_league():
                 "dev_environment": DEV_ENVIRONMENT,
                 "user": user,
                 "title": "Error: Short link already exists",
-                "message": "The short link you are looking for already exists. Please check the URL and try again.",
+                "message": "The short link you chose already exists. Please check the URL and try again.",
                 "action_name": "Back to league",
                 "action_url": f"/league/{league_id}"
             })
@@ -410,6 +410,11 @@ def create_series():
 def series(series_id):
     user = get_auth_user()
     try:
+        # first check if a short link exists to get the actual league_id
+        short_link = SeriesShortLinkRepository.get_short_link(series_id)
+        if short_link:
+            series_id = short_link.destination_link
+        
         # retrieve series
         series = SeriesRepository.get_series(series_id)
         return template_engine.render(f"series", {
@@ -503,16 +508,61 @@ def save_series():
     user = get_auth_user()
     series_id = flask.request.form.get("series_id")
     
+    # first check if the short link exists
+    short_link = SeriesShortLinkRepository.get_short_link(series_id)
+    if short_link:
+        series_id = short_link.destination_link
+    
     series = SeriesRepository.get_series(series_id)
 
-    # update the series name
+    # check if the short link needs to be updated
+    update_series_id = flask.request.form.get("update_series_id")
+    new_series_id = flask.request.form.get("new_series_id")
+    if update_series_id and new_series_id and update_series_id == "1":
+        # check if the new short link already exists
+        short_link = SeriesShortLinkRepository.get_short_link(new_series_id)
+        if short_link:
+            logger.error(f"Short link already exists: {new_series_id}")
+            return template_engine.render("error", {
+                "dev_environment": DEV_ENVIRONMENT,
+                "user": user,
+                "title": "Error: Short link already exists",
+                "message": "The short link you chose already exists. Please check the URL and try again.",
+                "action_name": "Back to series",
+                "action_url": f"/series/{series_id}"
+            })
+        else:
+            short_link = SeriesShortLink(new_series_id, series.id)
+            SeriesShortLinkRepository.save_short_link(short_link)
+            series.set_short_link(new_series_id)
+    
+    # now update the series name
     update_series_name = flask.request.form.get("update_series_name")
     new_series_name = flask.request.form.get("new_series_name")
     if new_series_name and update_series_name and update_series_name == "1" and new_series_name != "":
         series.name = new_series_name
     
+    # now update the series contributors
+    update_contributors = flask.request.form.get("update_contributors")
+    new_contributor_email = flask.request.form.get("new_contributor_email")
+    if update_contributors and update_contributors == "1" and new_contributor_email and new_contributor_email != "":
+        contributor = UserRepository.get_user(new_contributor_email)
+        if contributor:
+            series.add_contributor(contributor)
+            contributor.add_series(series.id)
+            UserRepository.save_user(contributor)
+        else:
+            return template_engine.render("error", {
+                "dev_environment": DEV_ENVIRONMENT,
+                "user": user,
+                "title": "Error: User not found",
+                "message": f"The contributor you are trying to add (<i>{new_contributor_email}</i>) was not found in the user database.",
+                "action_name": "Back to series",
+                "action_url": f"/series/{series_id}"
+            })
+    
     SeriesRepository.save_series(series)
-    return flask.redirect(f"/series/{series.id}")
+    return flask.redirect(f"/series/{series.id}" if not series.short_link else f"/series/{series.short_link}")
 
 @app.route("/profile")
 def profile():

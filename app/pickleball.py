@@ -382,8 +382,8 @@ class League:
         league.set_schedule([LeagueRound.from_object(round) for round in object["schedule"]])
         league.set_scoring_system(ScoringSystem(object["scoring_system"]))
         league.set_template(object["template"])
-        if "short_link" in object and object["short_link"] is not None:
-            league.set_short_link(object["short_link"])
+        if "short_link" in object and object.get("short_link") is not None:
+            league.set_short_link(object.get("short_link"))
         return league
     
 class Series:
@@ -394,6 +394,7 @@ class Series:
         self.scoring_system = ScoringSystem.SCORE
         self.owner = None
         self.contributors = []
+        self.short_link = None #string only
     
     def set_id(self, id: str):
         self.id = id
@@ -477,6 +478,10 @@ class Series:
 
         return rankings
     
+    def set_short_link(self, short_link: str):
+        if short_link is not None and len(short_link) > 0:
+            self.short_link = short_link
+    
     def to_object(self):
         return {
             "id": self.id,
@@ -484,7 +489,8 @@ class Series:
             "league_ids": self.league_ids,
             "scoring_system": self.scoring_system.value,
             "owner": self.owner.to_object() if self.owner else None,
-            "contributors": [contributor.to_object() for contributor in self.contributors]
+            "contributors": [contributor.to_object() for contributor in self.contributors],
+            "short_link": self.short_link if self.short_link else None
         }
     
     @staticmethod
@@ -499,4 +505,6 @@ class Series:
         for contributor in object.get("contributors", []):
             user = User(contributor["email"])
             series.add_contributor(user)
+        if "short_link" in object and object.get("short_link") is not None:
+            series.set_short_link(object.get("short_link"))
         return series

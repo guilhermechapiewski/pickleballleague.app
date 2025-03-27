@@ -15,3 +15,6 @@ class ShortLink:
     @staticmethod
     def from_object(object):
         return ShortLink(object["link"], object["destination_link"])
+
+class SeriesShortLink(ShortLink):
+    pass

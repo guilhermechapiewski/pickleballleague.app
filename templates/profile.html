@@ -234,7 +234,7 @@
                 <tr>
                     <td>{% if series.name %}{{ series.name }}{% else %}Unnamed series{% endif %}</td>
                     <td>
-                        <a href="http://{{ domain_name }}/series/{{ series.id }}">http://{{ domain_name }}/series/<br>{{ series.id }}</a>
+                        <a href="http://{{ domain_name }}/series/{% if series.short_link %}{{ series.short_link }}{% else %}{{ series.id }}{% endif %}">http://{{ domain_name }}/series/<br>{% if series.short_link %}{{ series.short_link }}{% else %}{{ series.id }}{% endif %}</a>
                     </td>
                     <td>{% if series.scoring_system.value == "score" %}Full scores{% elif series.scoring_system.value == "w_l" %}W/L only{% else %}{{ series.scoring_system.value }}{% endif %}</td>
                     <td>{% for player in series.get_all_players() %}{{ player.name }}{% if not loop.last %}, {% endif %}{% endfor %}</td>

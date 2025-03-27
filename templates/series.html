@@ -326,6 +326,79 @@
             document.getElementsByClassName("name-show-container")[0].style.display = "block";
             return false;
         }
+
+        var addContributor = function() {
+            document.getElementsByClassName("contributor-edit-container")[0].style.display = "block";
+            document.getElementById("add-contributor").style.display = "none";
+            return false;
+        }
+
+        var saveContributor = function() {
+            var new_contributor_email = document.getElementById("new_contributor_email").value;
+            if (new_contributor_email == "") {
+                alert("Please enter an email address for the new contributor.");
+                return false;
+            }
+            var all_contributor_emails = document.getElementById("all_contributor_emails").value;
+            if (all_contributor_emails.indexOf(new_contributor_email) != -1) {
+                alert("\"" + new_contributor_email + "\" is already a contributor.");
+                return false;
+            }
+            if (!isValidEmail(new_contributor_email)) {
+                alert("Invalid email format.");
+                return false;
+            }
+            document.getElementById("update_contributors").value = "1";
+            document.getElementById("series_form").submit();
+            return true;
+        }
+
+        var cancelAddContributor = function() {
+            document.getElementsByClassName("contributor-edit-container")[0].style.display = "none";
+            document.getElementById("add-contributor").style.display = "block";
+            return false;
+        }
+
+        var isValidEmail = function(email) {
+            var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        var editLink = function() {
+            document.getElementsByClassName("link-show-container")[0].style.display = "none";
+            document.getElementsByClassName("link-edit-container")[0].style.display = "block";
+            document.getElementById("new_series_id").focus();
+            return false;
+        }
+
+        var cancelEditLink = function() {
+            document.getElementsByClassName("link-edit-container")[0].style.display = "none";
+            document.getElementsByClassName("link-show-container")[0].style.display = "block";
+            return false;
+        }
+
+        var saveLink = function() {
+            if ((document.getElementById("new_series_id").value != document.getElementById("original_series_id").value) &&
+                    (document.getElementById("new_series_id").value.length > 0))  
+                {
+                var new_series_id = document.getElementById("new_series_id").value;
+                // Replace spaces and underscores with dashes
+                new_series_id = new_series_id.replace(/[\s_]/g, '-');
+                // Replace multiple dashes with a single dash
+                new_series_id = new_series_id.replace(/-+/g, '-');
+                // Replace dashes at the beginning and end with an empty string
+                new_series_id = new_series_id.replace(/^-+|-+$/g, '');
+                // Replace any non-alphanumeric characters (besides dashes) with an empty string
+                new_series_id = new_series_id.replace(/[^a-zA-Z0-9-]/g, '');
+                document.getElementById("new_series_id").value = new_series_id;
+                document.getElementById("update_series_id").value = "1";
+                document.getElementById("series_form").submit();
+                return true;
+            }
+            document.getElementsByClassName("link-edit-container")[0].style.display = "none";
+            document.getElementsByClassName("link-show-container")[0].style.display = "block";
+            return false;
+        }
         {% endif %}
         
         var copyLink = function(link) {
@@ -333,7 +406,7 @@
             return false;
         }
 
-        function toggleLeagueDetails(leagueId) {
+        var toggleLeagueDetails = function(leagueId) {
             const button = document.getElementById(`expand-${leagueId}`);
             const detailsRow = document.getElementById(`details-${leagueId}`);
             
@@ -348,55 +421,71 @@
     {% include 'templates/_auth.html' %}
     <div class="container">
         <form id="series_form" name="series_form" action="/save_series" method="post">
-            <input type="hidden" name="series_id" value="{{ series.id }}">
-            <h1>
-                {% if series.name %}
-                    <div class="name-show-container">{{ series.name }}
-                    {% if (series.owner and series.owner.email == user.email) or not series.owner %}
-                        <button id="edit-name" class="small-button" onclick="return editName()">Edit&nbsp;name&nbsp;✎</button>
-                    {% endif %}
-                    </div>  
-                {% else %}
-                    <div class="name-show-container">Series created on {{ series.date_created }}
-                    {% if (series.owner and series.owner.email == user.email) or not series.owner %}
-                        <button id="edit-name" class="small-button" onclick="return editName()">Edit&nbsp;name&nbsp;✎</button>
-                    {% endif %}
-                    </div>  
+        <input type="hidden" name="series_id" value="{{ series.id }}">
+        <h1>
+            {% if series.name %}
+                <div class="name-show-container">{{ series.name }}
+                {% if (series.owner and series.owner.email == user.email) or not series.owner %}
+                    <button id="edit-name" class="small-button" onclick="return editName()">Edit&nbsp;name&nbsp;✎</button>
                 {% endif %}
-                <div class="name-edit-container">
-                    <input type="text" id="new_series_name" name="new_series_name" class="name-input" value="{{ series.name }}">
-                    <input type="hidden" id="original_series_name" name="original_series_name" value="{{ series.name }}">
-                    <input type="hidden" id="update_series_name" name="update_series_name" value="">
-                    <button class="small-button" onclick="return saveName()">Save&nbsp;💾</button>
-                    <button class="small-button" onclick="return cancelEditName()">Cancel&nbsp;❌</button>
-                </div>
-            </h1>
-        </form>
+                </div>  
+            {% else %}
+                <div class="name-show-container">Series created on {{ series.date_created }}
+                {% if (series.owner and series.owner.email == user.email) or not series.owner %}
+                    <button id="edit-name" class="small-button" onclick="return editName()">Edit&nbsp;name&nbsp;✎</button>
+                {% endif %}
+                </div>  
+            {% endif %}
+            <div class="name-edit-container">
+                <input type="text" id="new_series_name" name="new_series_name" class="name-input" value="{{ series.name }}">
+                <input type="hidden" id="original_series_name" name="original_series_name" value="{{ series.name }}">
+                <input type="hidden" id="update_series_name" name="update_series_name" value="">
+                <button class="small-button" onclick="return saveName()">Save&nbsp;💾</button>
+                <button class="small-button" onclick="return cancelEditName()">Cancel&nbsp;❌</button>
+            </div>
+        </h1>
         <h3>Series details</h3>
         {% if series.owner %}
         <div class="contributor-container">
             <div class="contributor-show-container">
-                <i><b>Private series</b> (created by: <u>{{ series.owner.email }}</u>{% if series.contributors | length > 0 %}; contributors: <u>{{ series.contributors|map(attribute='email')|join('</u>, <u>') }}</u>{% endif %})</i>
+                <i><b>Private league</b> (created by: <u>{{ series.owner.email }}</u>{% if series.contributors | length > 0 %}; contributors: <u>{{ series.contributors|map(attribute='email')|join('</u>, <u>') }}</u>{% endif %})</i>
             </div>
+            {% if series.owner.email == user.email %}
+            &nbsp;&nbsp;<button id="add-contributor" class="small-button" onclick="return addContributor()">Add&nbsp;contributor&nbsp;+</button>
+            <div class="contributor-edit-container">
+                <input type="text" id="new_contributor_email" name="new_contributor_email" class="contributor-input" value="">
+                <button class="small-button" onclick="return saveContributor()">Save&nbsp;💾</button>
+                <button class="small-button" onclick="return cancelAddContributor()">Cancel&nbsp;❌</button>
+            </div>
+            <input type="hidden" id="update_contributors" name="update_contributors" value="">
+            <input type="hidden" id="all_contributor_emails" value="{{ series.owner.email }}{% if series.contributors | length > 0 %},{{ series.contributors|map(attribute='email')|join(',') }}{% endif %}">
+            {% endif %}
         </div>
         {% else %}
         <div class="contributor-container">
             <div class="contributor-show-container">
-                <p><i><b>Public series</b> (anyone with the link can view and edit)</i></p>
+                <p><i><b>Public league</b> (anyone with the link can view and edit)</i></p>
             </div>
         </div>
         {% endif %}
         <div class="link-container">
             <div class="link-show-container">
-                <b>Link:</b> <a href="http://{{ domain_name }}/series/{{ series.id }}">https://{{ domain_name }}/series/{{ series.id }}</a>
+                <b>Link:</b> <a href="http://{{ domain_name }}/series/{% if series.short_link %}{{ series.short_link }}{% else %}{{ series.id }}{% endif %}">https://{{ domain_name }}/series/{% if series.short_link %}{{ series.short_link }}{% else %}{{ series.id }}{% endif %}</a>
             </div>
             <div class="link-edit-container">
-                <b>Link:</b> http://{{ domain_name }}/series/<input type="text" id="new_series_id" name="new_series_id" class="link-input" value="{{ series.id }}">
+                <b>Link:</b> http://{{ domain_name }}/series/<input type="text" id="new_series_id" name="new_series_id" class="link-input" value="{% if series.short_link %}{{ series.short_link }}{% else %}{{ series.id }}{% endif %}">
+                <input type="hidden" id="original_series_id" name="original_series_id" value="{% if series.short_link %}{{ series.short_link }}{% else %}{{ series.id }}{% endif %}">
+                <input type="hidden" id="update_series_id" name="update_series_id" value="">
+                <button class="small-button" onclick="return saveLink()">Save 💾</button>
+                <button class="small-button" onclick="return cancelEditLink()">Cancel ❌</button>
             </div>
             &nbsp;&nbsp;
-            <button id="copy-link" class="small-button" onclick="return copyLink('http://{{ domain_name }}/series/{{ series.id }}');">Copy&nbsp;link</button>
+            <button id="copy-link" class="small-button" onclick="return copyLink('http://{{ domain_name }}/series/{% if series.short_link %}{{ series.short_link }}{% else %}{{ series.id }}{% endif %}');">Copy&nbsp;link</button>
+            {% if series.owner and series.owner.email == user.email %}
+                <button id="edit-link" class="small-button" onclick="return editLink();">Edit&nbsp;link&nbsp;✎</button>
+            {% endif %}
         </div>
-
+        </form>
         <h3>All rounds in this series</h3>
         {% if series.league_ids %}
         <div style="width: 100%; overflow-x: auto;">
