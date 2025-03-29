@@ -5,6 +5,8 @@ import uuid
 from enum import Enum
 from datetime import datetime
 from app.user import User
+import logging
+logger = logging.getLogger(__name__)
 
 class ScoringSystem(Enum):
     W_L = "w_l"
@@ -142,6 +144,18 @@ class LeagueRound:
     def __str__(self):
         return f"Round {self.number}: {', '.join([str(match.players) for match in self.matches])}"
     
+    def has_repeated_pairs(self, other_round: "LeagueRound"):
+        for match in self.matches:
+            for other_match in other_round.matches:
+                this_match_side1 = sorted(match.players[:2])
+                this_match_side2 = sorted(match.players[2:])
+                other_match_side1 = sorted(other_match.players[:2])
+                other_match_side2 = sorted(other_match.players[2:])
+                if this_match_side1 == other_match_side1 or this_match_side2 == other_match_side2 or \
+                    this_match_side1 == other_match_side2 or this_match_side2 == other_match_side1:
+                    return True
+        return False
+
     def to_object(self):
         return {
             "number": self.number,
@@ -195,9 +209,6 @@ class League:
         for round in self.schedule:
             for match in round.matches:
                 match.set_scoring_system(scoring_system)
-
-    def reset_schedule(self):
-        self.schedule = []
     
     def add_round(self, round: LeagueRound):
         self.schedule.append(round)
@@ -205,15 +216,8 @@ class League:
     def number_of_matches(self):
         return sum([round.number_of_matches() for round in self.schedule])
 
-    def calculate_max_possible_unique_pairs(self):
-        n = len(self.players)
-        if n < 4:
-            return 0
-        r = 2
-        return math.factorial(n) // (math.factorial(r) * math.factorial(n-r))
-    
     def set_template(self, template: str):
-        if template not in ["ricky", "irina-fariba"]:
+        if template not in ["ricky"]:
             raise ValueError("Invalid template name.")
         self.template = template
     
@@ -224,71 +228,73 @@ class League:
     def set_date_created(self, date_created: str):
         self.date_created = date_created
 
+    def reset_schedule(self):
+        self.schedule = []
+
+    def calculate_max_possible_unique_pairs(self):
+        n = len(self.players)
+        if n < 4:
+            return 0
+        r = 2
+        return math.factorial(n) // (math.factorial(r) * math.factorial(n-r))
+
+    def generate_round(self, number: int, roster: list[Player]):
+        if roster is None or len(roster) == 0:
+            raise ValueError("Roster cannot be empty")
+        if len(roster) < 4:
+            raise ValueError("Roster must have at least 4 players")
+        
+        num_players_out = len(roster) % 4
+
+        # Split players into players out and players in
+        players_out = roster[:num_players_out]
+        players_in = roster[num_players_out:]
+        random.shuffle(players_in)
+
+        # Generate matches
+        matches = []
+        for _ in range(len(players_in) // 4):
+            matches.append(Match(players_in[:4], self.scoring_system))
+            players_in = players_in[4:]
+        
+        return LeagueRound(number=number, matches=matches, players_out=players_out)
+    
     def generate_schedule(self, rounds: int=7):
         max_unique_pairs = self.calculate_max_possible_unique_pairs()
         if rounds > max_unique_pairs:
             raise ValueError(f"This number of rounds is not possible with the current number of players.")
 
-        # Reset schedule
-        self.reset_schedule()
+        # Shuffle players
+        roster = self.players.copy()
+        random.shuffle(roster)
 
-        while len(self.schedule) != rounds:
-            # Get all possible combinations of 4 players
-            all_possible_players_combinations = list(combinations(self.players, 4))
-            
-            # Shuffle the list of possible  matches to randomize schedule generation
-            random.shuffle(all_possible_players_combinations)
-            
-            generated_rounds = []
+        # calculate total number of pairs this league will have
+        total_pairs = rounds * len(roster) // 2
+        can_repeat_pairs = total_pairs > max_unique_pairs
+        logger.info(f"Total pairs: {total_pairs}, Max unique pairs: {max_unique_pairs}, Can repeat pairs: {can_repeat_pairs}")
+        
+        num_players_out_per_round = len(roster) % 4
+        generated_rounds = []
 
-            # Generate rounds
-            while len(generated_rounds) < rounds:
-                round_matches = []
-                remaining_available_players = set(self.players)
-                
-                # Keep adding matches until we can't add more
-                while len(remaining_available_players) >= 4:
-                    # If we run out of possible combinations, start over
-                    if len(all_possible_players_combinations) == 0:
-                        all_possible_players_combinations = list(combinations(self.players, 4))
-                        random.shuffle(all_possible_players_combinations)
-                    
-                    # Find a valid match from remaining combinations
-                    for players_combination in all_possible_players_combinations:
-                        # Check if all players in this match are still available
-                        if all(player in remaining_available_players for player in players_combination):
-                            players = list(players_combination)
-                            random.shuffle(players)
-                            round_matches.append(Match(players, self.scoring_system))
-
-                            all_possible_players_combinations.remove(players_combination)
-                            
-                            # Remove used players from available pool
-                            for player in players_combination:
-                                remaining_available_players.remove(player)
-                            break
-                
-                # Only add non-empty, non-duplicate rounds
-                if round_matches:
-                    is_duplicate = False
-                    for existing_round_matches, _ in generated_rounds:
-                        for existing_round_match in existing_round_matches:
-                            for new_match in round_matches:
-                                if existing_round_match == new_match:
-                                    is_duplicate = True
-                                    break
-                        if is_duplicate:
-                            break
-                    
-                    if not is_duplicate:
-                        generated_rounds.append((round_matches, remaining_available_players))
+        while len(generated_rounds) < rounds:
+            round = self.generate_round(len(generated_rounds) + 1, roster)
             
-            # Add rounds to schedule
-            round_number = 1
-            for round_matches, remaining_available_players in generated_rounds:
-                self.add_round(LeagueRound(round_number, round_matches, remaining_available_players))
-                round_number += 1
-    
+            # Check if the round is unique and add to generated rounds if yes
+            # and then rotate roster to change players out
+            valid_round = True
+            
+            for existing_round in generated_rounds:
+                if not can_repeat_pairs and round.has_repeated_pairs(existing_round):
+                    valid_round = False
+                    break
+            
+            if valid_round:
+                generated_rounds.append(round)
+            
+                # get the first n players (num_players_out_per_round) and move to the end of the list
+                roster = roster[num_players_out_per_round:] + roster[:num_players_out_per_round]
+
+        self.schedule = generated_rounds
         return self.schedule
 
     def get_player_rankings(self):

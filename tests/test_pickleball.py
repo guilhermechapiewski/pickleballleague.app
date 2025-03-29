@@ -289,6 +289,56 @@ class TestLeague(unittest.TestCase):
         self.assertEqual(retrieved_league.schedule[0].matches[0].players[0].name, "Sveta")
         self.assertTrue(Player("GC") in retrieved_league.schedule[0].players_out)
 
+    def test_generate_schedule_with_18_players_7_rounds_and_ensure_matches_will_never_be_repeated_and_same_person_will_not_be_out_more_than_once(self):
+        league = League(player_names="GC, Juliano, Fariba, Galina, Igor, Yuri, Scott, Mark, John, Tammy I, Tammy J, Stephanie, Lilly, Sveta, Mohammed, Lana, Aline, Irina")
+        schedule = league.generate_schedule(rounds=7)
+        
+        # Test that 7 rounds were generated
+        self.assertEqual(len(schedule), 7)
+
+        # Test that each round has 4 matches (16 players) and 2 players out
+        for round in schedule:
+            self.assertEqual(round.number_of_matches(), 4)
+            self.assertEqual(len(round.players_out), 2)
+
+        # Check that no matches are repeated across all rounds
+        all_matches = []
+        for round in schedule:
+            for match in round.matches:
+                # Check if this match exists in any form in previous matches
+                self.assertFalse(any(existing_match == match for existing_match in all_matches), 
+                               f"Found duplicate match: {match}")
+                all_matches.append(match)
+
+        # Check that no player is out more than once
+        players_out_count = {}
+        for round in schedule:
+            for player in round.players_out:
+                if player.name in players_out_count:
+                    players_out_count[player.name] += 1
+                else:
+                    players_out_count[player.name] = 1
+                
+                # Assert that no player is out more than once
+                self.assertEqual(players_out_count[player.name], 1, 
+                               f"Player {player.name} was out multiple times")
+
+        # Verify all players were used in the schedule
+        all_players = set(player.name for player in league.players)
+        scheduled_players = set()
+        for round in schedule:
+            # Add players in matches
+            for match in round.matches:
+                for player in match.players:
+                    scheduled_players.add(player.name)
+            # Add players who were out
+            for player in round.players_out:
+                scheduled_players.add(player.name)
+        
+        # Verify all players were scheduled
+        self.assertEqual(all_players, scheduled_players, 
+                        "Not all players were included in the schedule")
+
     def test_schedule_rounds_start_with_one(self):
         league = League(player_names="GC, Juliano, Fariba, Galina, Igor, Yuri, Scott, Mark, John")
         schedule = league.generate_schedule(rounds=5)
@@ -365,7 +415,6 @@ class TestLeague(unittest.TestCase):
         player_names="GC, Juliano, Fariba, Galina"
         league = League(name="Test League", player_names=player_names)
         league.generate_schedule(rounds=1)
-        league.set_template("irina-fariba")
         
         generated_league_object = league.to_object()
         league_object = {
@@ -383,7 +432,7 @@ class TestLeague(unittest.TestCase):
                     ],
                     "players_out": []
                 }
-            ], "scoring_system": "none", "template": "irina-fariba"
+            ], "scoring_system": "none", "template": "ricky"
         }
         
         self.assertEqual(generated_league_object["id"], league_object["id"])
@@ -406,7 +455,7 @@ class TestLeague(unittest.TestCase):
         player_names="GC, Juliano, Fariba, Galina"
         league = League(name="Test League", player_names=player_names)
         league.generate_schedule(rounds=1)
-        league.set_template("irina-fariba")
+        league.set_template("ricky")
         user = User("123", "test@test.com")
         league.set_owner(user)
         another_user = User("456", "another@test.com")
@@ -437,7 +486,7 @@ class TestLeague(unittest.TestCase):
                     ],
                     "players_out": []
                 }
-            ], "scoring_system": "none", "template": "irina-fariba"
+            ], "scoring_system": "none", "template": "ricky"
         }
         
         self.assertEqual(generated_league_object["id"], league_object["id"])
