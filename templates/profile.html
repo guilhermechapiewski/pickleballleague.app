@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    {% include 'templates/_google_analytics.html' %}
+    {% include '_google_analytics.html' %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>Pickleball League App - Profile</title>
     <style>
-        {% include 'templates/_main.css' %}
+        {% include '_main.css' %}
 
         .delete-button {
             background: white;
@@ -132,7 +132,7 @@
             width: 250px;
         }
 
-        {% include 'templates/_auth.css' %}
+        {% include '_auth.css' %}
     </style>
     <script language="javascript" type="text/javascript">
         var deleteLeague = function(leagueId, leagueName, leagueDateCreated) {
@@ -172,11 +172,11 @@
             return true;
         }
 
-        {% include 'templates/_auth.js' %}
+        {% include '_auth.js' %}
     </script>
 </head>
 <body>
-    {% include 'templates/_auth.html' %}
+    {% include '_auth.html' %}
     <h1>Dashboard</h1>
     <h3>Your leagues</h3>
     {% if user.league_ids %}

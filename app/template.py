@@ -1,8 +1,14 @@
+import os
+import logging
 from jinja2 import Environment, FileSystemLoader
 
-class TemplateEngine:    
-    def render(self, template_name, context={}):
-        # Setup Jinja environment
-        env = Environment(loader=FileSystemLoader('.'))
-        template = env.get_template(f"./templates/{template_name}.html")
+logger = logging.getLogger(__name__)
+
+class TemplateEngine:
+    template_dir = f"{os.path.dirname(os.path.dirname(os.path.abspath(__file__)))}/templates/"
+    env = Environment(loader=FileSystemLoader(template_dir))
+
+    @classmethod
+    def render(cls, template_name, context={}):
+        template = cls.env.get_template(f"{template_name}.html")
         return template.render(context)
