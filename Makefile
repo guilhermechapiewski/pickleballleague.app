@@ -2,8 +2,11 @@ run: clean
 	@export DEV_ENVIRONMENT="true" && python3 main.py
 
 test: clean
-	@export DEV_ENVIRONMENT="true" && pytest
+	@export DEV_ENVIRONMENT="true" && pytest --cache-clear --verbose --full-trace --color=yes --log-level=DEBUG --log-cli-level=DEBUG $(RUN_TEST_WITH_COVERAGE)
 	@rm -rf _dev_database/
+
+test-coverage: clean
+	@export RUN_TEST_WITH_COVERAGE="--cov=app --cov-report=term-missing" && make test
 
 deploy: clean test create_deployment_info
 	@echo "Deploying to Google App Engine..."

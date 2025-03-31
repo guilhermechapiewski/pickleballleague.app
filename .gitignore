@@ -6,3 +6,4 @@ __pycache__/
 secret.py
 .DS_Store
 _dev_database/
+.coverage
