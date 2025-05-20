@@ -683,13 +683,13 @@
         <h1>
             {% if league.name %}
                 <div class="name-show-container">{{ league.name }}
-                {% if (league.owner and league.owner.email == user.email) or not league.owner %}
+                {% if league.can_edit(user.email) %}
                     <button id="edit-name" class="small-button" onclick="return editName()">Edit&nbsp;name&nbsp;✎</button>
                 {% endif %}
                 </div>  
             {% else %}
                 <div class="name-show-container">League created on {{ league.date_created }}
-                {% if (league.owner and league.owner.email == user.email) or not league.owner %}
+                {% if league.can_edit(user.email) %}
                     <button id="edit-name" class="small-button" onclick="return editName()">Edit&nbsp;name&nbsp;✎</button>
                 {% endif %}
                 </div>  
@@ -708,12 +708,12 @@
                 <i><b>Last updated:</b>&nbsp;<span id="last-updated-time">...</span></i>
             </div>
         </div>
-        {% if league.owner %}
+        {% if league.owner != None %}
         <div class="contributor-container">
             <div class="contributor-show-container">
                 <i><b>Private league</b> (created by: <u>{{ league.owner.email }}</u>{% if league.contributors | length > 0 %}; contributors: <u>{{ league.contributors|map(attribute='email')|join('</u>, <u>') }}</u>{% endif %})</i>
             </div>
-            {% if league.owner.email == user.email %}
+            {% if league.can_edit(user.email) %}
             &nbsp;&nbsp;<button id="add-contributor" class="small-button" onclick="return addContributor()">Add&nbsp;contributor&nbsp;+</button>
             <div class="contributor-edit-container">
                 <input type="text" id="new_contributor_email" name="new_contributor_email" class="contributor-input" value="">
@@ -744,7 +744,7 @@
             </div>
             &nbsp;&nbsp;
             <button id="copy-link" class="small-button" onclick="return copyLink('http://{{ domain_name }}/league/{% if league.short_link %}{{ league.short_link }}{% else %}{{ league.id }}{% endif %}');">Copy&nbsp;link</button>
-            {% if league.owner and league.owner.email == user.email %}
+            {% if league.can_edit(user.email) %}
                 <button id="edit-link" class="small-button" onclick="return editLink();">Edit&nbsp;link&nbsp;✎</button>
             {% endif %}
         </div>
@@ -753,7 +753,7 @@
                 <thead>
                     <tr>
                         <th style="width: 20%; white-space: nowrap;" rowspan="2">
-                            Rounds{% if (league.owner and league.can_edit(user.email)) or not league.owner %}&nbsp;&nbsp;<button id="edit-players" class="small-button" onclick="return editPlayers();">Edit&nbsp;players&nbsp;✎</button><br>{% endif %}
+                            Rounds{% if league.can_edit(user.email) %}&nbsp;&nbsp;<button id="edit-players" class="small-button" onclick="return editPlayers();">Edit&nbsp;players&nbsp;✎</button><br>{% endif %}
                             <button id="text-size-increase" class="small-button" onclick="return increaseTextSize()">🔍&nbsp;+</button>&nbsp;
                             <button id="text-size-decrease" class="small-button" onclick="return decreaseTextSize()">🔍&nbsp;-</button>&nbsp;
                             <button id="edit-save-players" class="small-button" onclick="return savePlayers()">Save&nbsp;💾</button>&nbsp;&nbsp;<button id="edit-cancel-players" class="small-button" onclick="return cancelEditPlayers()">Cancel&nbsp;❌</button>&nbsp;
@@ -838,7 +838,7 @@
                                 {% if league.scoring_system.value == 'w_l' %}
                                     {% if player.name not in round.players_out|map(attribute='name')|list %}
                                         <td style="background-color: {{ ns1.color }};">    
-                                            {% if (league.owner and league.can_edit(user.email)) or not league.owner %}
+                                            {% if league.can_edit(user.email) %}
                                                 <select class="player-score-select" name="player_score_round{{ round.number }}_player{{ loop.index }}" id="player_score_round{{ round.number }}_player{{ loop.index }}">
                                                     <option value="0"></option>
                                                     <option value="w" {{ ns2.w }}>W</option>
@@ -854,7 +854,7 @@
                                 {% elif league.scoring_system.value == 'score' %}
                                     {% if player.name not in round.players_out|map(attribute='name')|list %}
                                         <td style="background-color: {{ ns1.color }};">
-                                            {% if (league.owner and league.can_edit(user.email)) or not league.owner %}
+                                            {% if league.can_edit(user.email) %}
                                                 <input type="number" class="player-score-input" name="player_score_round{{ round.number }}_player{{ loop.index }}" id="player_score_round{{ round.number }}_player{{ loop.index }}" min="0" max="100" step="1" value="{{ ns4.score }}">
                                             {% else %}
                                                 <span class="player-score-label">{{ ns4.score }}</span>
@@ -874,7 +874,7 @@
         </div>
         <div id="footer" class="footer">
             <a href="#" class="primary-button" onclick="printPage()">Print</a>
-            {% if league.scoring_system.value != 'none' and ((league.owner and league.owner.email == user.email) or not league.owner) %}<a class="primary-button" href="#" onclick="document.getElementById('league_form').submit()">Save</a>{% endif %}
+            {% if league.scoring_system.value != 'none' and league.can_edit(user.email) %}<a class="primary-button" href="#" onclick="document.getElementById('league_form').submit()">Save</a>{% endif %}
             <a class="primary-button" href="/">Home</a>
         </div>
     </div>
