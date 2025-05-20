@@ -6,14 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>Pickleball League App</title>
     <meta name="author" content="Guilherme Chapiewski">
-    <meta name="description" content="Create your own Pickleball League in seconds! 🏓">
+    <meta name="description" content="Track Pickleball tournaments for free and in no time! 🏓">
     
     <!-- Favicon -->
     <link rel="apple-touch-icon" sizes="180x180" href="//img1.wsimg.com/isteam/ip/static/pwa-app/logo-default.png/:/rs=w:180,h:180,m">
     
     <!-- Social Meta Tags -->
     <meta property="og:title" content="Pickleball League App">
-    <meta property="og:description" content="Create your own Pickleball League in seconds! 🏓">
+    <meta property="og:description" content="Track Pickleball tournaments for free and in no time! 🏓">
     <meta property="og:image" content="https://img1.wsimg.com/isteam/getty/1517470401">
     <meta property="og:url" content="https://pickleballleague.app/">
     <meta name="twitter:card" content="summary">
@@ -398,9 +398,9 @@
     <h1 class="title">Create a new league</h1>
     {% else %}
     <div class="hero">
-        <h1>Create your own Pickleball league in seconds! 🏓</h1>
+        <h1>Track your Pickleball tournaments for free and in no time! 🏓</h1>
     </div>
-    <div class="description"><strong>Elevate your pickleball tournaments! 🏓 </strong>Easily create custom leagues to <strong>track scores</strong>, <strong>monitor wins and losses</strong>, and create <strong>organized match schedules</strong> for your group. <strong>Share instant access</strong> with other players, allowing <strong>everyone to view and update results in real-time.</strong> No more confusion or paper shuffling — enjoy geeking out on stats without the hassle! 🥳🎉</div>
+    <div class="description"><strong>Elevate your pickleball tournaments! 🏓 </strong>Easily create custom leagues to <strong>track scores</strong>, <strong>record wins and losses</strong>, and create <strong>organized match schedules</strong> for your group. <strong>Share instant access</strong> with other players, allowing <strong>everyone to view and update results in real-time.</strong> No more confusion or paper shuffling — enjoy geeking out on stats without the hassle! 🥳🎉</div>
     {% endif %}
     <div class="container">
         <form method="POST" action="/create-league" onsubmit="return validateForm()">
@@ -460,7 +460,7 @@
         </form>
         <br>
         <div class="version">
-            <i>Open Sourced under <a href="https://creativecommons.org/licenses/by-nc/4.0/">Creative Commons BY-NC 4.0 license</a> | version <a href="https://github.com/guilhermechapiewski/pickleballleague.app/commit/{{version.git_commit}}">{{version.git_commit}}</a> | updated {{version.deploy_timestamp}}</i>
+            <i>This free app/service is Open Sourced under the <a href="https://creativecommons.org/licenses/by-nc/4.0/">Creative Commons BY-NC 4.0 license</a> | version <a href="https://github.com/guilhermechapiewski/pickleballleague.app/commit/{{version.git_commit}}">{{version.git_commit}}</a> | updated {{version.deploy_timestamp}}</i>
         </div>
     </div>
 </body>
